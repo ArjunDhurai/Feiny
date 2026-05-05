@@ -1,4 +1,3 @@
-// Arjun's Code
 let certificateLookupCache = {
   labs: [],
   descriptors: [],

@@ -3,7 +3,6 @@ let certificateLookupCache = {
   descriptors: [],
   supplements: [],
 };
-
 let certificateFiles = new Map();
 let certificateFilesToUpload = [];
 let diaImageFile = null;
@@ -1152,42 +1151,27 @@ function setupSpeciesAutoFill() {
 
 /* ================= RAPPORT PRICE ================= */
 function fetchRapportPrice() {
-  const shapeId = document.getElementById("dia_shape")?.value;
-  const colorId = document.getElementById("dia_color")?.value;
+  // Lookup fields — .value gives the linked record ID
+  const shapeId   = document.getElementById("dia_shape")?.value;
+  const colorId   = document.getElementById("dia_color")?.value;
   const clarityId = document.getElementById("dia_clarity")?.value;
-  const weight = parseFloat(document.getElementById("dia_weight")?.value);
+  const weight    = parseFloat(document.getElementById("dia_weight")?.value);
 
-  // ✅ Get the selected text labels (not IDs)
-  const shapeText =
-    document.getElementById("dia_shape")?.selectedOptions[0]?.text || "";
-  const colorText =
-    document.getElementById("dia_color")?.selectedOptions[0]?.text || "";
-  const clarityText =
-    document.getElementById("dia_clarity")?.selectedOptions[0]?.text || "";
+  console.log("IDs:", { shapeId, colorId, clarityId, weight });
 
-  console.log("VALUES:", {
-    shapeId,
-    colorId,
-    clarityId,
-    weight,
-    shapeText,
-    colorText,
-    clarityText,
-  });
+  const priceEl = document.getElementById("rapport_price");
 
-  if (
-    !shapeText ||
-    !colorText ||
-    !clarityText ||
-    isNaN(weight) ||
-    weight <= 0
-  ) {
-    document.getElementById("rapport_price").value = "";
+  if (!shapeId || !colorId || !clarityId || isNaN(weight) || weight <= 0) {
+    if (priceEl) priceEl.value = "";
     return;
   }
 
-  // ✅ Use only Weight_high_size1
-  const criteria = `(Weight_high_size1 == ${weight})`;
+  // Both forms share the same lookup tables so IDs match directly.
+  // Use FieldName.ID = numericId for each lookup field.
+  const criteria =
+    "Shapes.ID = " + shapeId +
+    " && Colors.ID = " + colorId +
+    " && Claritys.ID = " + clarityId;
 
   console.log("CRITERIA:", criteria);
 
@@ -1200,66 +1184,56 @@ function fetchRapportPrice() {
     .then(function (response) {
       console.log("FULL RESPONSE:", response);
 
-      if (
-        response.code !== 3000 ||
-        !response.data ||
-        response.data.length === 0
-      ) {
-        console.warn("No records from API");
-        document.getElementById("rapport_price").value = "";
+      if (response.code !== 3000 || !response.data || response.data.length === 0) {
+        console.warn("No Rapaport records returned — check IDs match Rapaport Master lookup IDs");
+        if (priceEl) priceEl.value = "";
         return;
       }
 
-      // ✅ Filter by text values (since Rapaport master stores text)
+      console.log("SAMPLE RECORD:", response.data[0]);
+
+      // Filter by weight — Weight_high_size1 must be >= the entered weight
       const filtered = response.data.filter(function (rec) {
-        return (
-          rec.Shapes === shapeText &&
-          rec.Colors === colorText &&
-          rec.Claritys === clarityText
-        );
+        const highWeight = parseFloat(rec.Weight_high_size1);
+        return !isNaN(highWeight) && highWeight >= weight;
       });
 
-      console.log("FILTERED:", filtered);
+      console.log("WEIGHT FILTERED:", filtered);
 
-      if (filtered.length > 0) {
-        // Sort by smallest Weight_high_size1 that still covers the weight
-        const sorted = filtered.sort(
-          (a, b) =>
-            parseFloat(a.Weight_high_size1) - parseFloat(b.Weight_high_size1),
-        );
-
-        const record = sorted[0];
-        const price = record.Rapaport_Price || "";
-
-        console.log("FINAL PRICE:", price);
-
-        document.getElementById("rapport_price").value = price;
-      } else {
-        console.warn("No matching combination found");
-        document.getElementById("rapport_price").value = "";
+      if (filtered.length === 0) {
+        console.warn("No Rapaport record covers this weight");
+        if (priceEl) priceEl.value = "";
+        return;
       }
+
+      // Smallest upper bound that still covers the entered weight
+      const sorted = [...filtered].sort(
+        (a, b) => parseFloat(a.Weight_high_size1) - parseFloat(b.Weight_high_size1)
+      );
+
+      const price = sorted[0].Rapaport_Price || "";
+      console.log("FINAL PRICE:", price);
+      if (priceEl) priceEl.value = price;
     })
     .catch(function (error) {
-      console.error("ERROR:", error);
-      document.getElementById("rapport_price").value = "";
+      console.error("Rapaport fetch error:", error);
+      if (priceEl) priceEl.value = "";
     });
 }
 
 /* ================= RAPPORT PRICE TRIGGERS ================= */
 function initRapportPriceTriggers() {
-  const shapeEl = document.getElementById("dia_shape");
-  const colorEl = document.getElementById("dia_color");
+  const shapeEl   = document.getElementById("dia_shape");
+  const colorEl   = document.getElementById("dia_color");
   const clarityEl = document.getElementById("dia_clarity");
-  const weightEl = document.getElementById("dia_weight");
+  const weightEl  = document.getElementById("dia_weight");
 
-  [shapeEl, colorEl, clarityEl, weightEl].forEach((el) => {
-    if (el) {
-      el.addEventListener("change", fetchRapportPrice);
-      el.addEventListener("input", fetchRapportPrice);
-    }
+  [shapeEl, colorEl, clarityEl].forEach(function (el) {
+    if (el) el.addEventListener("change", fetchRapportPrice);
   });
 
-  // ✅ Run once on page load if values already exist
+  if (weightEl) weightEl.addEventListener("input", fetchRapportPrice);
+
   fetchRapportPrice();
 }
 

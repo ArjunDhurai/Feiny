@@ -1,4 +1,3 @@
-// Date: 2024-06-20 time: 12:00 PM  ddddyy
 let certificateLookupCache = {
   labs: [],
   descriptors: [],
@@ -140,8 +139,8 @@ document.addEventListener("DOMContentLoaded", function () {
   typeof loadPartnerdataLookup === "function" && loadPartnerdataLookup();
   typeof initTotalCalculation === "function" && initTotalCalculation();
   typeof initRapportPriceTriggers === "function" && initRapportPriceTriggers();
-  typeof loadCertificateSubformLookups === "function" &&  loadCertificateSubformLookups();
-   
+  typeof loadCertificateSubformLookups === "function" &&
+    loadCertificateSubformLookups();
 
   /* ================= COLOR STONE AUTO DESCRIPTION ================= */
 
@@ -208,7 +207,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const diasymmetryEl = document.getElementById("dia_symmetry");
   const diaculetEl = document.getElementById("dia_culet");
   const diafluorescenceEl = document.getElementById("dia_fluorescence");
-  const diafluorescencecolorEl = document.getElementById("dia_colour_fluorescence",);
+  const diafluorescencecolorEl = document.getElementById(
+    "dia_colour_fluorescence",
+  );
   const diashortDescEl = document.getElementById("diashort_description");
   const dialongDescEl = document.getElementById("dialong_description");
 
@@ -221,17 +222,35 @@ document.addEventListener("DOMContentLoaded", function () {
     const diasymmetry = diasymmetryEl?.selectedOptions[0]?.text || "";
     const diaculet = diaculetEl?.selectedOptions[0]?.text || "";
     const diafluorescence = diafluorescenceEl?.selectedOptions[0]?.text || "";
-    const diafluorescencecolor = diafluorescencecolorEl?.selectedOptions[0]?.text || "";
+    const diafluorescencecolor =
+      diafluorescencecolorEl?.selectedOptions[0]?.text || "";
 
     const parts = [
-      diashape,diacolor,diaclarity,diacut,diapolish,diasymmetry,diaculet,diafluorescence,diafluorescencecolor,
+      diashape,
+      diacolor,
+      diaclarity,
+      diacut,
+      diapolish,
+      diasymmetry,
+      diaculet,
+      diafluorescence,
+      diafluorescencecolor,
     ].filter(Boolean);
     if (diashortDescEl) diashortDescEl.value = parts.join(" ");
     if (dialongDescEl) dialongDescEl.value = parts.join(", ");
   }
 
   [
-    diashapeEl,diacolorEl,diaclarityEl,diashapeEl,diacutEl,diapolishEl,diasymmetryEl,diaculetEl,diafluorescenceEl,diafluorescencecolorEl,
+    diashapeEl,
+    diacolorEl,
+    diaclarityEl,
+    diashapeEl,
+    diacutEl,
+    diapolishEl,
+    diasymmetryEl,
+    diaculetEl,
+    diafluorescenceEl,
+    diafluorescencecolorEl,
   ].forEach((el) => {
     if (el) el.addEventListener("change", updateDescriptions);
   });
@@ -259,7 +278,7 @@ document.addEventListener("DOMContentLoaded", function () {
         preview.src = ev.target.result;
         preview.style.display = "block";
         clearBtn.style.display = "inline-block";
-          document.getElementById("diamand_imageText").style.display = "none";
+        document.getElementById("diamand_imageText").style.display = "none";
       };
       reader.readAsDataURL(file);
     });
@@ -269,7 +288,7 @@ document.addEventListener("DOMContentLoaded", function () {
       diaInput.value = "";
       preview.style.display = "none";
       clearBtn.style.display = "none";
-       document.getElementById("diamand_imageText").style.display = "block";
+      document.getElementById("diamand_imageText").style.display = "block";
     });
   }
 
@@ -335,8 +354,14 @@ function updateDiamondDescriptions() {
   const fluorescence = diaFluorescenceEl?.selectedOptions[0]?.text || "";
 
   const parts = [
-    color,clarity,cut,shape,polish,symmetry,culet,fluorescence,
-
+    color,
+    clarity,
+    cut,
+    shape,
+    polish,
+    symmetry,
+    culet,
+    fluorescence,
   ].filter(Boolean);
   if (shortDescEl) shortDescEl.value = parts.join(" ");
   if (longDescEl) longDescEl.value = parts.join(", ");
@@ -459,24 +484,108 @@ function removeRow(btn) {
 
 function loadCountryDropdown() {
   const countries = [
-    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina",
-    "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain",
-    "Bangladesh", "Belgium", "Bhutan", "Bolivia", "Brazil", "Bulgaria",
-    "Cambodia", "Cameroon", "Canada", "Chile", "China", "Colombia",
-    "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark",
-    "Dominican Republic", "Ecuador", "Egypt", "Estonia", "Ethiopia",
-    "Finland", "France", "Georgia", "Germany", "Ghana", "Greece", "Greenland",
-    "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland",
-    "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya",
-    "Kuwait", "Laos", "Latvia", "Lebanon", "Lithuania", "Luxembourg",
-    "Malaysia", "Maldives", "Mexico", "Mongolia", "Morocco", "Myanmar",
-    "Nepal", "Netherlands", "New Zealand", "Nigeria", "North Korea",
-    "Norway", "Oman", "Pakistan", "Philippines", "Poland", "Portugal",
-    "Qatar", "Romania", "Russia", "Saudi Arabia", "Singapore",
-    "South Africa", "South Korea", "Spain", "Sri Lanka", "Sweden",
-    "Switzerland", "Thailand", "Turkey", "Ukraine",
-    "United Arab Emirates", "United Kingdom", "United States",
-    "Uruguay", "Uzbekistan", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+    "Afghanistan",
+    "Albania",
+    "Algeria",
+    "Andorra",
+    "Angola",
+    "Argentina",
+    "Armenia",
+    "Australia",
+    "Austria",
+    "Azerbaijan",
+    "Bahamas",
+    "Bahrain",
+    "Bangladesh",
+    "Belgium",
+    "Bhutan",
+    "Bolivia",
+    "Brazil",
+    "Bulgaria",
+    "Cambodia",
+    "Cameroon",
+    "Canada",
+    "Chile",
+    "China",
+    "Colombia",
+    "Costa Rica",
+    "Croatia",
+    "Cuba",
+    "Cyprus",
+    "Czech Republic",
+    "Denmark",
+    "Dominican Republic",
+    "Ecuador",
+    "Egypt",
+    "Estonia",
+    "Ethiopia",
+    "Finland",
+    "France",
+    "Georgia",
+    "Germany",
+    "Ghana",
+    "Greece",
+    "Greenland",
+    "Hungary",
+    "Iceland",
+    "India",
+    "Indonesia",
+    "Iran",
+    "Iraq",
+    "Ireland",
+    "Israel",
+    "Italy",
+    "Jamaica",
+    "Japan",
+    "Jordan",
+    "Kazakhstan",
+    "Kenya",
+    "Kuwait",
+    "Laos",
+    "Latvia",
+    "Lebanon",
+    "Lithuania",
+    "Luxembourg",
+    "Malaysia",
+    "Maldives",
+    "Mexico",
+    "Mongolia",
+    "Morocco",
+    "Myanmar",
+    "Nepal",
+    "Netherlands",
+    "New Zealand",
+    "Nigeria",
+    "North Korea",
+    "Norway",
+    "Oman",
+    "Pakistan",
+    "Philippines",
+    "Poland",
+    "Portugal",
+    "Qatar",
+    "Romania",
+    "Russia",
+    "Saudi Arabia",
+    "Singapore",
+    "South Africa",
+    "South Korea",
+    "Spain",
+    "Sri Lanka",
+    "Sweden",
+    "Switzerland",
+    "Thailand",
+    "Turkey",
+    "Ukraine",
+    "United Arab Emirates",
+    "United Kingdom",
+    "United States",
+    "Uruguay",
+    "Uzbekistan",
+    "Vietnam",
+    "Yemen",
+    "Zambia",
+    "Zimbabwe",
   ];
   const select = document.getElementById("origin_country");
   if (!select) return;
@@ -491,24 +600,108 @@ function loadCountryDropdown() {
 
 function loadCountrycutDropdown() {
   const countries = [
-    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina",
-    "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain",
-    "Bangladesh", "Belgium", "Bhutan", "Bolivia", "Brazil", "Bulgaria",
-    "Cambodia", "Cameroon", "Canada", "Chile", "China", "Colombia",
-    "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark",
-    "Dominican Republic", "Ecuador", "Egypt", "Estonia", "Ethiopia",
-    "Finland", "France", "Georgia", "Germany", "Ghana", "Greece", "Greenland",
-    "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland",
-    "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya",
-    "Kuwait", "Laos", "Latvia", "Lebanon", "Lithuania", "Luxembourg",
-    "Malaysia", "Maldives", "Mexico", "Mongolia", "Morocco", "Myanmar",
-    "Nepal", "Netherlands", "New Zealand", "Nigeria", "North Korea",
-    "Norway", "Oman", "Pakistan", "Philippines", "Poland", "Portugal",
-    "Qatar", "Romania", "Russia", "Saudi Arabia", "Singapore",
-    "South Africa", "South Korea", "Spain", "Sri Lanka", "Sweden",
-    "Switzerland", "Thailand", "Turkey", "Ukraine",
-    "United Arab Emirates", "United Kingdom", "United States",
-    "Uruguay", "Uzbekistan", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
+    "Afghanistan",
+    "Albania",
+    "Algeria",
+    "Andorra",
+    "Angola",
+    "Argentina",
+    "Armenia",
+    "Australia",
+    "Austria",
+    "Azerbaijan",
+    "Bahamas",
+    "Bahrain",
+    "Bangladesh",
+    "Belgium",
+    "Bhutan",
+    "Bolivia",
+    "Brazil",
+    "Bulgaria",
+    "Cambodia",
+    "Cameroon",
+    "Canada",
+    "Chile",
+    "China",
+    "Colombia",
+    "Costa Rica",
+    "Croatia",
+    "Cuba",
+    "Cyprus",
+    "Czech Republic",
+    "Denmark",
+    "Dominican Republic",
+    "Ecuador",
+    "Egypt",
+    "Estonia",
+    "Ethiopia",
+    "Finland",
+    "France",
+    "Georgia",
+    "Germany",
+    "Ghana",
+    "Greece",
+    "Greenland",
+    "Hungary",
+    "Iceland",
+    "India",
+    "Indonesia",
+    "Iran",
+    "Iraq",
+    "Ireland",
+    "Israel",
+    "Italy",
+    "Jamaica",
+    "Japan",
+    "Jordan",
+    "Kazakhstan",
+    "Kenya",
+    "Kuwait",
+    "Laos",
+    "Latvia",
+    "Lebanon",
+    "Lithuania",
+    "Luxembourg",
+    "Malaysia",
+    "Maldives",
+    "Mexico",
+    "Mongolia",
+    "Morocco",
+    "Myanmar",
+    "Nepal",
+    "Netherlands",
+    "New Zealand",
+    "Nigeria",
+    "North Korea",
+    "Norway",
+    "Oman",
+    "Pakistan",
+    "Philippines",
+    "Poland",
+    "Portugal",
+    "Qatar",
+    "Romania",
+    "Russia",
+    "Saudi Arabia",
+    "Singapore",
+    "South Africa",
+    "South Korea",
+    "Spain",
+    "Sri Lanka",
+    "Sweden",
+    "Switzerland",
+    "Thailand",
+    "Turkey",
+    "Ukraine",
+    "United Arab Emirates",
+    "United Kingdom",
+    "United States",
+    "Uruguay",
+    "Uzbekistan",
+    "Vietnam",
+    "Yemen",
+    "Zambia",
+    "Zimbabwe",
   ];
   const select = document.getElementById("country_cut");
   if (!select) return;
@@ -570,7 +763,6 @@ function populatePartnerDropdowns() {
 }
 
 function addPartnerRow() {
-
   const tbody = document.getElementById("partnerBody");
 
   if (!tbody) {
@@ -617,16 +809,13 @@ function addPartnerRow() {
   }
 }
 
-
 // Button Click
 document.addEventListener("DOMContentLoaded", function () {
-
   const addBtn = document.getElementById("addRowBtn");
 
   if (addBtn) {
     addBtn.addEventListener("click", addPartnerRow);
   }
-
 });
 
 /* ================= UNIT LOOKUP ================= */
@@ -929,7 +1118,6 @@ function loadSpeciesLookup() {
 
       // Initialize auto fill after loading species
       setupSpeciesAutoFill();
-
     })
     .catch(function (error) {
       console.error("Species lookup error:", error);
@@ -970,13 +1158,30 @@ function fetchRapportPrice() {
   const weight = parseFloat(document.getElementById("dia_weight")?.value);
 
   // ✅ Get the selected text labels (not IDs)
-  const shapeText = document.getElementById("dia_shape")?.selectedOptions[0]?.text || "";
-  const colorText = document.getElementById("dia_color")?.selectedOptions[0]?.text || "";
-  const clarityText = document.getElementById("dia_clarity")?.selectedOptions[0]?.text || "";
+  const shapeText =
+    document.getElementById("dia_shape")?.selectedOptions[0]?.text || "";
+  const colorText =
+    document.getElementById("dia_color")?.selectedOptions[0]?.text || "";
+  const clarityText =
+    document.getElementById("dia_clarity")?.selectedOptions[0]?.text || "";
 
-  console.log("VALUES:", { shapeId, colorId, clarityId, weight, shapeText, colorText, clarityText });
+  console.log("VALUES:", {
+    shapeId,
+    colorId,
+    clarityId,
+    weight,
+    shapeText,
+    colorText,
+    clarityText,
+  });
 
-  if (!shapeText || !colorText || !clarityText || isNaN(weight) || weight <= 0) {
+  if (
+    !shapeText ||
+    !colorText ||
+    !clarityText ||
+    isNaN(weight) ||
+    weight <= 0
+  ) {
     document.getElementById("rapport_price").value = "";
     return;
   }
@@ -990,12 +1195,16 @@ function fetchRapportPrice() {
     app_name: "feiny-app",
     report_name: "All_Rapaport_Masters",
     criteria: criteria,
-    max_records: 200
+    max_records: 200,
   })
     .then(function (response) {
       console.log("FULL RESPONSE:", response);
 
-      if (response.code !== 3000 || !response.data || response.data.length === 0) {
+      if (
+        response.code !== 3000 ||
+        !response.data ||
+        response.data.length === 0
+      ) {
         console.warn("No records from API");
         document.getElementById("rapport_price").value = "";
         return;
@@ -1014,8 +1223,9 @@ function fetchRapportPrice() {
 
       if (filtered.length > 0) {
         // Sort by smallest Weight_high_size1 that still covers the weight
-        const sorted = filtered.sort((a, b) =>
-          parseFloat(a.Weight_high_size1) - parseFloat(b.Weight_high_size1)
+        const sorted = filtered.sort(
+          (a, b) =>
+            parseFloat(a.Weight_high_size1) - parseFloat(b.Weight_high_size1),
         );
 
         const record = sorted[0];
@@ -1052,7 +1262,6 @@ function initRapportPriceTriggers() {
   // ✅ Run once on page load if values already exist
   fetchRapportPrice();
 }
-
 
 /* ================= SPECIES CHANGE → HTS / CODE ================= */
 const speciesLookupEl = document.getElementById("species_lookup");
@@ -1127,7 +1336,8 @@ function saveRecord() {
     Rapport_Price: getNumber("Rapport_Price"),
     Rough_Lot: document.getElementById("rough_lot")?.value || "",
     Name1: document.getElementById("cs_short_description")?.value || "",
-    Long_Description:document.getElementById("cs_long_description")?.value || "",
+    Long_Description:
+      document.getElementById("cs_long_description")?.value || "",
     length_field: getNumber("min_length"),
     Width: getNumber("min_width"),
     Height: getNumber("min_height"),
@@ -1153,7 +1363,8 @@ function saveRecord() {
     Culet: document.getElementById("dia_culet")?.value || "",
     Symmetry: document.getElementById("dia_symmetry")?.value || "",
     Fluorescence1: document.getElementById("dia_fluorescence")?.value || "",
-    Fluorescence_Color: document.getElementById("dia_colour_fluorescence")?.value || "",
+    Fluorescence_Color:
+      document.getElementById("dia_colour_fluorescence")?.value || "",
     Lab: document.getElementById("dia_lab")?.value || "",
     Length_mm: getNumber("dia_length"),
     Width_mm: getNumber("dia_width"),
@@ -1165,8 +1376,10 @@ function saveRecord() {
     Total_Price: getNumber("total_price"),
     Rapport_Price1: getNumber("rapport_price"),
     Quantity: getNumber("quantity"),
-    Short_Description1: document.getElementById("diashort_description")?.value || "",
-    Long_Description2: document.getElementById("dialong_description")?.value || "",
+    Short_Description1:
+      document.getElementById("diashort_description")?.value || "",
+    Long_Description2:
+      document.getElementById("dialong_description")?.value || "",
   };
 
   console.log("Saving config:", recordData);
@@ -1222,7 +1435,7 @@ function saveRecord() {
         } else {
           throw new Error(
             "Failed to create record: " +
-            (response.message || JSON.stringify(response)),
+              (response.message || JSON.stringify(response)),
           );
         }
       })
@@ -1290,8 +1503,7 @@ function saveRecord() {
           return Promise.all(uploadPromises);
         } else {
           throw new Error(
-            "Failed to update record: " +
-            (res.message || JSON.stringify(res)),
+            "Failed to update record: " + (res.message || JSON.stringify(res)),
           );
         }
       })
@@ -1464,7 +1676,9 @@ function createCertificateRecords(skuValue, lotRecordID) {
     // -- ROw ID ---
     // const rowUniqueID = row.getAttribute("data-id");
     const rowUniqueID = row.querySelector(".cert-rowUnique-id");
-    console.log("rowUniqueID -- " + rowUniqueID + " --- labDescSelect" + labDescSelect);
+    console.log(
+      "rowUniqueID -- " + rowUniqueID + " --- labDescSelect" + labDescSelect,
+    );
     const idValue = idInput?.value || "";
     const fileExists = fileInput?.files && fileInput.files.length > 0;
 
@@ -1473,7 +1687,18 @@ function createCertificateRecords(skuValue, lotRecordID) {
       const dateObj = new Date(dateInput.value);
       const day = String(dateObj.getDate()).padStart(2, "0");
       const monthNames = [
-        "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec",
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
       ];
       const month = monthNames[dateObj.getMonth()];
       const year = dateObj.getFullYear();
@@ -1507,7 +1732,7 @@ function createCertificateRecords(skuValue, lotRecordID) {
       Species: speciesValue,
       Sub_species: subspeciesvalue,
 
-      Lot_Master_ID: lotRecordID
+      Lot_Master_ID: lotRecordID,
     };
     console.log("UpdateLog --", certData);
 
@@ -1537,8 +1762,7 @@ function createCertificateRecords(skuValue, lotRecordID) {
         });
 
       promises.push(updatePromise);
-    }
-    else {
+    } else {
       console.log("Createlog --", certData);
       // ========= Create New Row =============
       const promise = new Promise((resolve) => {
@@ -1611,29 +1835,32 @@ function createCertificateRecords(skuValue, lotRecordID) {
   return promises;
 }
 
-
 /* ================= GET PARTNERSHIP SUBFORM DATA ================= */
 
 function getPartnerRowsData() {
   const partnerRows = [];
 
-  document.querySelectorAll("#partnerBody .partner-row").forEach(function(row) {
-    partnerRows.push({
-      Partner_Name: row.querySelector(".partnerdatalookup")?.ID || 
-                    row.querySelector(".partnerdatalookup")?.value || "",
+  document
+    .querySelectorAll("#partnerBody .partner-row")
+    .forEach(function (row) {
+      partnerRows.push({
+        Partner_Name:
+          row.querySelector(".partnerdatalookup")?.ID ||
+          row.querySelector(".partnerdatalookup")?.value ||
+          "",
 
-      Partnership_shares: row.querySelector(".partner-share")?.value || "",
+        Partnership_shares: row.querySelector(".partner-share")?.value || "",
 
-      Partnership: row.querySelector(".partner-percent")?.value || "",
+        Partnership: row.querySelector(".partner-percent")?.value || "",
 
-      Commission: row.querySelector(".commission-percent")?.value || "",
+        Commission: row.querySelector(".commission-percent")?.value || "",
 
-      Description: row.querySelector(".partner-desc")?.value || "",
+        Description: row.querySelector(".partner-desc")?.value || "",
 
-      Commission_Itemized_on_Invoice:
-        row.querySelector(".commission-itemized")?.checked || false
+        Commission_Itemized_on_Invoice:
+          row.querySelector(".commission-itemized")?.checked || false,
+      });
     });
-  });
 
   return partnerRows;
 }
@@ -1641,92 +1868,78 @@ function getPartnerRowsData() {
 /* ================= CLEAR FULL PAGE AFTER SAVE ================= */
 
 function clearPageAfterSave() {
-
   // ---------------- BASIC FIELDS ----------------
-  document.querySelectorAll("input, textarea, select").forEach(function(el){
+  document.querySelectorAll("input, textarea, select").forEach(function (el) {
+    if (el.type === "button" || el.type === "submit" || el.type === "hidden") {
+      return;
+    }
 
-      if (
-        el.type === "button" ||
-        el.type === "submit" ||
-        el.type === "hidden"
-      ){
-         return;
-      }
-
-      if(el.type === "checkbox" || el.type === "radio"){
-          el.checked = false;
-      }
-      else if(el.type === "file"){
-          el.value = "";
-      }
-      else{
-          el.value = "";
-      }
-
+    if (el.type === "checkbox" || el.type === "radio") {
+      el.checked = false;
+    } else if (el.type === "file") {
+      el.value = "";
+    } else {
+      el.value = "";
+    }
   });
-
 
   // ---------------- RESET DEFAULT SELECT OPTIONS ----------------
-  document.querySelectorAll("select").forEach(function(sel){
-      sel.selectedIndex = 0;
+  document.querySelectorAll("select").forEach(function (sel) {
+    sel.selectedIndex = 0;
   });
-
 
   // ---------------- CLEAR IMAGES ----------------
   diaImageFile = null;
   stoneImageFile = null;
 
   let diaPrev = document.getElementById("imagePreview");
-  if(diaPrev){
-      diaPrev.src="";
-      diaPrev.style.display="none";
+  if (diaPrev) {
+    diaPrev.src = "";
+    diaPrev.style.display = "none";
   }
 
   let stonePrev = document.getElementById("stoneImagePreview");
-  if(stonePrev){
-      stonePrev.src="";
-      stonePrev.style.display="none";
+  if (stonePrev) {
+    stonePrev.src = "";
+    stonePrev.style.display = "none";
   }
 
-  let clearImg=document.getElementById("clearImage");
-  if(clearImg){
-      clearImg.style.display="none";
+  let clearImg = document.getElementById("clearImage");
+  if (clearImg) {
+    clearImg.style.display = "none";
   }
 
-  let clearStone=document.getElementById("clearStoneImage");
-  if(clearStone){
-      clearStone.style.display="none";
+  let clearStone = document.getElementById("clearStoneImage");
+  if (clearStone) {
+    clearStone.style.display = "none";
   }
 
-  if(document.getElementById("diamand_imageText")){
-      document.getElementById("diamand_imageText").style.display="block";
+  if (document.getElementById("diamand_imageText")) {
+    document.getElementById("diamand_imageText").style.display = "block";
   }
 
-  if(document.getElementById("imageText")){
-      document.getElementById("imageText").style.display="block";
+  if (document.getElementById("imageText")) {
+    document.getElementById("imageText").style.display = "block";
   }
-
 
   // ---------------- CLEAR CERTIFICATE SUBFORM ----------------
-  let certBody=document.getElementById("certificateBody");
+  let certBody = document.getElementById("certificateBody");
 
-  if(certBody){
-      certBody.innerHTML="";
-      addCertificateRow(); // add one blank row
+  if (certBody) {
+    certBody.innerHTML = "";
+    addCertificateRow(); // add one blank row
   }
 
   certificateFiles.clear();
-  certificateFilesToUpload=[];
-
+  certificateFilesToUpload = [];
 
   // ---------------- CLEAR PARTNERSHIP SUBFORM ----------------
-  let partnerBody=document.getElementById("partnerBody");
+  let partnerBody = document.getElementById("partnerBody");
 
-  if(partnerBody){
-      partnerBody.innerHTML="";
-      addPartnerRow();
+  if (partnerBody) {
+    partnerBody.innerHTML = "";
+    addPartnerRow();
   }
-
 
   // ---------------- CLEAR AUTO CALCULATED FIELDS ----------------
   [
@@ -1738,43 +1951,39 @@ function clearPageAfterSave() {
     "diashort_description",
     "dialong_description",
     "hts_field",
-    "code_field"
-  ].forEach(function(id){
-      let f=document.getElementById(id);
-      if(f){
-         f.value="";
-      }
+    "code_field",
+  ].forEach(function (id) {
+    let f = document.getElementById(id);
+    if (f) {
+      f.value = "";
+    }
   });
-
 
   // ---------------- HIDE CONDITIONAL SECTIONS ----------------
   [
-   "colorStoneSection",
-   "diamondSection",
-   "jewelleryWrapper",
-   "pricingSection",
-   "Dimensionssection",
-   "neededcertificatesec",
-   "certificateuploadsec",
-   "partnershipsec"
-  ].forEach(function(id){
-      let sec=document.getElementById(id);
-      if(sec){
-          sec.style.display="none";
-      }
+    "colorStoneSection",
+    "diamondSection",
+    "jewelleryWrapper",
+    "pricingSection",
+    "Dimensionssection",
+    "neededcertificatesec",
+    "certificateuploadsec",
+    "partnershipsec",
+  ].forEach(function (id) {
+    let sec = document.getElementById(id);
+    if (sec) {
+      sec.style.display = "none";
+    }
   });
-
 
   // ---------------- RESET GLOBAL VARIABLES ----------------
   recId = null;
   lot_edit = false;
 
-
   // optional scroll top
-  window.scrollTo(0,0);
+  window.scrollTo(0, 0);
 
   console.log("Form Cleared Successfully");
-
 }
 
 /* =================================================================================
@@ -1804,7 +2013,7 @@ function loadExistingRecord(recordID) {
 
       /* ================= DIAMOND IMAGE PREVIEW ================= */
 
-    // Replace Diamond_Image with your actual field link name
+      // Replace Diamond_Image with your actual field link name
       let diaFullUrl = "https://creator.zoho.com" + data.item_Image;
       let diaFrame = document.getElementById("imagePreview");
 
@@ -1814,20 +2023,22 @@ function loadExistingRecord(recordID) {
       document.getElementById("diamand_imageText").style.display = "none";
       document.getElementById("clearImage").style.display = "block";
 
-       ///------DIAMOND IMAGE PREVIEW END---- ///
+      ///------DIAMOND IMAGE PREVIEW END---- ///
 
       document.getElementById("In_SKU").value = data.In_SKU || "";
       document.getElementById("itemType").value = data.Select || "";
       document.getElementById("surface_lookup").value = data.Surface?.ID || "";
       document.getElementById("species_lookup").value = data.Species?.ID || "";
-      document.getElementById("treatment_lookup").value = data.Treatment?.ID || "";
+      document.getElementById("treatment_lookup").value =
+        data.Treatment?.ID || "";
       document.getElementById("shape_lookup").value = data.Shape?.ID || "";
       document.getElementById("origin_country").value = data.Origin || "";
       document.getElementById("country_cut").value = data.Country_of_Cut || "";
       document.getElementById("hts_field").value = data.HTS || "";
       document.getElementById("code_field").value = data.Code || "";
       document.getElementById("cs_short_description").value = data.Name1 || "";
-      document.getElementById("cs_long_description").value = data.Long_Description || "";
+      document.getElementById("cs_long_description").value =
+        data.Long_Description || "";
       document.getElementById("min_length").value = data.length_field || "";
       document.getElementById("min_width").value = data.Width || "";
       document.getElementById("min_height").value = data.Height || "";
@@ -1840,7 +2051,8 @@ function loadExistingRecord(recordID) {
       document.getElementById("cert_agl").checked = data.AGL || false;
       document.getElementById("cert_gia").checked = data.GIA || false;
       document.getElementById("cert_ssef").checked = data.SSEF || false;
-      document.getElementById("certificate_details").value = data.Description2 || "";
+      document.getElementById("certificate_details").value =
+        data.Description2 || "";
       document.getElementById("Price4").value = data.Price4 || "";
       document.getElementById("MinimumPrice").value = data.Minimum_Price || "";
       document.getElementById("unit_lookup").value = data.Unit?.ID || "";
@@ -1853,8 +2065,10 @@ function loadExistingRecord(recordID) {
       document.getElementById("dia_polish").value = data.Polish?.ID || "";
       document.getElementById("dia_symmetry").value = data.Symmetry?.ID || "";
       document.getElementById("dia_culet").value = data.Culet?.ID || "";
-      document.getElementById("dia_fluorescence").value = data.Fluorescence1?.ID || "";
-      document.getElementById("dia_colour_fluorescence").value = data.Fluorescence_Color?.ID || "";
+      document.getElementById("dia_fluorescence").value =
+        data.Fluorescence1?.ID || "";
+      document.getElementById("dia_colour_fluorescence").value =
+        data.Fluorescence_Color?.ID || "";
       document.getElementById("dia_length").value = data.Length_mm || "";
       document.getElementById("dia_width").value = data.Width_mm || "";
       document.getElementById("dia_depth").value = data.Depth1 || "";
@@ -1862,11 +2076,15 @@ function loadExistingRecord(recordID) {
       document.getElementById("dia_depth_percent").value = data.Depth2 || "";
       document.getElementById("quantity").value = data.Quantity || "";
       document.getElementById("dia_weight").value = data.Weight_Ct || "";
-      document.getElementById("price_per_carat").value = data.Price_Per_carat || "";  
+      document.getElementById("price_per_carat").value =
+        data.Price_Per_carat || "";
       document.getElementById("total_price").value = data.Total_Price || "";
-      document.getElementById("rapport_price").value = data.Rapport_Price1 || "";
-      document.getElementById("diashort_description").value = data.Short_Description1 || "";
-      document.getElementById("dialong_description").value = data.Long_Description2 || "";
+      document.getElementById("rapport_price").value =
+        data.Rapport_Price1 || "";
+      document.getElementById("diashort_description").value =
+        data.Short_Description1 || "";
+      document.getElementById("dialong_description").value =
+        data.Long_Description2 || "";
 
       /* ─── CERTIFICATE UPLOADS SUBFORM ─── */
       loadCertificateSubform(recordID);
@@ -1887,15 +2105,19 @@ function loadExistingRecord(recordID) {
         <option value="">Select Partner</option>
       </select>
     </td>
-    <td><input type="text" class="partner-share" value="${item.Partnership_shares || ""
-            }"></td>
-    <td><input type="text" class="partner-percent" value="${item.Partnership || ""
-            }"></td>
-    <td><input type="text" class="commission-percent" value="${item.Commission || ""
-            }"></td>
+    <td><input type="text" class="partner-share" value="${
+      item.Partnership_shares || ""
+    }"></td>
+    <td><input type="text" class="partner-percent" value="${
+      item.Partnership || ""
+    }"></td>
+    <td><input type="text" class="commission-percent" value="${
+      item.Commission || ""
+    }"></td>
     <td style="text-align:center">
-      <input type="checkbox" class="commission-itemized" ${item.Commission_Itemized_on_Invoice === "true" ? "checked" : ""
-            }>
+      <input type="checkbox" class="commission-itemized" ${
+        item.Commission_Itemized_on_Invoice === "true" ? "checked" : ""
+      }>
     </td>
     <td><textarea class="partner-desc">${item.Description || ""}</textarea></td>
   `;

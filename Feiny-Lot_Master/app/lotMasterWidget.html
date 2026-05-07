@@ -1,20 +1,26 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lot Master - Jewelry & Diamond Management</title>
-    
+
     <!-- ================= EXTERNAL SCRIPTS & STYLES ================= -->
     <script defer src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://js.zohostatic.com/creator/widgets/version/2.0/widgetsdk-min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    />
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    ></script>
+
     <!-- ================= CUSTOM STYLES ================= -->
-    <link rel="stylesheet" href="style.css">
-    
+    <link rel="stylesheet" href="style.css" />
+
     <!-- ================= CUSTOM SCRIPTS ================= -->
     <script defer src="getFileNameFromUrl.js"></script>
     <script defer src="mainJSFile.js"></script>
@@ -22,7 +28,6 @@
 
   <body>
     <div class="creator-container">
-
       <!-- ========== TOP SECTION: LOT MASTER + SYSTEM INFO ========== -->
       <div class="top-grid">
         <div class="card">
@@ -39,7 +44,7 @@
             </div>
             <div class="field">
               <label>SKU</label>
-              <input type="text" id="In_SKU">
+              <input type="text" id="In_SKU" />
             </div>
           </div>
         </div>
@@ -49,7 +54,7 @@
           <div class="grid-2">
             <div class="field">
               <label>Stock on Hand</label>
-              <input type="number" id="Stock_On_Hand" value="1">
+              <input type="number" id="Stock_On_Hand" value="1" />
             </div>
             <div class="field">
               <label>Status</label>
@@ -68,69 +73,143 @@
       </div>
 
       <!-- ========== DIAMOND SECTION ========== -->
-      <div id="diamondSection" style="display:none;">
+      <div id="diamondSection" style="display: none">
         <div class="card">
           <div class="card-title">Diamond Lot Master</div>
           <div class="diamond-grid">
-
             <!-- ROW 1: Shape, Color, Clarity, Cut -->
             <div class="diamond-fields-grid">
-              <div class="field"><label>Shape</label><select id="dia_shape"></select></div>
-              <div class="field"><label>Color</label><select id="dia_color"></select></div>
-              <div class="field"><label>Clarity</label><select id="dia_clarity"></select></div>
-              <div class="field"><label>Cut</label><select id="dia_cut"></select></div>
+              <div class="field">
+                <label>Shape</label
+                ><select id="dia_shape"></select>
+              </div>
+              <div class="field">
+                <label>Color</label
+                ><select id="dia_color"></select>
+              </div>
+              <div class="field">
+                <label>Clarity</label
+                ><select id="dia_clarity"></select>
+              </div>
+              <div class="field">
+                <label>Cut</label
+                ><select id="dia_cut"></select>
+              </div>
             </div>
 
             <!-- ROW 2: Polish, Symmetry, Culet, Fluorescence -->
             <div class="diamond-fields-grid">
-              <div class="field"><label>Polish</label><select id="dia_polish"></select></div>
-              <div class="field"><label>Symmetry</label><select id="dia_symmetry"></select></div>
-              <div class="field"><label>Culet</label><select id="dia_culet"></select></div>
-              <div class="field"><label>Fluorescence</label><select id="dia_fluorescence"></select></div>
+              <div class="field">
+                <label>Polish</label
+                ><select id="dia_polish"></select>
+              </div>
+              <div class="field">
+                <label>Symmetry</label
+                ><select id="dia_symmetry"></select>
+              </div>
+              <div class="field">
+                <label>Culet</label
+                ><select id="dia_culet"></select>
+              </div>
+              <div class="field">
+                <label>Fluorescence</label
+                ><select id="dia_fluorescence"></select>
+              </div>
             </div>
 
             <!-- ROW 3: Dimensions -->
             <div class="diamond-fields-grid">
-              <div class="field"><label>Length (mm)</label><input type="text" id="dia_length"></div>
-              <div class="field"><label>Width (mm)</label><input type="text" id="dia_width"></div>
-              <div class="field"><label>Depth (mm)</label><input type="text" id="dia_depth"></div>
-              <div class="field"><label>Table (%)</label><input type="text" id="dia_table"></div>
+              <div class="field">
+                <label>Length (mm)</label><input type="text" id="dia_length" />
+              </div>
+              <div class="field">
+                <label>Width (mm)</label><input type="text" id="dia_width" />
+              </div>
+              <div class="field">
+                <label>Depth (mm)</label><input type="text" id="dia_depth" />
+              </div>
+              <div class="field">
+                <label>Table (%)</label><input type="text" id="dia_table" />
+              </div>
             </div>
 
             <!-- ROW 4: More Properties -->
             <div class="diamond-fields-grid">
-              <div class="field"><label>Depth (%)</label><input type="text" id="dia_depth_percent"></div>
-              <div class="field"><label>Fluorescence Color</label><select id="dia_colour_fluorescence"></select></div>
-              <div class="field"><label>Weight (Ct)</label><input type="text" id="dia_weight" step="0.01"></div>
-              <div class="field"><label>Quantity</label><input type="number" id="quantity"></div>
+              <div class="field">
+                <label>Depth (%)</label
+                ><input type="text" id="dia_depth_percent" />
+              </div>
+              <div class="field">
+                <label>Fluorescence Color</label
+                ><select id="dia_colour_fluorescence"></select>
+              </div>
+              <div class="field">
+                <label>Weight (Ct)</label
+                ><input type="text" id="dia_weight" step="0.01" />
+              </div>
+              <div class="field">
+                <label>Quantity</label><input type="number" id="quantity" />
+              </div>
             </div>
 
             <!-- ROW 5: Pricing & Description -->
             <div class="diamond-fields-grid">
-              <div class="field"><label>Price Per Carat ($)</label><input type="number" id="price_per_carat" step="0.01"></div>
-              <div class="field"><label>Total Price ($)</label><input type="number" id="total_price" step="0.01" readonly></div>
-              <div class="field"><label>Rapaport Price</label><input type="number" id="rapport_price"></div>
-              <div class="field"><label>Cost Amount</label><input type="number" id="cost_amount" step="0.01"></div>
-              
+              <div class="field">
+                <label>Price Per Carat ($)</label
+                ><input type="number" id="price_per_carat" step="0.01" />
+              </div>
+              <div class="field">
+                <label>Total Price ($)</label
+                ><input type="number" id="total_price" step="0.01" readonly />
+              </div>
+              <div class="field">
+                <label>Rapaport Price</label
+                ><input type="number" id="rapport_price" />
+              </div>
+              <div class="field">
+                <label>Cost Amount</label
+                ><input type="number" id="cost_amount" step="0.01" />
+              </div>
             </div>
 
             <!-- ROW 6: Long Description & Image -->
             <div class="diamond-fields-grid">
-              <div class="field"><label>Short Description</label><input type="text" id="diashort_description"></div>
-              <div class="field"><label>Long Description</label><textarea id="dialong_description"></textarea></div>
+              <div class="field">
+                <label>Short Description</label
+                ><input type="text" id="diashort_description" />
+              </div>
+              <div class="field">
+                <label>Long Description</label
+                ><textarea id="dialong_description"></textarea>
+              </div>
               <div class="field">
                 <label>Image</label>
                 <label class="image-upload">
-                  <input type="file" id="dia_image" accept="image/png, image/jpeg, image/gif">
-                  <span id="diamand_imageText">Drag & drop or <b>Choose file</b><br><small>JPEG, PNG, GIF up to 5MB</small></span>
-                  <img id="imagePreview" style="display:none; max-width:120px; margin-top:5px;">
+                  <input
+                    type="file"
+                    id="dia_image"
+                    accept="image/png, image/jpeg, image/gif"
+                  />
+                  <span id="diamand_imageText"
+                    >Drag & drop or <b>Choose file</b><br /><small
+                      >JPEG, PNG, GIF up to 5MB</small
+                    ></span
+                  >
+                  <img
+                    id="imagePreview"
+                    style="display: none; max-width: 120px; margin-top: 5px"
+                  />
                 </label>
-                <button type="button" id="clearImage" style="display:none;" class="btn-small">Remove</button>
+                <button
+                  type="button"
+                  id="clearImage"
+                  style="display: none"
+                  class="btn-small"
+                >
+                  Remove
+                </button>
               </div>
             </div>
-              
-            
-
 
             <!-- ROW 7: Image Upload
             <div class="diamond-fields-grid">
@@ -144,116 +223,217 @@
                 <button type="button" id="clearImage" style="display:none;" class="btn-small">Remove</button>
               </div>
             </div> -->
-
           </div>
         </div>
       </div>
 
       <!-- ========== COLOR STONE SECTION ========== -->
-      <div id="colorStoneSection" style="display:none;">
+      <div id="colorStoneSection" style="display: none">
         <div class="card">
           <div class="card-title">Color Stone Details</div>
           <div class="colorstone-grid">
-
             <!-- LEFT: Image -->
             <div class="field">
               <label>Image</label>
               <label class="image-upload" id="imageDropZone">
-                <input type="file" id="stone_image" accept="image/png, image/jpeg, image/gif">
-                <span id="imageText">Drag & drop or <b>Choose file</b><br><small>JPEG, PNG, GIF up to 5MB</small></span>
-                <img id="stoneImagePreview" style="display:none; max-width:100%; max-height:100px; margin-top:5px;">
+                <input
+                  type="file"
+                  id="stone_image"
+                  accept="image/png, image/jpeg, image/gif"
+                />
+                <span id="imageText"
+                  >Drag & drop or <b>Choose file</b><br /><small
+                    >JPEG, PNG, GIF up to 5MB</small
+                  ></span
+                >
+                <img
+                  id="stoneImagePreview"
+                  style="
+                    display: none;
+                    max-width: 100%;
+                    max-height: 100px;
+                    margin-top: 5px;
+                  "
+                />
               </label>
-              <button type="button" id="clearStoneImage" style="display:none; margin-top:5px;" class="btn-small">Remove</button>
+              <button
+                type="button"
+                id="clearStoneImage"
+                style="display: none; margin-top: 5px"
+                class="btn-small"
+              >
+                Remove
+              </button>
             </div>
 
             <!-- RIGHT: Fields -->
             <div>
               <!-- ROW 1: Basic Properties -->
               <div class="colorstone-fields-grid">
-                <div class="field"><label>Treatment</label><select id="treatment_lookup"></select></div>
-                <div class="field"><label>Species</label><select id="species_lookup"></select></div>
-               <div class="field"><label>Sub Species</label><input type="text" id="sub_species"></div>
-                <div class="field"><label>Surface</label><select id="surface_lookup"></select></div>
-                
+                <div class="field">
+                  <label>Treatment</label
+                  ><select id="treatment_lookup"></select>
+                </div>
+                <div class="field">
+                  <label>Species</label
+                  ><select id="species_lookup"></select>
+                </div>
+                <div class="field">
+                  <label>Sub Species</label
+                  ><input type="text" id="sub_species" />
+                </div>
+                <div class="field">
+                  <label>Surface</label
+                  ><select id="surface_lookup"></select>
+                </div>
               </div>
 
               <!-- ROW 2: Origin, Cut, HTS, Code, Descriptions -->
               <div class="colorstone-fields-grid">
-                <div class="field"><label>Shape</label><select id="shape_lookup"></select></div>
-                <div class="field"><label>Country of Origin (COO)</label><select id="origin_country"></select></div>
-                <div class="field"><label>Country of Cut (COC)</label><select id="country_cut"></select></div>
-                <div class="field"><label>HTS</label><input type="text" id="hts_field" readonly></div>
-               
+                <div class="field">
+                  <label>Shape</label
+                  ><select id="shape_lookup"></select>
+                </div>
+                <div class="field">
+                  <label>Country of Origin (COO)</label
+                  ><select id="origin_country"></select>
+                </div>
+                <div class="field">
+                  <label>Country of Cut (COC)</label
+                  ><select id="country_cut"></select>
+                </div>
+                <div class="field">
+                  <label>HTS</label
+                  ><input type="text" id="hts_field" readonly />
+                </div>
               </div>
 
               <!-- ROW 3: Descriptions -->
               <div class="colorstone-fields-grid">
-                 <div class="field"><label>Code</label><input type="text" id="code_field" readonly></div>
-                <div class="field"><label>Cost Amount</label><input type="number" id="cost_amount" step="0.01"></div>
-                <div class="field"><label>Short Description</label><input type="text" id="cs_short_description"></div>
-                <div class="field"><label>Long Description</label><textarea id="cs_long_description"></textarea></div>
+                <div class="field">
+                  <label>Code</label
+                  ><input type="text" id="code_field" readonly />
+                </div>
+                <div class="field">
+                  <label>Cost Amount</label
+                  ><input type="number" id="cost_amount" step="0.01" />
+                </div>
+                <div class="field">
+                  <label>Short Description</label
+                  ><input type="text" id="cs_short_description" />
+                </div>
+                <div class="field">
+                  <label>Long Description</label
+                  ><textarea id="cs_long_description"></textarea>
+                </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>
 
       <!-- ========== DIMENSIONS (Color Stone only) ========== -->
-      <div id="Dimensionssection" style="display:none;">
+      <div id="Dimensionssection" style="display: none">
         <div class="card">
           <div class="card-title">Dimensions</div>
           <div class="dimensions-grid">
-
             <div class="dim-block">
               <div class="dim-title">Minimum Dimensions (mm)</div>
               <div class="dim-row">
-                <input id="min_length" placeholder="Length" type="number" step="0.01">
-                <input id="min_width" placeholder="Width" type="number" step="0.01">
-                <input id="min_height" placeholder="Height" type="number" step="0.01">
+                <input
+                  id="min_length"
+                  placeholder="Length"
+                  type="number"
+                  step="0.01"
+                />
+                <input
+                  id="min_width"
+                  placeholder="Width"
+                  type="number"
+                  step="0.01"
+                />
+                <input
+                  id="min_height"
+                  placeholder="Height"
+                  type="number"
+                  step="0.01"
+                />
               </div>
             </div>
 
             <div class="dim-block">
               <div class="dim-title">Maximum Dimensions (mm)</div>
               <div class="dim-row">
-                <input id="max_length" placeholder="Length" type="number" step="0.01">
-                <input id="max_width" placeholder="Width" type="number" step="0.01">
-                <input id="max_height" placeholder="Height" type="number" step="0.01">
+                <input
+                  id="max_length"
+                  placeholder="Length"
+                  type="number"
+                  step="0.01"
+                />
+                <input
+                  id="max_width"
+                  placeholder="Width"
+                  type="number"
+                  step="0.01"
+                />
+                <input
+                  id="max_height"
+                  placeholder="Height"
+                  type="number"
+                  step="0.01"
+                />
               </div>
             </div>
 
             <div class="dim-block">
               <div class="dim-title">Weight (ct)</div>
               <div class="dim-row">
-                <input id="weight" placeholder="Weight" type="number" step="0.01">
+                <input
+                  id="weight"
+                  placeholder="Weight"
+                  type="number"
+                  step="0.01"
+                />
               </div>
             </div>
-
           </div>
         </div>
       </div>
 
       <!-- ========== NEEDED CERTIFICATES (Color Stone only) ========== -->
-      <div id="neededcertificatesec" style="display:none;">
+      <div id="neededcertificatesec" style="display: none">
         <div class="card">
           <div class="card-title">Needed Certificates</div>
           <div class="cert-grid">
-            <label class="cert-checkbox"><input type="checkbox" id="cert_agl"> AGL</label>
-            <label class="cert-checkbox"><input type="checkbox" id="cert_gia"> GIA</label>
-            <label class="cert-checkbox"><input type="checkbox" id="cert_gubelin"> Gubelin</label>
-            <label class="cert-checkbox"><input type="checkbox" id="cert_ssef"> SSEF</label>
-            <label class="cert-checkbox"><input type="checkbox" id="cert_other"> Other</label>
+            <label class="cert-checkbox"
+              ><input type="checkbox" id="cert_agl" /> AGL</label
+            >
+            <label class="cert-checkbox"
+              ><input type="checkbox" id="cert_gia" /> GIA</label
+            >
+            <label class="cert-checkbox"
+              ><input type="checkbox" id="cert_gubelin" /> Gubelin</label
+            >
+            <label class="cert-checkbox"
+              ><input type="checkbox" id="cert_ssef" /> SSEF</label
+            >
+            <label class="cert-checkbox"
+              ><input type="checkbox" id="cert_other" /> Other</label
+            >
           </div>
           <div class="field">
             <label>Certificate Details</label>
-            <input type="text" id="certificate_details" placeholder="Certificate Details">
+            <input
+              type="text"
+              id="certificate_details"
+              placeholder="Certificate Details"
+            />
           </div>
         </div>
       </div>
 
       <!-- ========== CERTIFICATE UPLOAD (Color Stone + Diamond) ========== -->
-      <div id="certificateuploadsec" style="display:none;">
+      <div id="certificateuploadsec" style="display: none">
         <div class="card">
           <div class="card-subtitle">Certificate Upload</div>
           <div class="table-scroll">
@@ -273,25 +453,44 @@
               </thead>
               <tbody id="certificateBody">
                 <tr class="cert-row">
-                  <td><button type="button" class="btn-remove" onclick="removeRow(this)">❌</button></td>
-                  <td><input class="cert-id"></td>
-                  <td><input type="file" class="cert-file" accept=".pdf,.jpg,.jpeg,.png,.gif"></td>
-                  <td><input type="date" class="cert-date"></td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn-remove"
+                      onclick="removeRow(this)"
+                    >
+                      ❌
+                    </button>
+                  </td>
+                  <td><input class="cert-id" /></td>
+                  <td>
+                    <input
+                      type="file"
+                      class="cert-file"
+                      accept=".pdf,.jpg,.jpeg,.png,.gif"
+                    />
+                  </td>
+                  <td><input type="date" class="cert-date" /></td>
                   <td><textarea class="cert-notes"></textarea></td>
                   <td><select class="cert-lab"></select></td>
                   <td><select class="cert-lab-desc"></select></td>
                   <td><select class="cert-lab-sup"></select></td>
                   <td><select class="cert-rowUnique-id"></select></td>
-                  
                 </tr>
               </tbody>
             </table>
           </div>
-          <button type="button" class="btn-outline" onclick="addCertificateRow()">+ Add Row</button>
+          <button
+            type="button"
+            class="btn-outline"
+            onclick="addCertificateRow()"
+          >
+            + Add Row
+          </button>
         </div>
       </div>
       <!-- ========== PARTNERSHIP DETAILS (Color Stone + Diamond) ========== -->
-      <div id="partnershipsec" style="display:none;">
+      <div id="partnershipsec" style="display: none">
         <div class="card">
           <div class="card-subtitle">Partnership Details</div>
           <div class="table-scroll">
@@ -308,56 +507,102 @@
               </thead>
               <tbody id="partnerBody">
                 <tr class="partner-row">
-                  <td><select class="partnerdatalookup"><option value="">Select Partner</option></select></td>
-                  <td><input type="text" class="partner-share"></td>
-                  <td><input type="text" class="partner-percent"></td>
-                  <td><input type="text" class="commission-percent"></td>
-                  <td style="text-align:center"><input type="checkbox" class="commission-itemized"></td>
+                  <td>
+                    <select class="partnerdatalookup">
+                      <option value="">Select Partner</option>
+                    </select>
+                  </td>
+                  <td><input type="text" class="partner-share" /></td>
+                  <td><input type="text" class="partner-percent" /></td>
+                  <td><input type="text" class="commission-percent" /></td>
+                  <td style="text-align: center">
+                    <input type="checkbox" class="commission-itemized" />
+                  </td>
                   <td><textarea class="partner-desc"></textarea></td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <button type="button" class="btn-outline" onclick="addPartnerRow()">+ Add Row</button>
+          <button type="button" class="btn-outline" onclick="addPartnerRow()">
+            + Add Row
+          </button>
         </div>
       </div>
-      
+
       <!-- ========== PRICING (Color Stone only) ========== -->
-      <div id="pricingSection" style="display:none;">
+      <div id="pricingSection" style="display: none">
         <div class="card pricing-card">
           <div class="card-title">Pricing</div>
           <div class="pricing-row">
-            <div class="pricing-field"><label>Asking Price</label><input id="Price4" type="number" step="0.01"></div>
-            <div class="pricing-field"><label>Minimum Price</label><input id="MinimumPrice" type="number" step="0.01"></div>
-            <div class="pricing-field"><label>Unit</label><select id="unit_lookup"></select></div>
+            <div class="pricing-field">
+              <label>Asking Price</label
+              ><input id="Price4" type="number" step="0.01" />
+            </div>
+            <div class="pricing-field">
+              <label>Minimum Price</label
+              ><input id="MinimumPrice" type="number" step="0.01" />
+            </div>
+            <div class="pricing-field">
+              <label>Unit</label
+              ><select id="unit_lookup"></select>
+            </div>
           </div>
         </div>
       </div>
 
-      
-
       <!-- ========== JEWELLERY SECTION ========== -->
-      <div id="jewelleryWrapper" style="display:none;">
-
+      <div id="jewelleryWrapper" style="display: none">
         <div class="card jewellery-card">
           <div class="card-title">Jewellery Lot Master</div>
           <div class="jewellery-grid">
-            <div class="jm-field"><label>Style</label><input type="text"></div>
-            <div class="jm-field"><label>Style Type</label><select></select></div>
-            <div class="jm-field"><label>Image</label><input type="file"></div>
-            <div class="jm-field"><label>Side Image</label><input type="file"></div>
-            <div class="jm-field"><label>Category</label><select></select></div>
-            <div class="jm-field"><label>Platinum</label><input type="text"></div>
-            <div class="jm-field"><label>Tag Diam Wt</label><input type="text"></div>
-            <div class="jm-field"><label>Production</label><input type="text"></div>
-            <div class="jm-field"><label>Diam Quality</label><input type="text"></div>
-            <div class="jm-field"><label>Gold</label><input type="text"></div>
-            <div class="jm-field"><label>Country of Origin</label><select></select></div>
-            <div class="jm-field"><label>Metal Colour</label><input type="text"></div>
-            <div class="jm-field"><label>Metal Type</label><select></select></div>
-            <div class="jm-field"><label>Size</label><input type="text"></div>
-            <div class="jm-field full-width"><label>Description</label><textarea></textarea></div>
-            <div class="jm-field full-width"><label>Instruction</label><textarea></textarea></div>
+            <div class="jm-field">
+              <label>Style</label><input type="text" />
+            </div>
+            <div class="jm-field">
+              <label>Style Type</label
+              ><select></select>
+            </div>
+            <div class="jm-field">
+              <label>Image</label><input type="file" />
+            </div>
+            <div class="jm-field">
+              <label>Side Image</label><input type="file" />
+            </div>
+            <div class="jm-field">
+              <label>Category</label
+              ><select></select>
+            </div>
+            <div class="jm-field">
+              <label>Platinum</label><input type="text" />
+            </div>
+            <div class="jm-field">
+              <label>Tag Diam Wt</label><input type="text" />
+            </div>
+            <div class="jm-field">
+              <label>Production</label><input type="text" />
+            </div>
+            <div class="jm-field">
+              <label>Diam Quality</label><input type="text" />
+            </div>
+            <div class="jm-field"><label>Gold</label><input type="text" /></div>
+            <div class="jm-field">
+              <label>Country of Origin</label
+              ><select></select>
+            </div>
+            <div class="jm-field">
+              <label>Metal Colour</label><input type="text" />
+            </div>
+            <div class="jm-field">
+              <label>Metal Type</label
+              ><select></select>
+            </div>
+            <div class="jm-field"><label>Size</label><input type="text" /></div>
+            <div class="jm-field full-width">
+              <label>Description</label><textarea></textarea>
+            </div>
+            <div class="jm-field full-width">
+              <label>Instruction</label><textarea></textarea>
+            </div>
           </div>
         </div>
 
@@ -367,16 +612,32 @@
             <table class="subform-table">
               <thead>
                 <tr>
-                  <th>Cast#</th><th>Vendor</th><th>Metal Type</th><th>Colour</th>
-                  <th>Unit</th><th>Wt</th><th>Qty</th><th>Metal Market</th>
-                  <th>Price</th><th>Gold Cost</th><th>Remarks</th>
+                  <th>Cast#</th>
+                  <th>Vendor</th>
+                  <th>Metal Type</th>
+                  <th>Colour</th>
+                  <th>Unit</th>
+                  <th>Wt</th>
+                  <th>Qty</th>
+                  <th>Metal Market</th>
+                  <th>Price</th>
+                  <th>Gold Cost</th>
+                  <th>Remarks</th>
                 </tr>
               </thead>
               <tbody id="jewel1Body">
                 <tr>
-                  <td><input></td><td><input></td><td><select></select></td><td><input></td>
-                  <td><input></td><td><input type="number"></td><td><input type="number"></td>
-                  <td><input type="number"></td><td><input></td><td><input></td><td><textarea></textarea></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><select></select></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input type="number" /></td>
+                  <td><input type="number" /></td>
+                  <td><input type="number" /></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><textarea></textarea></td>
                 </tr>
               </tbody>
             </table>
@@ -390,14 +651,26 @@
             <table class="subform-table">
               <thead>
                 <tr>
-                  <th>Diamond Lot #</th><th>Shape</th><th>Quality</th><th>No of Stones</th>
-                  <th>Total Ct Wt</th><th>Price</th><th>Diamond Cost</th><th>Remarks</th>
+                  <th>Diamond Lot #</th>
+                  <th>Shape</th>
+                  <th>Quality</th>
+                  <th>No of Stones</th>
+                  <th>Total Ct Wt</th>
+                  <th>Price</th>
+                  <th>Diamond Cost</th>
+                  <th>Remarks</th>
                 </tr>
               </thead>
               <tbody id="jewel2Body">
                 <tr>
-                  <td><input></td><td><input></td><td><input></td><td><input type="number"></td>
-                  <td><input type="number"></td><td><input></td><td><input></td><td><textarea></textarea></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input type="number" /></td>
+                  <td><input type="number" /></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><textarea></textarea></td>
                 </tr>
               </tbody>
             </table>
@@ -411,19 +684,48 @@
             <table class="subform-table">
               <thead>
                 <tr>
-                  <th>Lot #</th><th>Stone Type</th><th>Shape</th><th>Quality</th><th>Range</th>
-                  <th>No Stones</th><th>Wt/Stone</th><th>CT WT</th><th>Unit</th><th>Cut</th>
-                  <th>Stone Color</th><th>Clarity</th><th>Supplier</th><th>Setter</th>
-                  <th>Price</th><th>Stone Cost</th><th>C.S</th><th>Duty</th><th>Remarks</th>
+                  <th>Lot #</th>
+                  <th>Stone Type</th>
+                  <th>Shape</th>
+                  <th>Quality</th>
+                  <th>Range</th>
+                  <th>No Stones</th>
+                  <th>Wt/Stone</th>
+                  <th>CT WT</th>
+                  <th>Unit</th>
+                  <th>Cut</th>
+                  <th>Stone Color</th>
+                  <th>Clarity</th>
+                  <th>Supplier</th>
+                  <th>Setter</th>
+                  <th>Price</th>
+                  <th>Stone Cost</th>
+                  <th>C.S</th>
+                  <th>Duty</th>
+                  <th>Remarks</th>
                 </tr>
               </thead>
               <tbody id="jewel3Body">
                 <tr>
-                  <td><input></td><td><select></select></td><td><input></td><td><input></td>
-                  <td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
-                  <td><input></td><td><input></td><td><input></td><td><input></td><td><input></td>
-                  <td><input></td><td><input></td><td><input type="checkbox"></td>
-                  <td><input type="checkbox"></td><td><textarea></textarea></td>
+                  <td><input /></td>
+                  <td><select></select></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input type="checkbox" /></td>
+                  <td><input type="checkbox" /></td>
+                  <td><textarea></textarea></td>
                 </tr>
               </tbody>
             </table>
@@ -437,14 +739,22 @@
             <table class="subform-table">
               <thead>
                 <tr>
-                  <th>Labor #</th><th>Description</th><th>Price</th>
-                  <th>Qty</th><th>Duty</th><th>Amount</th>
+                  <th>Labor #</th>
+                  <th>Description</th>
+                  <th>Price</th>
+                  <th>Qty</th>
+                  <th>Duty</th>
+                  <th>Amount</th>
                 </tr>
               </thead>
               <tbody id="jewel4Body">
                 <tr>
-                  <td><input></td><td><textarea></textarea></td><td><input></td>
-                  <td><input></td><td><input type="checkbox"></td><td><input></td>
+                  <td><input /></td>
+                  <td><textarea></textarea></td>
+                  <td><input /></td>
+                  <td><input /></td>
+                  <td><input type="checkbox" /></td>
+                  <td><input /></td>
                 </tr>
               </tbody>
             </table>
@@ -455,16 +765,33 @@
         <div class="card metal-subform-card">
           <div class="card-title">Jewellery Cost Summary</div>
           <div class="cost-summary-grid">
-
-            <div class="cost-field"><label>Diamond Price</label><input type="number"></div>
-            <div class="cost-field"><label>Semi Mount Price</label><input type="number"></div>
-            <div class="cost-field"><label>Other Cost</label><input type="number"></div>
-            <div class="cost-field"><label>Total Cost</label><input type="number"></div>
-            <div class="cost-field"><label>Duty %</label><input type="number"></div>
-            <div class="cost-field"><label>Amount</label><input type="number"></div>
-            <div class="cost-field highlight-field"><label>Final Cost</label><input type="number"></div>
-            <div class="cost-field highlight-field"><label>Selling Price / Piece</label><input type="number"></div>
-            <div class="cost-field"><label>Cost Amount</label><input type="number"></div>
+            <div class="cost-field">
+              <label>Diamond Price</label><input type="number" />
+            </div>
+            <div class="cost-field">
+              <label>Semi Mount Price</label><input type="number" />
+            </div>
+            <div class="cost-field">
+              <label>Other Cost</label><input type="number" />
+            </div>
+            <div class="cost-field">
+              <label>Total Cost</label><input type="number" />
+            </div>
+            <div class="cost-field">
+              <label>Duty %</label><input type="number" />
+            </div>
+            <div class="cost-field">
+              <label>Amount</label><input type="number" />
+            </div>
+            <div class="cost-field highlight-field">
+              <label>Final Cost</label><input type="number" />
+            </div>
+            <div class="cost-field highlight-field">
+              <label>Selling Price / Piece</label><input type="number" />
+            </div>
+            <div class="cost-field">
+              <label>Cost Amount</label><input type="number" />
+            </div>
           </div>
         </div>
 
@@ -484,27 +811,37 @@
               </thead>
               <tbody id="subform-body">
                 <tr>
-                  <td><select class="partner_lookup"><option value="">Select Partner</option></select></td>
-                  <td><input type="text"></td>
-                  <td><input type="text"></td>
-                  <td><input type="text"></td>
-                  <td><input type="checkbox"></td>
+                  <td>
+                    <select class="partner_lookup">
+                      <option value="">Select Partner</option>
+                    </select>
+                  </td>
+                  <td><input type="text" /></td>
+                  <td><input type="text" /></td>
+                  <td><input type="text" /></td>
+                  <td><input type="checkbox" /></td>
                   <td><textarea></textarea></td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <button type="button" id="addRowBtn" class="btn-outline">+ Add Row</button>
+          <button type="button" id="addRowBtn" class="btn-outline">
+            + Add Row
+          </button>
         </div>
-
       </div>
 
       <!-- ========== SAVE BUTTON ========== -->
       <div class="save-container">
-        <button type="button" class="save-btn" id="addRecord" onclick="saveRecord()">Save</button>
+        <button
+          type="button"
+          class="save-btn"
+          id="addRecord"
+          onclick="saveRecord()"
+        >
+          Save
+        </button>
       </div>
-
     </div>
   </body>
-
 </html>

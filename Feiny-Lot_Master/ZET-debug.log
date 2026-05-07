@@ -17,3 +17,33 @@ Response Headers{"server":"ZGS","date":"Sat, 18 Apr 2026 08:14:10 GMT","content-
 [debug] [2026-04-18T08:14:11.710Z] : <<<< HTTP RESPONSE : 200
 Response Headers{"server":"ZGS","date":"Sat, 18 Apr 2026 08:14:10 GMT","content-type":"application/json;charset=UTF-8","content-length":"107","connection":"keep-alive","set-cookie":["zalb_b266a5bf57=ca9803f56b086bd11d10c7e23195c2c1; Path=/; Secure; HttpOnly","iamcsr=fd26c1e4-d1fe-4ba8-8172-6b64dff73d41;path=/;SameSite=Strict;Secure;priority=high"],"x-content-type-options":"nosniff","cache-control":"private,no-cache,no-store,max-age=0,must-revalidate","pragma":"no-cache","expires":"Thu, 01 Jan 1970 00:00:00 GMT","x-frame-options":"SAMEORIGIN","content-language":"en-US","strict-transport-security":"max-age=64072000; includeSubDomains; preload"}
 
+[error] [2026-05-06T09:00:01.592Z] : × Below file formats are not allowed in Sigma
+[info] [2026-05-06T09:00:01.645Z] :  ==> app\er.name
+[info] [2026-05-06T09:00:01.647Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-05-06T09:00:01.663Z] : × Below file formats are not allowed in Sigma
+[info] [2026-05-06T09:00:01.663Z] :  ==> app\er.name
+[info] [2026-05-06T09:00:01.665Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-05-06T09:56:10.179Z] : × Below file formats are not allowed in Sigma
+[info] [2026-05-06T09:56:10.190Z] :  ==> app\er.name
+[info] [2026-05-06T09:56:10.192Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-05-06T09:56:10.208Z] : × Below file formats are not allowed in Sigma
+[info] [2026-05-06T09:56:10.209Z] :  ==> app\er.name
+[info] [2026-05-06T09:56:10.211Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-05-06T10:00:30.616Z] : × Below file formats are not allowed in Sigma
+[info] [2026-05-06T10:00:30.621Z] :  ==> app\er.name
+[info] [2026-05-06T10:00:30.623Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-05-06T10:00:30.634Z] : × Below file formats are not allowed in Sigma
+[info] [2026-05-06T10:00:30.635Z] :  ==> app\er.name
+[info] [2026-05-06T10:00:30.636Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-05-06T10:07:58.963Z] : × Below file formats are not allowed in Sigma
+[info] [2026-05-06T10:07:58.967Z] :  ==> app\er.name
+[info] [2026-05-06T10:07:58.968Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-05-06T10:07:58.980Z] : × Below file formats are not allowed in Sigma
+[info] [2026-05-06T10:07:58.981Z] :  ==> app\er.name
+[info] [2026-05-06T10:07:58.982Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-05-06T10:43:44.624Z] : × Below file formats are not allowed in Sigma
+[info] [2026-05-06T10:43:44.629Z] :  ==> app\er.name
+[info] [2026-05-06T10:43:44.630Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-05-06T10:43:44.640Z] : × Below file formats are not allowed in Sigma
+[info] [2026-05-06T10:43:44.642Z] :  ==> app\er.name
+[info] [2026-05-06T10:43:44.643Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2

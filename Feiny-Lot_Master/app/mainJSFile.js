@@ -3,6 +3,9 @@
 document.addEventListener("DOMContentLoaded", function () {
   loadJewelleryTypeLookup();
   loadOriginCountryDropdown();
+  loadVendorLookup();
+  loadMetalTypeLookup();
+  loadColorLookup();
 });
 
 /* ================= LOOKUP LOADS ================= */

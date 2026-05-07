@@ -1,5 +1,5 @@
 function loadOriginCountryDropdown() {
-  console.log("Loading country dropdown...");
+  // console.log("Loading country dropdown...");
   const countries = [
     "Afghanistan",
     "Albania",

@@ -26,6 +26,9 @@
     <script defer src="getFileNameFromUrl.js"></script>
     <script defer src="jewelleryType.js"></script>
     <script defer src="loadOriginCountryDropdown.js"></script>
+    <script defer src="Select_Vendor.js"></script>
+    <script defer src="Select_Metal_Type.js"></script>
+    <script defer src="Select_Color.js"></script>
   </head>
 
   <body>
@@ -676,9 +679,9 @@
               <thead>
                 <tr>
                   <th>Cast#</th>
-                  <th>Vendor</th>
-                  <th>Metal Type</th>
-                  <th>Colour</th>
+                  <th style="width: 150pt">Vendor</th>
+                  <th style="width: 150pt">Metal Type</th>
+                  <th style="width: 150pt">Colour</th>
                   <th>Unit</th>
                   <th>Wt</th>
                   <th>Qty</th>
@@ -691,9 +694,21 @@
               <tbody id="jewel1Body">
                 <tr>
                   <td><input /></td>
-                  <td><input /></td>
-                  <td><select></select></td>
-                  <td><input /></td>
+                  <td>
+                    <select id="select_vendor">
+                      <option value="">Select Vendor</option>
+                    </select>
+                  </td>
+                  <td>
+                    <select id="select_metal_type">
+                      <option value="">Select Metal Type</option>
+                    </select>
+                  </td>
+                  <td>
+                    <select id="select_color">
+                      <option value="">Select Color</option>
+                    </select>
+                  </td>
                   <td><input /></td>
                   <td><input type="number" /></td>
                   <td><input type="number" /></td>

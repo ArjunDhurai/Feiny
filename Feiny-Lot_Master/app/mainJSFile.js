@@ -1,3 +1,9 @@
+/* ================= LOOKUP LOADS ================= */
+
+typeof loadJewelleryTypeLookup === "function" && loadJewelleryTypeLookup();
+
+/* ================= LOOKUP LOADS ================= */
+
 let certificateLookupCache = {
   labs: [],
   descriptors: [],

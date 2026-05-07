@@ -22,9 +22,6 @@
     <link rel="stylesheet" href="style.css" />
 
     <!-- ================= CUSTOM SCRIPTS ================= -->
-    <script defer src="jewelleryType.js"></script>
-    <script defer src="styleType.js"></script>
-    <script defer src="getFileNameFromUrl.js"></script>
     <script defer src="mainJSFile.js"></script>
   </head>
 
@@ -562,7 +559,9 @@
             </div>
             <div class="jm-field">
               <label>Jewellery Type</label
-              ><select id="jewellery_type"></select>
+              ><select id="jewellery_type">
+                <option value="">Select</option>
+              </select>
             </div>
             <div class="jm-field">
               <label>Image</label><input type="file" />

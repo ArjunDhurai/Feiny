@@ -1,9 +1,10 @@
 /* ================= LOOKUP LOADS ================= */
 
-typeof loadJewelleryTypeLookup === "function" && loadJewelleryTypeLookup();
+document.addEventListener("DOMContentLoaded", function () {
+  loadJewelleryTypeLookup();
+});
 
 /* ================= LOOKUP LOADS ================= */
-
 let certificateLookupCache = {
   labs: [],
   descriptors: [],

@@ -16,7 +16,7 @@ function loadJewelleryTypeLookup() {
         option.value = record.ID;
         option.text = record.Description1;
         styleTypeSelect.appendChild(option);
-      });
+    });
     })
     .catch(function (error) {
       console.error("Style type lookup error:", error);

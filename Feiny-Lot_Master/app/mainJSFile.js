@@ -299,7 +299,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const stonePreview = document.getElementById("stoneImagePreview");
   const stoneClearBtn = document.getElementById("clearStoneImage");
 
-  if (stoneInput) {
+  if (stoneInput && stonePreview && stoneClearBtn) {
     stoneInput.addEventListener("change", function (e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -318,9 +318,7 @@ document.addEventListener("DOMContentLoaded", function () {
       };
       reader.readAsDataURL(file);
     });
-  }
 
-  if (stoneClearBtn) {
     stoneClearBtn.addEventListener("click", function () {
       stoneImageFile = null;
       stoneInput.value = "";
@@ -1977,6 +1975,7 @@ function loadExistingRecord(recordID) {
       console.log("Existing record data:", data);
 
       // -- Image Stone Preview Code ---
+      
       // let fullUrl = "https://creator.zoho.com/api/v2.1/ankit_feiny/feiny-app/report/All_Lot_Master/4904766000000663048/item_Image/download?filepath=1777292396643738_apac_primary_fullcolour-e1485885228203__1_.png"
       let fullUrl = "https://creator.zoho.com" + data.item_Image;
       let frame = document.getElementById("stoneImagePreview");

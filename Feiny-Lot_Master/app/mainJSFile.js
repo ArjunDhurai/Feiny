@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 /* ================= LOOKUP LOADS ================= */
+
 let certificateLookupCache = {
   labs: [],
   descriptors: [],

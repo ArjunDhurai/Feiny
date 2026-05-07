@@ -2,7 +2,7 @@
 function loadJewelleryTypeLookup() {
   ZOHO.CREATOR.DATA.getRecords({
     app_name: "feiny-app",
-    report_name: "JewelleryTypes",
+    report_name: "Jewellery_Type",
   })
     .then(function (response) {
       const styleTypeSelect = document.getElementById("jewellery_type");

@@ -552,74 +552,122 @@
         </div>
       </div>
 
-      <!-- ========== JEWELLERY SECTION ========== -->
-      <div id="jewelleryWrapper" style="display: none">
-        <div class="card jewellery-card">
-          <div class="card-title">Jewellery Lot Master</div>
-          <div class="jewellery-grid">
-            <div class="jm-field">
-              <label>Style</label><input type="text" />
-            </div>
-            <div class="jm-field">
-              <label>Jewellery Type</label
-              ><select id="jewellery_type">
-                <option value="">Select Jewellery Type</option>
-              </select>
-            </div>
-            <div class="jm-field">
-              <label>Image</label><input type="file" />
-            </div>
-            <div class="jm-field">
-              <label>Side Image</label><input type="file" />
-            </div>
-            <div class="jm-field">
-              <label>Category</label
-              ><select></select>
-            </div>
-            <div class="jm-field">
-              <label>Platinum</label><input type="text" />
-            </div>
-            <div class="jm-field">
-              <label>Tag Diam Wt</label><input type="text" />
-            </div>
-            <div class="jm-field">
-              <label>Production</label><input type="text" />
-            </div>
-            <div class="jm-field">
-              <label>Diam Quality</label><input type="text" />
-            </div>
-            <div class="jm-field"><label>Gold</label><input type="text" /></div>
+     <!-- ========== JEWELLERY SECTION ========== -->
+<div id="jewelleryWrapper" style="display: none">
+  <div class="card jewellery-card">
+    <div class="card-title">Jewellery Lot Master</div>
 
-            <div class="jm-field">
-              <label>Country of Origin</label
-              ><select id="countries_origin">
-                <option value="">Select Country</option>
-              </select>
-            </div>
+    <div class="jewellery-grid">
 
-            <div class="jm-field"><label>Size</label><input type="text" /></div>
-            <div class="jm-field">
-              <label>Weight (grams)</label><input type="text" />
-            </div>
-            <div class="jm-field">
-              <label>Circa</label><input type="text" />
-            </div>
-            <div class="jm-field">
-              <label>Brand</label><input type="text" />
-            </div>
-            <div class="jm-field"><label>HTS</label><input type="text" /></div>
-            <div class="jm-field full-width">
-              <label>Description</label><textarea></textarea>
-            </div>
-            <div class="jm-field"><label>Note</label><input type="text" /></div>
-            <div class="jm-field">
-              <label>Diamond</label><input type="text" />
-            </div>
-            <div class="jm-field full-width">
-              <label>Instruction</label><textarea></textarea>
-            </div>
-          </div>
-        </div>
+      <div class="jm-field">
+        <label for="style">Style</label>
+        <input id="style" type="text" />
+      </div>
+
+      <div class="jm-field">
+        <label for="jewellery_type">Jewellery Type</label>
+        <select id="jewellery_type">
+          <option value="">Select Jewellery Type</option>
+        </select>
+      </div>
+
+      <div class="jm-field">
+        <label for="main_image">Image</label>
+        <input id="main_image" type="file" />
+      </div>
+
+      <div class="jm-field">
+        <label for="side_image">Side Image</label>
+        <input id="side_image" type="file" />
+      </div>
+
+      <div class="jm-field">
+        <label for="category">Category</label>
+        <select id="category">
+          <option value="">Select Category</option>
+        </select>
+      </div>
+
+      <div class="jm-field">
+        <label for="platinum">Platinum</label>
+        <input id="platinum" type="text" />
+      </div>
+
+      <!-- <div class="jm-field">
+        <label for="tag_diam_wt">Tag Diam Wt</label>
+        <input id="tag_diam_wt" type="text" />
+      </div> -->
+
+      <div class="jm-field">
+        <label for="production">Production</label>
+        <input id="production" type="text" />
+      </div>
+
+      <!-- <div class="jm-field">
+        <label for="diam_quality">Diam Quality</label>
+        <input id="diam_quality" type="text" />
+      </div> -->
+
+      <div class="jm-field">
+        <label for="gold">Gold</label>
+        <input id="gold" type="text" />
+      </div>
+
+      <div class="jm-field">
+        <label for="countries_origin">Country of Origin</label>
+        <select id="countries_origin">
+          <option value="">Select Country</option>
+        </select>
+      </div>
+
+      <div class="jm-field">
+        <label for="size">Size</label>
+        <input id="size" type="text" />
+      </div>
+
+      <div class="jm-field">
+        <label for="weight_grams">Weight (grams)</label>
+        <input id="weight_grams" type="text" />
+      </div>
+
+      <div class="jm-field">
+        <label for="circa">Circa</label>
+        <input id="circa" type="text" />
+      </div>
+
+      <div class="jm-field">
+        <label for="brand">Brand</label>
+        <input id="brand" type="text" />
+      </div>
+
+      <div class="jm-field">
+        <label for="hts">HTS</label>
+        <input id="hts" type="text" />
+      </div>
+
+      <div class="jm-field full-width">
+        <label for="description">Description</label>
+        <textarea id="description"></textarea>
+      </div>
+
+      <div class="jm-field">
+        <label for="note">Note</label>
+        <input id="note" type="text" />
+      </div>
+
+      <div class="jm-field">
+        <label for="diamond">Diamond</label>
+        <input id="diamond" type="text" />
+      </div>
+
+      <div class="jm-field full-width">
+        <label for="instruction">Instruction</label>
+        <textarea id="instruction"></textarea>
+      </div>
+
+    </div>
+  </div>
+</div>
 
         <div class="card metal-subform-card">
           <div class="card-subtitle">Jewellery 1 – Metal Details</div>

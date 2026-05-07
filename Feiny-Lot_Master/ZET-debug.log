@@ -47,3 +47,15 @@ Response Headers{"server":"ZGS","date":"Sat, 18 Apr 2026 08:14:10 GMT","content-
 [error] [2026-05-06T10:43:44.640Z] : × Below file formats are not allowed in Sigma
 [info] [2026-05-06T10:43:44.642Z] :  ==> app\er.name
 [info] [2026-05-06T10:43:44.643Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-05-07T11:31:06.820Z] : × Below file formats are not allowed in Sigma
+[info] [2026-05-07T11:31:06.824Z] :  ==> app\er.name
+[info] [2026-05-07T11:31:06.826Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-05-07T11:31:06.840Z] : × Below file formats are not allowed in Sigma
+[info] [2026-05-07T11:31:06.841Z] :  ==> app\er.name
+[info] [2026-05-07T11:31:06.842Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-05-07T11:32:46.315Z] : × Below file formats are not allowed in Sigma
+[info] [2026-05-07T11:32:46.319Z] :  ==> app\er.name
+[info] [2026-05-07T11:32:46.321Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-05-07T11:32:46.329Z] : × Below file formats are not allowed in Sigma
+[info] [2026-05-07T11:32:46.330Z] :  ==> app\er.name
+[info] [2026-05-07T11:32:46.331Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2

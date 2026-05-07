@@ -1,11 +1,11 @@
-/* ================= METAL TYPE LOOKUP ================= */
-function loadMetalTypeLookup() {
+/* ================= JEWELLERY TYPE LOOKUP ================= */
+function loadJewelleryTypeLookup() {
   ZOHO.CREATOR.DATA.getRecords({
     app_name: "feiny-app",
-    report_name: "Metals",
+    report_name: "JewelleryTypes",
   })
     .then(function (response) {
-      const styleTypeSelect = document.getElementById("metal_type");
+      const styleTypeSelect = document.getElementById("jellery_type");
       if (!styleTypeSelect) return;
       styleTypeSelect.innerHTML = `<option value="">None</option>`;
       if (!response.data || response.data.length === 0) return;

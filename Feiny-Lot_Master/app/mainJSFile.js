@@ -91,6 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
       show(partnershipsec);
     } else if (selectedValue === "Jewellery") {
       show(jewelleryWrapper);
+      show(certificateuploadsec);
     }
 
     setTimeout(() => {
@@ -1150,10 +1151,10 @@ function setupSpeciesAutoFill() {
 /* ================= RAPPORT PRICE ================= */
 function fetchRapportPrice() {
   // Lookup fields — .value gives the linked record ID
-  const shapeId   = document.getElementById("dia_shape")?.value;
-  const colorId   = document.getElementById("dia_color")?.value;
+  const shapeId = document.getElementById("dia_shape")?.value;
+  const colorId = document.getElementById("dia_color")?.value;
   const clarityId = document.getElementById("dia_clarity")?.value;
-  const weight    = parseFloat(document.getElementById("dia_weight")?.value);
+  const weight = parseFloat(document.getElementById("dia_weight")?.value);
 
   console.log("IDs:", { shapeId, colorId, clarityId, weight });
 
@@ -1167,9 +1168,12 @@ function fetchRapportPrice() {
   // Both forms share the same lookup tables so IDs match directly.
   // Use FieldName.ID = numericId for each lookup field.
   const criteria =
-    "Shapes.ID = " + shapeId +
-    " && Colors.ID = " + colorId +
-    " && Claritys.ID = " + clarityId;
+    "Shapes.ID = " +
+    shapeId +
+    " && Colors.ID = " +
+    colorId +
+    " && Claritys.ID = " +
+    clarityId;
 
   console.log("CRITERIA:", criteria);
 
@@ -1182,8 +1186,14 @@ function fetchRapportPrice() {
     .then(function (response) {
       console.log("FULL RESPONSE:", response);
 
-      if (response.code !== 3000 || !response.data || response.data.length === 0) {
-        console.warn("No Rapaport records returned — check IDs match Rapaport Master lookup IDs");
+      if (
+        response.code !== 3000 ||
+        !response.data ||
+        response.data.length === 0
+      ) {
+        console.warn(
+          "No Rapaport records returned — check IDs match Rapaport Master lookup IDs",
+        );
         if (priceEl) priceEl.value = "";
         return;
       }
@@ -1206,7 +1216,8 @@ function fetchRapportPrice() {
 
       // Smallest upper bound that still covers the entered weight
       const sorted = [...filtered].sort(
-        (a, b) => parseFloat(a.Weight_high_size1) - parseFloat(b.Weight_high_size1)
+        (a, b) =>
+          parseFloat(a.Weight_high_size1) - parseFloat(b.Weight_high_size1),
       );
 
       const price = sorted[0].Rapaport_Price || "";
@@ -1221,10 +1232,10 @@ function fetchRapportPrice() {
 
 /* ================= RAPPORT PRICE TRIGGERS ================= */
 function initRapportPriceTriggers() {
-  const shapeEl   = document.getElementById("dia_shape");
-  const colorEl   = document.getElementById("dia_color");
+  const shapeEl = document.getElementById("dia_shape");
+  const colorEl = document.getElementById("dia_color");
   const clarityEl = document.getElementById("dia_clarity");
-  const weightEl  = document.getElementById("dia_weight");
+  const weightEl = document.getElementById("dia_weight");
 
   [shapeEl, colorEl, clarityEl].forEach(function (el) {
     if (el) el.addEventListener("change", fetchRapportPrice);
@@ -1973,7 +1984,7 @@ function loadExistingRecord(recordID) {
       console.log("Existing record data:", data);
 
       // -- Image Stone Preview Code ---
-      
+
       // let fullUrl = "https://creator.zoho.com/api/v2.1/ankit_feiny/feiny-app/report/All_Lot_Master/4904766000000663048/item_Image/download?filepath=1777292396643738_apac_primary_fullcolour-e1485885228203__1_.png"
       let fullUrl = "https://creator.zoho.com" + data.item_Image;
       let frame = document.getElementById("stoneImagePreview");

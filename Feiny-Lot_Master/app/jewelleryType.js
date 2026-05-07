@@ -5,7 +5,7 @@ function loadJewelleryTypeLookup() {
     report_name: "JewelleryTypes",
   })
     .then(function (response) {
-      const styleTypeSelect = document.getElementById("jellery_type");
+      const styleTypeSelect = document.getElementById("jewellery_type");
       if (!styleTypeSelect) return;
       styleTypeSelect.innerHTML = `<option value="">None</option>`;
       if (!response.data || response.data.length === 0) return;

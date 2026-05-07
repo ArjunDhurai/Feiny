@@ -1156,7 +1156,7 @@ function fetchRapportPrice() {
   const clarityId = document.getElementById("dia_clarity")?.value;
   const weight = parseFloat(document.getElementById("dia_weight")?.value);
 
-  console.log("IDs:", { shapeId, colorId, clarityId, weight });
+  // console.log("IDs:", { shapeId, colorId, clarityId, weight });
 
   const priceEl = document.getElementById("rapport_price");
 

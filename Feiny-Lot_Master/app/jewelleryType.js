@@ -1,5 +1,6 @@
 /* ================= JEWELLERY TYPE LOOKUP ================= */
 function loadJewelleryTypeLookup() {
+  console.log("Loading jewellery type lookup...");
   ZOHO.CREATOR.DATA.getRecords({
     app_name: "feiny-app",
     report_name: "Jewellery_Type",

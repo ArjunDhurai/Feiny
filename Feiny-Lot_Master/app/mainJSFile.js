@@ -2,6 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", function () {
   loadJewelleryTypeLookup();
+  loadOriginCountryDropdown();
 });
 
 /* ================= LOOKUP LOADS ================= */

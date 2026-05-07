@@ -25,6 +25,7 @@
     <script defer src="mainJSFile.js"></script>
     <script defer src="getFileNameFromUrl.js"></script>
     <script defer src="jewelleryType.js"></script>
+    <script defer src="loadOriginCountryDropdown.js"></script>
   </head>
 
   <body>
@@ -562,7 +563,7 @@
             <div class="jm-field">
               <label>Jewellery Type</label
               ><select id="jewellery_type">
-                <option value="">Select</option>
+                <option value="">Select Jewellery Type</option>
               </select>
             </div>
             <div class="jm-field">
@@ -588,10 +589,14 @@
               <label>Diam Quality</label><input type="text" />
             </div>
             <div class="jm-field"><label>Gold</label><input type="text" /></div>
+
             <div class="jm-field">
               <label>Country of Origin</label
-              ><select></select>
+              ><select id="countries_origin">
+                <option value="">Select Country</option>
+              </select>
             </div>
+
             <div class="jm-field"><label>Size</label><input type="text" /></div>
             <div class="jm-field">
               <label>Weight (grams)</label><input type="text" />

@@ -1,3 +1,4 @@
+// Add Row Function for Jewellery 1 Table - Jewellery 1 – Metal Details
 function addJewellery1Row() {
   console.log("Adding Jewellery 1 row...");
   const tbody = document.getElementById("jewel1Body");
@@ -21,6 +22,12 @@ function addJewellery1Row() {
                         <option value="">Select Color</option>
                       </select>
                     </td>
+                    
+                        <td>
+                    <select id="select_purity">
+                      <option value="">Select Purity</option>
+                    </select>
+                  </td>
                     <td>
                       <select id="select_unit">
                         <option value="">Select Unit</option>
@@ -35,4 +42,8 @@ function addJewellery1Row() {
         `;
   tbody.appendChild(newRow);
   loadContactLookup();
+  loadMetalTypeLookup();
+  loadColorLookup();
+  loadPurityLookup();
+  loadUnitLookup();
 }

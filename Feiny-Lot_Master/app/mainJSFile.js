@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", function () {
   loadVendorLookup();
   loadMetalTypeLookup();
   loadColorLookup();
+  loadDiamondLookup();
 });
 
 /* ================= LOOKUP LOADS ================= */

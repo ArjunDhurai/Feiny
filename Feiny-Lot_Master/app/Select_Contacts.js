@@ -1,12 +1,13 @@
 /* ================= CONTACTS LOOKUP ================= */
 function loadContactLookup() {
-  console.log("Loading contacts lookup...");
+  // console.log("Loading contacts lookup...");
 
   ZOHO.CREATOR.DATA.getRecords({
     app_name: "feiny-app",
     report_name: "All_Customers1",
   })
     .then(function (response) {
+      // console.log("Contacts lookup response:", response);
       const contactsSelect = document.getElementById("select_contact");
       const contactsSelect_Jewellery_Partnership = document.getElementById(
         "select_contact_Jewellery_Partnership",
@@ -19,7 +20,7 @@ function loadContactLookup() {
         const option = document.createElement("option");
         option.value = record.ID;
         option.text = record.Legal_Name;
-
+        console.log(option);
         contactsSelect.appendChild(option);
         contactsSelect_Jewellery_Partnership.appendChild(
           option.cloneNode(true),

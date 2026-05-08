@@ -8,11 +8,12 @@ function loadContactLookup() {
 
       // Fill ALL select_contact elements (classes + IDs)
       const allContactSelects = document.querySelectorAll(
-        "#select_contact, .select_contact, #select_contact_Jewellery_Partnership",
+        "#select_contact, .select_contact",
       );
 
       allContactSelects.forEach(function (select) {
         select.innerHTML = `<option value="">Select Contact</option>`;
+        if (!response.data || response.data.length === 0) return;
 
         response.data.forEach(function (record) {
           const option = document.createElement("option");

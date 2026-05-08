@@ -1,30 +1,25 @@
-/* ================= CONTACTS LOOKUP ================= */
 function loadContactLookup() {
-  // console.log("Loading contacts lookup...");
-
   ZOHO.CREATOR.DATA.getRecords({
     app_name: "feiny-app",
     report_name: "All_Customers1",
   })
     .then(function (response) {
-      // console.log("Contacts lookup response:", response);
-      const contactsSelect = document.getElementById("select_contact");
-      const contactsSelect_Jewellery_Partnership = document.getElementById(
-        "select_contact_Jewellery_Partnership",
+      if (!response.data || response.data.length === 0) return;
+
+      // Fill ALL select_contact elements (classes + IDs)
+      const allContactSelects = document.querySelectorAll(
+        "#select_contact, .select_contact, #select_contact_Jewellery_Partnership",
       );
 
-      contactsSelect.innerHTML = `<option value="">Select Contact</option>`;
-      contactsSelect_Jewellery_Partnership.innerHTML = `<option value="">Select Contact</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Legal_Name;
-        console.log(option);
-        contactsSelect.appendChild(option);
-        contactsSelect_Jewellery_Partnership.appendChild(
-          option.cloneNode(true),
-        );
+      allContactSelects.forEach(function (select) {
+        select.innerHTML = `<option value="">Select Contact</option>`;
+
+        response.data.forEach(function (record) {
+          const option = document.createElement("option");
+          option.value = record.ID;
+          option.text = record.Legal_Name;
+          select.appendChild(option.cloneNode(true));
+        });
       });
     })
     .catch(function (error) {

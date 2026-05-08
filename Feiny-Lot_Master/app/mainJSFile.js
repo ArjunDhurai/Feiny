@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", function () {
   loadColorLookup();
   loadDiamondLookup();
   loadUnitLookup();
+  loadBrandLookup();
+  loadPurityLookup();
 });
 
 /* ================= LOOKUP LOADS ================= */

@@ -4,7 +4,7 @@ function loadColorLookup() {
 
   ZOHO.CREATOR.DATA.getRecords({
     app_name: "feiny-app",
-    report_name: "Color",
+    report_name: "Gold_Metal_Color",
   })
     .then(function (response) {
       //   console.log("Color lookup response:", JSON.stringify(response));

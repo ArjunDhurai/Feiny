@@ -3,10 +3,11 @@
 document.addEventListener("DOMContentLoaded", function () {
   loadJewelleryTypeLookup();
   loadOriginCountryDropdown();
-  loadVendorLookup();
+  loadContactLookup();
   loadMetalTypeLookup();
   loadColorLookup();
   loadDiamondLookup();
+  loadUnitLookup();
 });
 
 /* ================= LOOKUP LOADS ================= */
@@ -1332,7 +1333,8 @@ function saveRecord() {
     Rapport_Price: getNumber("Rapport_Price"),
     Rough_Lot: document.getElementById("rough_lot")?.value || "",
     Name1: document.getElementById("cs_short_description")?.value || "",
-    Long_Description:document.getElementById("cs_long_description")?.value || "",
+    Long_Description:
+      document.getElementById("cs_long_description")?.value || "",
     length_field: getNumber("min_length"),
     Width: getNumber("min_width"),
     Height: getNumber("min_height"),
@@ -1358,7 +1360,8 @@ function saveRecord() {
     Culet: document.getElementById("dia_culet")?.value || "",
     Symmetry: document.getElementById("dia_symmetry")?.value || "",
     Fluorescence1: document.getElementById("dia_fluorescence")?.value || "",
-    Fluorescence_Color:document.getElementById("dia_colour_fluorescence")?.value || "",
+    Fluorescence_Color:
+      document.getElementById("dia_colour_fluorescence")?.value || "",
     Lab: document.getElementById("dia_lab")?.value || "",
     Length_mm: getNumber("dia_length"),
     Width_mm: getNumber("dia_width"),
@@ -1370,25 +1373,27 @@ function saveRecord() {
     Total_Price: getNumber("total_price"),
     Rapport_Price1: getNumber("rapport_price"),
     Quantity: getNumber("quantity"),
-    Short_Description1:document.getElementById("diashort_description")?.value || "",
-    Long_Description2:document.getElementById("dialong_description")?.value || "",
-    Style:document.getElementById("style")?.value || "",
-    Jewellery__Type:document.getElementById("jewellery_type")?.value || "",
-    Platinum:document.getElementById("platinum")?.value || "",
-    Category:document.getElementById("category")?.value || "",
-    Description3:document.getElementById("description")?.value || "",
-    Gold:document.getElementById("gold")?.value || "",
-    Production:document.getElementById("production")?.value || "",
-    Instructions:document.getElementById("instructions")?.value || "",
-    Country_Of_Origin1:document.getElementById("countries_origin")?.value || "",
-    Size:document.getElementById("size")?.value || "",
+    Short_Description1:
+      document.getElementById("diashort_description")?.value || "",
+    Long_Description2:
+      document.getElementById("dialong_description")?.value || "",
+    Style: document.getElementById("style")?.value || "",
+    Jewellery__Type: document.getElementById("jewellery_type")?.value || "",
+    Platinum: document.getElementById("platinum")?.value || "",
+    Category: document.getElementById("category")?.value || "",
+    Description3: document.getElementById("description")?.value || "",
+    Gold: document.getElementById("gold")?.value || "",
+    Production: document.getElementById("production")?.value || "",
+    Instructions: document.getElementById("instructions")?.value || "",
+    Country_Of_Origin1:
+      document.getElementById("countries_origin")?.value || "",
+    Size: document.getElementById("size")?.value || "",
     Weight_grams: getNumber("weight_grams"),
-    Circa:document.getElementById("circa")?.value || "",
-    Brand:document.getElementById("brand")?.value || "",
-    HTS1:document.getElementById("hts_code")?.value || "",
-    Notes:document.getElementById("notes")?.value || "",
-    diamond:document.getElementById("diamond")?.value || ""
-    
+    Circa: document.getElementById("circa")?.value || "",
+    Brand: document.getElementById("brand")?.value || "",
+    HTS1: document.getElementById("hts_code")?.value || "",
+    Notes: document.getElementById("notes")?.value || "",
+    diamond: document.getElementById("diamond")?.value || "",
   };
 
   console.log("Saving config:", recordData);

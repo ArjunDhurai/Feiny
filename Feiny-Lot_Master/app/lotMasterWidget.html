@@ -26,10 +26,11 @@
     <script defer src="getFileNameFromUrl.js"></script>
     <script defer src="jewelleryType.js"></script>
     <script defer src="loadOriginCountryDropdown.js"></script>
-    <script defer src="Select_Vendor.js"></script>
+    <script defer src="Select_Contacts.js"></script>
     <script defer src="Select_Metal_Type.js"></script>
     <script defer src="Select_Color.js"></script>
     <script defer src="Select_Diamonds.js"></script>
+    <script defer src="Select_Unit.js"></script>
   </head>
 
   <body>
@@ -683,7 +684,7 @@
                   <th style="width: 150pt">Vendor</th>
                   <th style="width: 150pt">Metal Type</th>
                   <th style="width: 150pt">Colour</th>
-                  <th>Unit</th>
+                  <th style="width: 75pt">Unit</th>
                   <th>Wt</th>
                   <th>Qty</th>
                   <th>Metal Market</th>
@@ -696,10 +697,10 @@
                 <tr>
                   <td><input /></td>
                   <td>
-                    <select id="select_vendor">
+                    <select id="select_contact">
                       <option value="">Select Vendor</option>
                     </select>
-                  </td>
+                </td>
                   <td>
                     <select id="select_metal_type">
                       <option value="">Select Metal Type</option>
@@ -710,7 +711,11 @@
                       <option value="">Select Color</option>
                     </select>
                   </td>
-                  <td><input /></td>
+                  <td>
+                    <select id="select_unit">
+                      <option value="">Select Unit</option>
+                    </select>
+                  </td>
                   <td><input type="number" /></td>
                   <td><input type="number" /></td>
                   <td><input type="number" /></td>
@@ -893,7 +898,7 @@
               <tbody id="subform-body">
                 <tr>
                   <td>
-                    <select class="partner_lookup">
+                    <select  id="select_contact_Jewellery_Partnership">
                       <option value="">Select Partner</option>
                     </select>
                   </td>

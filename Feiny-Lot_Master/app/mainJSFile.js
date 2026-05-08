@@ -51,6 +51,12 @@ document.addEventListener("DOMContentLoaded", function () {
       neededcertificatesec: document.getElementById("neededcertificatesec"),
       certificateuploadsec: document.getElementById("certificateuploadsec"),
       partnershipsec: document.getElementById("partnershipsec"),
+      //  Jewellery-1–Metal-Details: document.getElementById("Jewellery-1–Metal-Details"),
+      //  Jewellery-2–Diamond-Details: document.getElementById("Jewellery-2–Diamond-Details"),
+      //  Jewellery-3–Color-Stone: document.getElementById("Jewellery-3–Color-Stone"),
+      //  Jewellery-4–Labour: document.getElementById("Jewellery-4–Labour"),
+      //  Jewellery-Cost-Summary: document.getElementById("Jewellery-Cost-Summary"),
+      //  Jewellery-Partnership: document.getElementById("Jewellery-Partnership"),
     };
   }
 
@@ -85,6 +91,12 @@ document.addEventListener("DOMContentLoaded", function () {
     hide(neededcertificatesec);
     hide(certificateuploadsec);
     hide(partnershipsec);
+    hide(document.getElementById("Jewellery-1–Metal-Details"));
+    hide(document.getElementById("Jewellery-2–Diamond-Details"));
+    hide(document.getElementById("Jewellery-3–Color-Stone"));
+    hide(document.getElementById("Jewellery-4–Labour"));
+    hide(document.getElementById("Jewellery-Cost-Summary"));
+    hide(document.getElementById("Jewellery-Partnership"));
 
     if (!itemTypeEl) {
       isApplying = false;

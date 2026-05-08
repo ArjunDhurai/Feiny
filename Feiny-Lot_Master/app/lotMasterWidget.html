@@ -27,10 +27,12 @@
     <script defer src="jewelleryType.js"></script>
     <script defer src="loadOriginCountryDropdown.js"></script>
     <script defer src="Select_Contacts.js"></script>
+    <script defer src="Select_Contact_w_Perameter.js"></script>
     <script defer src="Select_Metal_Type.js"></script>
     <script defer src="Select_Color.js"></script>
     <script defer src="Select_Diamonds.js"></script>
     <script defer src="Select_Unit.js"></script>
+    <script defer src="Add_Row.js"></script>
   </head>
 
   <body>
@@ -697,8 +699,8 @@
                 <tr>
                   <td><input /></td>
                   <td>
-                    <select id="select_contact">
-                      <option value="">Select Vendor</option>
+                    <select class="select_contact">
+                      <option value="">Select Contact</option>
                     </select>
                 </td>
                   <td>
@@ -726,7 +728,7 @@
               </tbody>
             </table>
           </div>
-          <button type="button" class="btn-outline">+ Add Row</button>
+          <button type="button" class="btn-outline" onclick="addJewellery1Row()">+ Add Row</button>
         </div>
 
         <div class="card metal-subform-card">

@@ -7,7 +7,7 @@ function loadDiamondLookup() {
     report_name: "All_Diamond",
   })
     .then(function (response) {
-      console.log("Diamond lookup response:", JSON.stringify(response));
+      // console.log("Diamond lookup response:", JSON.stringify(response));
       const diamondSelect = document.getElementById("select_diamond");
       diamondSelect.innerHTML = `<option value="">Select Diamond</option>`;
       if (!response.data || response.data.length === 0) return;

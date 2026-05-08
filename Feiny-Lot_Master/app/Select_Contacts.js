@@ -1,6 +1,6 @@
 /* ================= CONTACTS LOOKUP ================= */
 function loadContactLookup() {
-  // console.log("Loading contacts lookup...");
+  console.log("Loading contacts lookup...");
 
   ZOHO.CREATOR.DATA.getRecords({
     app_name: "feiny-app",

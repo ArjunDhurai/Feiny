@@ -642,27 +642,35 @@
         <input id="circa" type="text" />
       </div>
       
-            <div class="jm-field full-width">
+      <div class="jm-field">
+  <label for="order">Order #</label>
+  <input id="order" type="text" />
+</div>
+      
+<div class="jm-field">
+  <label for="brand">Brand</label>
+          <select id="brand">
+          <option value="">Select Brand</option>
+        </select>
+</div>
+
+<div class="jm-field">
+  <label for="hts">HTS</label>
+  <input id="hts" type="text" />
+</div>
+<div class="jm-field">
+  <label for="note">Note</label>
+  <input id="note" type="text" />
+</div>
+
+<div class="jm-field full-width">
               <label for="description">Short Description</label>
               <textarea id="description"></textarea>
             </div>
 
-            <div class="jm-field">
-        <label for="brand">Order #</label>
-        <input id="brand" type="text" />
-      </div>
 
 
 
-      <div class="jm-field">
-        <label for="brand">Brand</label>
-        <input id="brand" type="text" />
-      </div>
-
-      <div class="jm-field">
-        <label for="hts">HTS</label>
-        <input id="hts" type="text" />
-      </div>
 
       
       <!-- <div class="jm-field">
@@ -675,10 +683,6 @@
         <textarea id="instruction"></textarea>
       </div>
       
-      <div class="jm-field">
-        <label for="note">Note</label>
-        <input id="note" type="text" />
-      </div>
     </div>
   </div>
 </div>
@@ -692,7 +696,8 @@
                   <th>Cast#</th>
                   <th style="width: 150pt">Vendor</th>
                   <th style="width: 150pt">Metal Type</th>
-                  <th style="width: 150pt">Colour</th>
+                  <th style="width: 150pt">Metal Colour</th>
+                  <th style="width: 150pt">Metal Purity</th>
                   <th style="width: 75pt">Unit</th>
                   <th>Wt</th>
                   <th>Qty</th>
@@ -718,6 +723,11 @@
                   <td>
                     <select id="select_color">
                       <option value="">Select Color</option>
+                    </select>
+                  </td>
+                  <td>
+                    <select id="select_purity">
+                      <option value="">Select Purity</option>
                     </select>
                   </td>
                   <td>
@@ -756,9 +766,7 @@
               </thead>
               <tbody id="jewel2Body">
                 <tr>
-                  <td><select id="select_diamond">
-                    <option value="">Select Diamond</option>
-                  </select></td>
+                  <td><input /></td>
                   <td><input /></td>
                   <td><input /></td>
                   <td><input type="number" /></td>

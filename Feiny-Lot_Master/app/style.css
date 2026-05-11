@@ -17,7 +17,7 @@ body {
   margin: 0;
   padding: 0;
   background: #f6f7f8;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   font-size: 14px;
   color: #333;
   line-height: 1.5;
@@ -34,36 +34,37 @@ body {
   font-weight: 400;
 }
 
-
 /* ============================================================
    CARDS
    ============================================================ */
 
-.card{
-  background:#fff;
-  border:1px solid #e1e3e6;
-  border-radius:8px;
-  padding:18px 22px; /* reduced */
-  margin-bottom:12px; /* reduced gap */
-  box-shadow:0 1px 3px rgba(0,0,0,.05);
+.card {
+  background: #fff;
+  border: 1px solid #e1e3e6;
+  border-radius: 8px;
+  padding: 18px 22px; /* reduced */
+  margin-bottom: 12px; /* reduced gap */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.card:last-child{margin-bottom:12px;}
-
-.card-title{
-  font-size:16px;
-  font-weight:600;
-  color:#222;
-  margin-bottom:14px;
-  display:block;
+.card:last-child {
+  margin-bottom: 12px;
 }
 
-.card-subtitle{
-  font-size:15px;
-  font-weight:600;
-  color:#222;
-  margin-bottom:14px;
-  display:block;
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 14px;
+  display: block;
+}
+
+.card-subtitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 14px;
+  display: block;
 }
 
 /* ============================================================
@@ -290,33 +291,34 @@ body {
    CERTIFICATES SECTION
    ============================================================ */
 
-.cert-grid{
- display:flex;
- flex-wrap:wrap;
- gap:12px; /* reduced */
- margin-bottom:8px;
+.cert-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px; /* reduced */
+  margin-bottom: 8px;
 }
 
-.cert-checkbox{
- display:flex;
- align-items:center;
- gap:6px;
+.cert-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.cert-checkbox input{
- width:16px;height:16px;
+.cert-checkbox input {
+  width: 16px;
+  height: 16px;
 }
 
 /* certificate details after checkbox reduced width */
 #certificate_details,
-[name="certificate_details"]{
- width:340px !important;
- max-width:340px !important;
+[name="certificate_details"] {
+  width: 340px !important;
+  max-width: 340px !important;
 }
 
-.cert-details-field{
- margin-top:8px;
- width:340px;
+.cert-details-field {
+  margin-top: 8px;
+  width: 340px;
 }
 
 /* ============================================================
@@ -431,24 +433,24 @@ body {
 .btn-outline,
 .add-row-btn,
 .subform-add-row,
-button.add-row{
-    display:inline-block !important;
-    width:220px !important;
-    margin:12px 0 0 0 !important;   /* remove auto centering */
+button.add-row {
+  display: inline-block !important;
+  width: 220px !important;
+  margin: 12px 0 0 0 !important; /* remove auto centering */
 }
 
 /* if button is inside wrapper */
 .add-row-container,
-.subform-button-wrap{
-    display:flex !important;
-    justify-content:flex-start !important;
-    align-items:flex-start !important;
+.subform-button-wrap {
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
 }
 
 /* Zoho subform add row button */
 .table-scroll + .btn-outline,
-.subform-table + .btn-outline{
-   margin-left:0 !important;
+.subform-table + .btn-outline {
+  margin-left: 0 !important;
 }
 
 /* ============================================================
@@ -1003,4 +1005,15 @@ button.add-row{
   .table-scroll {
     overflow: visible;
   }
+}
+
+.unit {
+  width: 150px;
+  /* padding: 6px 8px;
+  font-size: 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 3px;
+  font-family: inherit;
+  background: #ffffff;
+  transition: all 0.2s ease; */
 }

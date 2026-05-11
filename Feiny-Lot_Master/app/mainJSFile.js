@@ -51,12 +51,18 @@ document.addEventListener("DOMContentLoaded", function () {
       neededcertificatesec: document.getElementById("neededcertificatesec"),
       certificateuploadsec: document.getElementById("certificateuploadsec"),
       partnershipsec: document.getElementById("partnershipsec"),
-      //  Jewellery-1–Metal-Details: document.getElementById("Jewellery-1–Metal-Details"),
-      //  Jewellery-2–Diamond-Details: document.getElementById("Jewellery-2–Diamond-Details"),
-      //  Jewellery-3–Color-Stone: document.getElementById("Jewellery-3–Color-Stone"),
-      //  Jewellery-4–Labour: document.getElementById("Jewellery-4–Labour"),
-      //  Jewellery-Cost-Summary: document.getElementById("Jewellery-Cost-Summary"),
-      //  Jewellery-Partnership: document.getElementById("Jewellery-Partnership"),
+      Jewellery_1_Metal_Details: document.getElementById(
+        "Jewellery_1_Metal_Details",
+      ),
+      Jewellery_2_Diamond_Details: document.getElementById(
+        "Jewellery_2_Diamond_Details",
+      ),
+      Jewellery_3_Color_Stone: document.getElementById(
+        "Jewellery_3_Color_Stone",
+      ),
+      Jewellery_4_Labour: document.getElementById("Jewellery_4_Labour"),
+      Jewellery_Cost_Summary: document.getElementById("Jewellery_Cost_Summary"),
+      Jewellery_Partnership: document.getElementById("Jewellery_Partnership"),
     };
   }
 
@@ -81,6 +87,12 @@ document.addEventListener("DOMContentLoaded", function () {
       neededcertificatesec,
       certificateuploadsec,
       partnershipsec,
+      Jewellery_1_Metal_Details,
+      Jewellery_2_Diamond_Details,
+      Jewellery_3_Color_Stone,
+      Jewellery_4_Labour,
+      Jewellery_Cost_Summary,
+      Jewellery_Partnership,
     } = getElements();
 
     hide(colorStoneSection);
@@ -91,12 +103,12 @@ document.addEventListener("DOMContentLoaded", function () {
     hide(neededcertificatesec);
     hide(certificateuploadsec);
     hide(partnershipsec);
-    hide(document.getElementById("Jewellery-1–Metal-Details"));
-    hide(document.getElementById("Jewellery-2–Diamond-Details"));
-    hide(document.getElementById("Jewellery-3–Color-Stone"));
-    hide(document.getElementById("Jewellery-4–Labour"));
-    hide(document.getElementById("Jewellery-Cost-Summary"));
-    hide(document.getElementById("Jewellery-Partnership"));
+    hide(Jewellery_1_Metal_Details);
+    hide(Jewellery_2_Diamond_Details);
+    hide(Jewellery_3_Color_Stone);
+    hide(Jewellery_4_Labour);
+    hide(Jewellery_Cost_Summary);
+    hide(Jewellery_Partnership);
 
     if (!itemTypeEl) {
       isApplying = false;
@@ -119,7 +131,12 @@ document.addEventListener("DOMContentLoaded", function () {
       show(partnershipsec);
     } else if (selectedValue === "Jewellery") {
       show(jewelleryWrapper);
-      // show(certificateuploadsec);
+      show(Jewellery_1_Metal_Details);
+      show(Jewellery_2_Diamond_Details);
+      show(Jewellery_3_Color_Stone);
+      show(Jewellery_4_Labour);
+      show(Jewellery_Cost_Summary);
+      show(Jewellery_Partnership);
     }
 
     setTimeout(() => {

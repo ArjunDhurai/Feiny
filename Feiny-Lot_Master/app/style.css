@@ -347,7 +347,7 @@ body {
 
 .subform-table th {
   padding: 10px 8px;
-  text-align: left;
+  text-align: center;
   font-weight: 600;
   font-size: 12px;
   color: #333;
@@ -365,6 +365,7 @@ body {
   border-right: 1px solid #e8e8e8;
   vertical-align: top;
   font-size: 12px;
+  min-width: 159px;
 }
 
 .subform-table td:last-child {
@@ -401,9 +402,260 @@ body {
   min-height: 40px;
 }
 
-.subform-table input[type="checkbox"],
+.subform-table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.subform-table input[type="checkbox"] {
+    display: block;
+    margin: 0 auto;
+    width: 16px;
+    height: 16px;
+}
+
+/* Keep date field normal */
 .subform-table input[type="date"] {
-  width: auto;
+    width: auto;
+}
+
+/* ============================================================
+   SUBFORM COLUMN WIDTHS - METAL DETAILS
+   ============================================================ */
+
+/* Metal Details table layout fixed */
+.subform-table.metal-details-table {
+  table-layout: fixed !important;
+  width: 100% !important;
+}
+
+/* Metal Details: Cast#, Vendor, Metal Type, Metal Colour, Metal Purity, Unit, Wt, Qty, Metal Market, Price, Gold Cost, Remarks */
+.subform-table.metal-details-table th:nth-child(1),
+.subform-table.metal-details-table td:nth-child(1) {
+  width: 5% !important;
+  min-width: 5% !important;
+  max-width: 5% !important;
+}
+
+.subform-table.metal-details-table th:nth-child(2),
+.subform-table.metal-details-table td:nth-child(2) {
+  width: 12% !important;
+  min-width: 12% !important;
+  max-width: 12% !important;
+}
+
+.subform-table.metal-details-table th:nth-child(3),
+.subform-table.metal-details-table td:nth-child(3) {
+  width: 11% !important;
+  min-width: 11% !important;
+  max-width: 11% !important;
+}
+
+.subform-table.metal-details-table th:nth-child(4),
+.subform-table.metal-details-table td:nth-child(4) {
+  width: 11% !important;
+  min-width: 11% !important;
+  max-width: 11% !important;
+}
+
+.subform-table.metal-details-table th:nth-child(5),
+.subform-table.metal-details-table td:nth-child(5) {
+  width: 10% !important;
+  min-width: 10% !important;
+  max-width: 10% !important;
+}
+
+.subform-table.metal-details-table th:nth-child(6),
+.subform-table.metal-details-table td:nth-child(6) {
+  width: 7% !important;
+  min-width: 7% !important;
+  max-width: 7% !important;
+}
+
+.subform-table.metal-details-table th:nth-child(7),
+.subform-table.metal-details-table td:nth-child(7) {
+  width: 6% !important;
+  min-width: 6% !important;
+  max-width: 6% !important;
+}
+
+.subform-table.metal-details-table th:nth-child(8),
+.subform-table.metal-details-table td:nth-child(8) {
+  width: 6% !important;
+  min-width: 6% !important;
+  max-width: 6% !important;
+}
+
+.subform-table.metal-details-table th:nth-child(9),
+.subform-table.metal-details-table td:nth-child(9) {
+  width: 9% !important;
+  min-width: 9% !important;
+  max-width: 9% !important;
+}
+
+.subform-table.metal-details-table th:nth-child(10),
+.subform-table.metal-details-table td:nth-child(10) {
+  width: 7% !important;
+  min-width: 7% !important;
+  max-width: 7% !important;
+}
+
+.subform-table.metal-details-table th:nth-child(11),
+.subform-table.metal-details-table td:nth-child(11) {
+  width: 8% !important;
+  min-width: 8% !important;
+  max-width: 8% !important;
+}
+
+.subform-table.metal-details-table th:nth-child(12),
+.subform-table.metal-details-table td:nth-child(12) {
+  width: 8% !important;
+  min-width: 8% !important;
+  max-width: 8% !important;
+}
+
+/* ============================================================
+   SUBFORM COLUMN WIDTHS - COLOR STONE
+   ============================================================ */
+
+/* Color Stone table layout fixed */
+.subform-table.colorstone-table {
+  table-layout: fixed !important;
+  width: 100% !important;
+}
+
+/* Color Stone: Lot #, Stone Type, Shape, Quality, Range, No Stones, Wt/Stone, CT WT, Unit, Cut, Stone Color, Clarity, Supplier, Setter, Price, Stone Cost, C.S, Duty, Remarks */
+.subform-table.colorstone-table th:nth-child(1),
+.subform-table.colorstone-table td:nth-child(1) {
+  width: 4% !important;
+  min-width: 4% !important;
+  max-width: 4% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(2),
+.subform-table.colorstone-table td:nth-child(2) {
+  width: 6% !important;
+  min-width: 6% !important;
+  max-width: 6% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(3),
+.subform-table.colorstone-table td:nth-child(3) {
+  width: 5% !important;
+  min-width: 5% !important;
+  max-width: 5% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(4),
+.subform-table.colorstone-table td:nth-child(4) {
+  width: 5% !important;
+  min-width: 5% !important;
+  max-width: 5% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(5),
+.subform-table.colorstone-table td:nth-child(5) {
+  width: 5% !important;
+  min-width: 5% !important;
+  max-width: 5% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(6),
+.subform-table.colorstone-table td:nth-child(6) {
+  width: 5% !important;
+  min-width: 5% !important;
+  max-width: 5% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(7),
+.subform-table.colorstone-table td:nth-child(7) {
+  width: 5% !important;
+  min-width: 5% !important;
+  max-width: 5% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(8),
+.subform-table.colorstone-table td:nth-child(8) {
+  width: 5% !important;
+  min-width: 5% !important;
+  max-width: 5% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(9),
+.subform-table.colorstone-table td:nth-child(9) {
+  width: 5% !important;
+  min-width: 5% !important;
+  max-width: 5% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(10),
+.subform-table.colorstone-table td:nth-child(10) {
+  width: 5% !important;
+  min-width: 5% !important;
+  max-width: 5% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(11),
+.subform-table.colorstone-table td:nth-child(11) {
+  width: 6% !important;
+  min-width: 6% !important;
+  max-width: 6% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(12),
+.subform-table.colorstone-table td:nth-child(12) {
+  width: 5% !important;
+  min-width: 5% !important;
+  max-width: 5% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(13),
+.subform-table.colorstone-table td:nth-child(13) {
+  width: 6% !important;
+  min-width: 6% !important;
+  max-width: 6% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(14),
+.subform-table.colorstone-table td:nth-child(14) {
+  width: 5% !important;
+  min-width: 5% !important;
+  max-width: 5% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(15),
+.subform-table.colorstone-table td:nth-child(15) {
+  width: 5% !important;
+  min-width: 5% !important;
+  max-width: 5% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(16),
+.subform-table.colorstone-table td:nth-child(16) {
+  width: 6% !important;
+  min-width: 6% !important;
+  max-width: 6% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(17),
+.subform-table.colorstone-table td:nth-child(17) {
+  width: 3% !important;
+  min-width: 3% !important;
+  max-width: 3% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(18),
+.subform-table.colorstone-table td:nth-child(18) {
+  width: 3% !important;
+  min-width: 3% !important;
+  max-width: 3% !important;
+}
+
+.subform-table.colorstone-table th:nth-child(19),
+.subform-table.colorstone-table td:nth-child(19) {
+  width: 7% !important;
+  min-width: 7% !important;
+  max-width: 7% !important;
 }
 
 /* ============================================================

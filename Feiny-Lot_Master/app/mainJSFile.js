@@ -2075,16 +2075,14 @@ function loadExistingRecord(recordID) {
       document.getElementById("itemType").value = data.Select || "";
       document.getElementById("surface_lookup").value = data.Surface?.ID || "";
       document.getElementById("species_lookup").value = data.Species?.ID || "";
-      document.getElementById("treatment_lookup").value =
-        data.Treatment?.ID || "";
+      document.getElementById("treatment_lookup").value = data.Treatment?.ID || "";
       document.getElementById("shape_lookup").value = data.Shape?.ID || "";
       document.getElementById("origin_country").value = data.Origin || "";
       document.getElementById("country_cut").value = data.Country_of_Cut || "";
       document.getElementById("hts_field").value = data.HTS || "";
       document.getElementById("code_field").value = data.Code || "";
       document.getElementById("cs_short_description").value = data.Name1 || "";
-      document.getElementById("cs_long_description").value =
-        data.Long_Description || "";
+      document.getElementById("cs_long_description").value = data.Long_Description || "";
       document.getElementById("min_length").value = data.length_field || "";
       document.getElementById("min_width").value = data.Width || "";
       document.getElementById("min_height").value = data.Height || "";
@@ -2097,8 +2095,7 @@ function loadExistingRecord(recordID) {
       document.getElementById("cert_agl").checked = data.AGL || false;
       document.getElementById("cert_gia").checked = data.GIA || false;
       document.getElementById("cert_ssef").checked = data.SSEF || false;
-      document.getElementById("certificate_details").value =
-        data.Description2 || "";
+      document.getElementById("certificate_details").value = data.Description2 || "";
       document.getElementById("Price4").value = data.Price4 || "";
       document.getElementById("MinimumPrice").value = data.Minimum_Price || "";
       document.getElementById("unit_lookup").value = data.Unit?.ID || "";
@@ -2111,10 +2108,8 @@ function loadExistingRecord(recordID) {
       document.getElementById("dia_polish").value = data.Polish?.ID || "";
       document.getElementById("dia_symmetry").value = data.Symmetry?.ID || "";
       document.getElementById("dia_culet").value = data.Culet?.ID || "";
-      document.getElementById("dia_fluorescence").value =
-        data.Fluorescence1?.ID || "";
-      document.getElementById("dia_colour_fluorescence").value =
-        data.Fluorescence_Color?.ID || "";
+      document.getElementById("dia_fluorescence").value =data.Fluorescence1?.ID || "";
+      document.getElementById("dia_colour_fluorescence").value =data.Fluorescence_Color?.ID || "";
       document.getElementById("dia_length").value = data.Length_mm || "";
       document.getElementById("dia_width").value = data.Width_mm || "";
       document.getElementById("dia_depth").value = data.Depth1 || "";
@@ -2122,15 +2117,26 @@ function loadExistingRecord(recordID) {
       document.getElementById("dia_depth_percent").value = data.Depth2 || "";
       document.getElementById("quantity").value = data.Quantity || "";
       document.getElementById("dia_weight").value = data.Weight_Ct || "";
-      document.getElementById("price_per_carat").value =
-        data.Price_Per_carat || "";
+      document.getElementById("price_per_carat").value =data.Price_Per_carat || "";
       document.getElementById("total_price").value = data.Total_Price || "";
-      document.getElementById("rapport_price").value =
-        data.Rapport_Price1 || "";
-      document.getElementById("diashort_description").value =
-        data.Short_Description1 || "";
-      document.getElementById("dialong_description").value =
-        data.Long_Description2 || "";
+      document.getElementById("rapport_price").value =data.Rapport_Price1 || "";
+      document.getElementById("diashort_description").value =data.Short_Description1 || "";
+      document.getElementById("dialong_description").value = data.Long_Description2 || "";
+      document.getElementById("style").value = data.Style || "";
+      document.getElementById("jewellery_type").value = data.Jewellery__Type || "";
+      document.getElementById("platinum").value = data.Platinum || "";
+      document.getElementById("category").value = data.Category || "";
+      document.getElementById("description").value = data.Description3 || "";
+      document.getElementById("gold").value = data.Gold || "";
+      document.getElementById("production").value = data.Production || "";
+      document.getElementById("instructions").value = data.Instructions || "";
+      document.getElementById("countries_origin").value = data.Country_Of_Origin1 || "";    
+      document.getElementById("size").value = data.Size || "";
+      document.getElementById("weight_grams").value = data.Weight_grams || "";
+      document.getElementById("circa").value = data.Circa || "";
+      document.getElementById("brand").value = data.Brand || "";
+      document.getElementById("hts_code").value = data.HTS1 || "";
+      document.getElementById("notes").value = data.Notes || "";
 
       /* ─── CERTIFICATE UPLOADS SUBFORM ─── */
       loadCertificateSubform(recordID);

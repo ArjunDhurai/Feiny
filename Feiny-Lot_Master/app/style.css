@@ -390,10 +390,10 @@ body {
 }
 
 .subform-table input:focus,
-.subform-table select:focus,
+.subform-table select:focus,  
 .subform-table textarea:focus {
   outline: none;
-  border-color: #0066cc;
+  border-color: #616466;
   box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
 }
 
@@ -1214,7 +1214,7 @@ button.add-row {
 }
 
 .table-scroll::-webkit-scrollbar-thumb:hover {
-  background: #0066cc;
+  background: #81868b;
 }
 
 /* ============================================================

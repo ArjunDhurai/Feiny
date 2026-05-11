@@ -88,7 +88,9 @@ function addJewellery3Row() {
                   <td><input /></td>
                   <td><input /></td>
                   <td><input /></td>
-                  <td><input /></td>
+                  <td><select id="select_unit">
+                        <option value="">Select Unit</option>
+                      </select></td>
                   <td><input /></td>
                   <td><input /></td>
                   <td><input /></td>
@@ -102,6 +104,7 @@ function addJewellery3Row() {
                 
         `;
   tbody.appendChild(newRow);
+  loadUnitLookup();
 }
 
 // Add Row Function for Jewellery 2 – Diamond Details

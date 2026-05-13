@@ -55,25 +55,23 @@ function addJewellery2Row() {
   const tbody = document.getElementById("jewel2Body");
 
   const newRow = document.createElement("tr");
-  newRow.className = "partner-row";
+  newRow.className = "jewel2-row";
   newRow.innerHTML = `
-              
-                  <td><input /></td>
-                                  <td>
-                  <select id ="select_shape">
-                    <option value="">Select Shape</option>
-                  </select>
-                </td>
-                  <td><input /></td>
-                  <td><input type="number" /></td>
-                  <td><input type="number" /></td>
-                  <td><input /></td>
-                  <td><input /></td>
-                  <td><textarea></textarea></td>
-                
+    <td><input type="text" class="j2-lot" /></td>
+    <td>
+      <select class="select_shape j2-shape">
+        <option value="">Select Shape</option>
+      </select>
+    </td>
+    <td><input type="text" class="j2-quality" /></td>
+    <td><input type="number" class="j2-stones" /></td>
+    <td><input type="number" class="j2-total-ct" /></td>
+    <td><input type="text" class="j2-price" /></td>
+    <td><input type="text" class="j2-cost" /></td>
+    <td><textarea class="j2-remarks"></textarea></td>
         `;
   tbody.appendChild(newRow);
-  loadShapeLookup();
+  loadShapeLookup(newRow.querySelector(".select_shape"));
 }
 
 // Add Row Function for Jewellery 2 – Diamond Details

@@ -59,7 +59,11 @@ function addJewellery2Row() {
   newRow.innerHTML = `
               
                   <td><input /></td>
-                  <td><input /></td>
+                                  <td>
+                  <select id ="select_shape">
+                    <option value="">Select Shape</option>
+                  </select>
+                </td>
                   <td><input /></td>
                   <td><input type="number" /></td>
                   <td><input type="number" /></td>
@@ -69,6 +73,7 @@ function addJewellery2Row() {
                 
         `;
   tbody.appendChild(newRow);
+  loadShapeLookup();
 }
 
 // Add Row Function for Jewellery 2 – Diamond Details
@@ -82,7 +87,11 @@ function addJewellery3Row() {
               
                   <td><input /></td>
                   <td><select></select></td>
-                  <td><input /></td>
+                                                    <td>
+                  <select class="select_shape">
+                    <option value="">Select Shape</option>
+                  </select>
+                </td>
                   <td><input /></td>
                   <td><input /></td>
                   <td><input /></td>
@@ -105,6 +114,7 @@ function addJewellery3Row() {
         `;
   tbody.appendChild(newRow);
   loadUnitLookup();
+  loadShapeLookup();
 }
 
 // Add Row Function for Jewellery 2 – Diamond Details

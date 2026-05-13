@@ -36,6 +36,7 @@
     <script defer src="Select_Brand.js"></script>
     <script defer src="Select_Purity.js"></script>
     <script defer src="Jewellery_on_creation.js"></script>
+    <script defer src="Select_Shape.js"></script>
   </head>
 
   <body>
@@ -562,522 +563,482 @@
         </div>
       </div>
 
-     <!-- ========== JEWELLERY SECTION ========== -->
-<div id="jewelleryWrapper" style="display: none">
-  <div class="card jewellery-card">
-    <div class="card-title">Jewellery Lot Master</div>
+      <!-- ========== JEWELLERY SECTION ========== -->
+      <div id="jewelleryWrapper" style="display: none">
+        <div class="card jewellery-card">
+          <div class="card-title">Jewellery Lot Master</div>
 
-    <div class="jewellery-grid">
+          <div class="jewellery-grid">
+            <div class="jm-field">
+              <label for="style">Style</label>
+              <input id="style" type="text" />
+            </div>
 
-      <div class="jm-field">
-        <label for="style">Style</label>
-        <input id="style" type="text" />
-      </div>
+            <div class="jm-field">
+              <label for="jewellery_type">Jewellery Type</label>
+              <select id="jewellery_type">
+                <option value="">Select Jewellery Type</option>
+              </select>
+            </div>
 
-      <div class="jm-field">
-        <label for="jewellery_type">Jewellery Type</label>
-        <select id="jewellery_type">
-          <option value="">Select Jewellery Type</option>
-        </select>
-      </div>
+            <div class="jm-field">
+              <label for="main_image">Image</label>
+              <input id="main_image" type="file" />
+            </div>
 
-      <div class="jm-field">
-        <label for="main_image">Image</label>
-        <input id="main_image" type="file" />
-      </div>
+            <div class="jm-field">
+              <label for="side_image">Side Image</label>
+              <input id="side_image" type="file" />
+            </div>
 
-      <div class="jm-field">
-        <label for="side_image">Side Image</label>
-        <input id="side_image" type="file" />
-      </div>
+            <div class="jm-field">
+              <label for="category">Category</label>
+              <select id="category">
+                <option value="">Select Category</option>
+              </select>
+            </div>
 
-      <div class="jm-field">
-        <label for="category">Category</label>
-        <select id="category">
-          <option value="">Select Category</option>
-        </select>
-      </div>
+            <div class="jm-field">
+              <label for="platinum">Platinum</label>
+              <input id="platinum" type="text" />
+            </div>
 
-      <div class="jm-field">
-        <label for="platinum">Platinum</label>
-        <input id="platinum" type="text" />
-      </div>
-
-      <!-- <div class="jm-field">
+            <!-- <div class="jm-field">
         <label for="tag_diam_wt">Tag Diam Wt</label>
         <input id="tag_diam_wt" type="text" />
       </div> -->
 
-      <div class="jm-field">
-        <label for="production">Production</label>
-        <input id="production" type="text" />
-      </div>
+            <div class="jm-field">
+              <label for="production">Production</label>
+              <input id="production" type="text" />
+            </div>
 
-      <!-- <div class="jm-field">
+            <!-- <div class="jm-field">
         <label for="diam_quality">Diam Quality</label>
         <input id="diam_quality" type="text" />
       </div> -->
 
-      <div class="jm-field">
-        <label for="gold">Gold</label>
-        <input id="gold" type="text" />
-      </div>
+            <div class="jm-field">
+              <label for="gold">Gold</label>
+              <input id="gold" type="text" />
+            </div>
 
-      <div class="jm-field">
-        <label for="countries_origin">Country of Origin</label>
-        <select id="countries_origin">
-          <option value="">Select Country</option>
-        </select>
-      </div>
+            <div class="jm-field">
+              <label for="countries_origin">Country of Origin</label>
+              <select id="countries_origin">
+                <option value="">Select Country</option>
+              </select>
+            </div>
 
-      <div class="jm-field">
-        <label for="size">Size</label>
-        <input id="size" type="number" step="0.01" />
-      </div>
+            <div class="jm-field">
+              <label for="size">Size</label>
+              <input id="size" type="number" step="0.01" />
+            </div>
 
-      <div class="jm-field">
-        <label for="weight_grams">Weight (grams)</label>
-        <input id="weight_grams" type="number" step="0.01" />
-      </div>
+            <div class="jm-field">
+              <label for="weight_grams">Weight (grams)</label>
+              <input id="weight_grams" type="number" step="0.01" />
+            </div>
 
-      <div class="jm-field">
-        <label for="circa">Circa</label>
-        <input id="circa" type="text" />
-      </div>
-      
-      <div class="jm-field">
-  <label for="order">Order #</label>
-  <input id="order" type="text" />
-</div>
-      
-<div class="jm-field">
-  <label for="brand">Brand</label>
-          <select id="brand">
-          <option value="">Select Brand</option>
-        </select>
-</div>
+            <div class="jm-field">
+              <label for="circa">Circa</label>
+              <input id="circa" type="text" />
+            </div>
 
-<div class="jm-field">
-  <label for="hts">HTS</label>
-  <input id="hts" type="number" step="0.01" />
-</div>
-<div class="jm-field">
-  <label for="note">Note</label>
-  <input id="note" type="text" />
-</div>
+            <div class="jm-field">
+              <label for="order">Order #</label>
+              <input id="order" type="text" />
+            </div>
 
-<div class="jm-field full-width">
+            <div class="jm-field">
+              <label for="brand">Brand</label>
+              <select id="brand">
+                <option value="">Select Brand</option>
+              </select>
+            </div>
+
+            <div class="jm-field">
+              <label for="hts">HTS</label>
+              <input id="hts" type="number" step="0.01" />
+            </div>
+            <div class="jm-field">
+              <label for="note">Note</label>
+              <input id="note" type="text" />
+            </div>
+
+            <div class="jm-field full-width">
               <label for="description">Short Description</label>
               <textarea id="description"></textarea>
             </div>
 
-      <div class="jm-field full-width">
-        <label for="instruction">Long Description</label>
-        <textarea id="instruction"></textarea>
+            <div class="jm-field full-width">
+              <label for="instruction">Long Description</label>
+              <textarea id="instruction"></textarea>
+            </div>
+          </div>
+        </div>
       </div>
-      
-    </div>
-  </div>
-</div>
-
-       <!-- ========================================= -->
-<!-- JEWELLERY 1 – METAL DETAILS -->
-<!-- ========================================= -->
-
-<div id="Jewellery_1_Metal_Details" class="card metal-subform-card">
-
-  <div class="card-subtitle">
-    Jewellery 1 – Metal Details
-  </div>
-
-  <div class="table-scroll">
-
-    <table class="subform-table">
-
-      <thead>
-        <tr>
-          <th>Cast#</th>
-          <th>Vendor</th>
-          <th>Metal Type</th>
-          <th>Metal Colour</th>
-          <th>Metal Purity</th>
-          <th>Unit</th>
-          <th>Wt</th>
-          <th>Qty</th>
-          <th>Metal Market</th>
-          <th>Price</th>
-          <th>Gold Cost</th>
-          <th>Remarks</th>
-        </tr>
-      </thead>
-
-      <tbody id="jewel1Body">
-
-        <tr class="jewel1-row">
-
-          <td>
-            <input type="text" class="j1-cast-no">
-          </td>
-
-          <td>
-            <select class="select_contact j1-vendor">
-              <option value="">Select Contact</option>
-            </select>
-          </td>
 
-          <td>
-            <select class="select_metal_type j1-metal-type">
-              <option value="">Select Metal Type</option>
-            </select>
-          </td>
-
-          <td>
-            <select class="select_color j1-metal-color">
-              <option value="">Select Color</option>
-            </select>
-          </td>
-
-          <td>
-            <select class="select_purity j1-metal-purity">
-              <option value="">Select Purity</option>
-            </select>
-          </td>
-
-          <td>
-            <select class="select_unit j1-unit">
-              <option value="">Select Unit</option>
-            </select>
-          </td>
-
-          <td>
-            <input type="number" class="j1-weight">
-          </td>
-
-          <td>
-            <input type="number" class="j1-qty">
-          </td>
-
-          <td>
-            <input type="number" class="j1-market">
-          </td>
-
-          <td>
-            <input type="text" class="j1-price">
-          </td>
-
-          <td>
-            <input type="text" class="j1-gold-cost">
-          </td>
-
-          <td>
-            <textarea class="j1-remarks"></textarea>
-          </td>
-
-        </tr>
-
-      </tbody>
-
-    </table>
-
-  </div>
-
-  <button type="button" class="btn-outline" onclick="addJewellery1Row()">
-    + Add Row
-  </button>
-
-</div>
-
-<!-- ========================================= -->
-<!-- JEWELLERY 2 – DIAMOND DETAILS -->
-<!-- ========================================= -->
-
-<div id="Jewellery_2_Diamond_Details" class="card metal-subform-card">
-
-  <div class="card-subtitle">
-    Jewellery 2 – Diamond Details
-  </div>
-
-  <div class="table-scroll">
-
-    <table class="subform-table">
-
-      <thead>
-        <tr>
-          <th>Diamond Lot #</th>
-          <th>Shape</th>
-          <th>Quality</th>
-          <th>No of Stones</th>
-          <th>Total Ct Wt</th>
-          <th>Price</th>
-          <th>Diamond Cost</th>
-          <th>Remarks</th>
-        </tr>
-      </thead>
-
-      <tbody id="jewel2Body">
-
-        <tr class="jewel2-row">
-
-          <td><input type="text" class="j2-lot"></td>
-
-          <td><input type="text" class="j2-shape"></td>
-
-          <td><input type="text" class="j2-quality"></td>
-
-          <td><input type="number" class="j2-stones"></td>
-
-          <td><input type="number" class="j2-total-ct"></td>
-
-          <td><input type="text" class="j2-price"></td>
-
-          <td><input type="text" class="j2-cost"></td>
-
-          <td><textarea class="j2-remarks"></textarea></td>
-
-        </tr>
-
-      </tbody>
-
-    </table>
-
-  </div>
-
-  <button type="button" class="btn-outline" onclick="addJewellery2Row()">
-    + Add Row
-  </button>
-
-</div>
-
-<!-- ========================================= -->
-<!-- JEWELLERY 3 – COLOR STONE -->
-<!-- ========================================= -->
-
-<div id="Jewellery_3_Color_Stone" class="card metal-subform-card">
-
-  <div class="card-subtitle">
-    Jewellery 3 – Color Stone
-  </div>
-
-  <div class="table-scroll">
-
-    <table class="subform-table">
-
-      <thead>
-        <tr>
-          <th>Lot #</th>
-          <th>Stone Type</th>
-          <th>Shape</th>
-          <th>Quality</th>
-          <th>Range</th>
-          <th>No Stones</th>
-          <th>Wt/Stone</th>
-          <th>CT WT</th>
-          <th>Unit</th>
-          <th>Cut</th>
-          <th>Stone Color</th>
-          <th>Clarity</th>
-          <th>Supplier</th>
-          <th>Setter</th>
-          <th>Price</th>
-          <th>Stone Cost</th>
-          <th>C.S</th>
-          <th>Duty</th>
-          <th>Remarks</th>
-        </tr>
-      </thead>
-
-      <tbody id="jewel3Body">
-
-        <tr class="jewel3-row">
-
-          <td><input type="text" class="j3-lot"></td>
-
-          <td>
-            <select class="j3-stone-type">
-              <option value="">Select</option>
-            </select>
-          </td>
-
-          <td><input type="text" class="j3-shape"></td>
-
-          <td><input type="text" class="j3-quality"></td>
-
-          <td><input type="text" class="j3-range"></td>
-
-          <td><input type="number" class="j3-no-stones"></td>
-
-          <td><input type="number" class="j3-wt-stone"></td>
-
-          <td><input type="number" class="j3-ctwt"></td>
-
-          <td>
-            <select class="select_unit j3-unit">
-              <option value="">Select Unit</option>
-            </select>
-          </td>
-
-          <td><input type="text" class="j3-cut"></td>
-
-          <td><input type="text" class="j3-color"></td>
-
-          <td><input type="text" class="j3-clarity"></td>
-
-          <td><input type="text" class="j3-supplier"></td>
-
-          <td><input type="text" class="j3-setter"></td>
-
-          <td><input type="text" class="j3-price"></td>
-
-          <td><input type="text" class="j3-cost"></td>
-
-          <td><input type="checkbox" class="j3-cs"></td>
-
-          <td><input type="checkbox" class="j3-duty"></td>
-
-          <td><textarea class="j3-remarks"></textarea></td>
-
-        </tr>
-
-      </tbody>
-
-    </table>
-
-  </div>
-
-  <button type="button" class="btn-outline" onclick="addJewellery3Row()">
-    + Add Row
-  </button>
-
-</div>
-
-<!-- ========================================= -->
-<!-- JEWELLERY 4 – LABOUR -->
-<!-- ========================================= -->
-
-<div id="Jewellery_4_Labour" class="card metal-subform-card">
-
-  <div class="card-subtitle">
-    Jewellery 4 – Labour
-  </div>
-
-  <div class="table-scroll">
-
-    <table class="subform-table">
-
-      <thead>
-        <tr>
-          <th>Labor #</th>
-          <th>Description</th>
-          <th>Price</th>
-          <th>Qty</th>
-          <th>Duty</th>
-          <th>Amount</th>
-        </tr>
-      </thead>
-
-      <tbody id="jewel4Body">
-
-        <tr class="jewel4-row">
-
-          <td><input type="text" class="j4-labor-no"></td>
-
-          <td><textarea class="j4-description"></textarea></td>
-
-          <td><input type="text" class="j4-price"></td>
-
-          <td><input type="number" class="j4-qty"></td>
-
-          <td><input type="checkbox" class="j4-duty"></td>
-
-          <td><input type="text" class="j4-amount"></td>
-
-        </tr>
-
-      </tbody>
-
-    </table>
-
-  </div>
-
-  <button type="button" class="btn-outline" onclick="addJewellery4Row()">
-    + Add Row
-  </button>
-
-</div>
-        <div id="Jewellery_Partnership" class="card metal-subform-card">
-  <div class="card-subtitle">Jewellery Partnership</div>
-
-  <div class="table-scroll">
-    <table class="subform-table">
-      <thead>
-        <tr>
-          <th>Partner</th>
-          <th>Shares</th>
-          <th>Partnership %</th>
-          <th>Commission %</th>
-          <th>Commission Itemization</th>
-          <th>Description</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-
-      <tbody id="jewelleryPartnershipBody">
-        <tr class="jewellery-partnership-row">
-
-          <!-- Partner -->
-          <td>
-            <select class="jp_partner select_contact">
-              <option value="">Select Partner</option>
-            </select>
-          </td>
-
-          <!-- Shares -->
-          <td>
-            <input type="text" class="jp_shares" />
-          </td>
-
-          <!-- Partnership % -->
-          <td>
-            <input type="text" class="jp_partnership_percentage" />
-          </td>
-
-          <!-- Commission % -->
-          <td>
-            <input type="text" class="jp_commission_percentage" />
-          </td>
-
-          <!-- Commission Itemization -->
-          <td class="checkbox-cell">
-            <input type="checkbox" class="jp_commission_itemization" />
-          </td>
-
-          <!-- Description -->
-          <td>
-            <textarea class="jp_description"></textarea>
-          </td>
-
-          <!-- Delete Button -->
-          <td>
-            <button type="button"
+      <!-- ========================================= -->
+      <!-- JEWELLERY 1 – METAL DETAILS -->
+      <!-- ========================================= -->
+
+      <div id="Jewellery_1_Metal_Details" class="card metal-subform-card">
+        <div class="card-subtitle">Jewellery 1 – Metal Details</div>
+
+        <div class="table-scroll">
+          <table class="subform-table">
+            <thead>
+              <tr>
+                <th>Cast#</th>
+                <th>Vendor</th>
+                <th>Metal Type</th>
+                <th>Metal Colour</th>
+                <th>Metal Purity</th>
+                <th>Unit</th>
+                <th>Wt</th>
+                <th>Qty</th>
+                <th>Metal Market</th>
+                <th>Price</th>
+                <th>Gold Cost</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+
+            <tbody id="jewel1Body">
+              <tr class="jewel1-row">
+                <td>
+                  <input type="text" class="j1-cast-no" />
+                </td>
+
+                <td>
+                  <select class="select_contact j1-vendor">
+                    <option value="">Select Contact</option>
+                  </select>
+                </td>
+
+                <td>
+                  <select class="select_metal_type j1-metal-type">
+                    <option value="">Select Metal Type</option>
+                  </select>
+                </td>
+
+                <td>
+                  <select class="select_color j1-metal-color">
+                    <option value="">Select Color</option>
+                  </select>
+                </td>
+
+                <td>
+                  <select class="select_purity j1-metal-purity">
+                    <option value="">Select Purity</option>
+                  </select>
+                </td>
+
+                <td>
+                  <select class="select_unit j1-unit">
+                    <option value="">Select Unit</option>
+                  </select>
+                </td>
+
+                <td>
+                  <input type="number" class="j1-weight" />
+                </td>
+
+                <td>
+                  <input type="number" class="j1-qty" />
+                </td>
+
+                <td>
+                  <input type="number" class="j1-market" />
+                </td>
+
+                <td>
+                  <input type="text" class="j1-price" />
+                </td>
+
+                <td>
+                  <input type="text" class="j1-gold-cost" />
+                </td>
+
+                <td>
+                  <textarea class="j1-remarks"></textarea>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <button type="button" class="btn-outline" onclick="addJewellery1Row()">
+          + Add Row
+        </button>
+      </div>
+
+      <!-- ========================================= -->
+      <!-- JEWELLERY 2 – DIAMOND DETAILS -->
+      <!-- ========================================= -->
+
+      <div id="Jewellery_2_Diamond_Details" class="card metal-subform-card">
+        <div class="card-subtitle">Jewellery 2 – Diamond Details</div>
+
+        <div class="table-scroll">
+          <table class="subform-table">
+            <thead>
+              <tr>
+                <th>Diamond Lot #</th>
+                <th>Shape</th>
+                <th>Quality</th>
+                <th>No of Stones</th>
+                <th>Total Ct Wt</th>
+                <th>Price</th>
+                <th>Diamond Cost</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+
+            <tbody id="jewel2Body">
+              <tr class="jewel2-row">
+                <td><input type="text" class="j2-lot" /></td>
+
+                <td>
+                  <select class="select_shape">
+                    <option value="">Select Shape</option>
+                  </select>
+                </td>
+
+                <td><input type="text" class="j2-quality" /></td>
+
+                <td><input type="number" class="j2-stones" /></td>
+
+                <td><input type="number" class="j2-total-ct" /></td>
+
+                <td><input type="text" class="j2-price" /></td>
+
+                <td><input type="text" class="j2-cost" /></td>
+
+                <td><textarea class="j2-remarks"></textarea></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <button type="button" class="btn-outline" onclick="addJewellery2Row()">
+          + Add Row
+        </button>
+      </div>
+
+      <!-- ========================================= -->
+      <!-- JEWELLERY 3 – COLOR STONE -->
+      <!-- ========================================= -->
+
+      <div id="Jewellery_3_Color_Stone" class="card metal-subform-card">
+        <div class="card-subtitle">Jewellery 3 – Color Stone</div>
+
+        <div class="table-scroll">
+          <table class="subform-table">
+            <thead>
+              <tr>
+                <th>Lot #</th>
+                <th>Stone Type</th>
+                <th>Shape</th>
+                <th>Quality</th>
+                <th>Range</th>
+                <th>No Stones</th>
+                <th>Wt/Stone</th>
+                <th>CT WT</th>
+                <th>Unit</th>
+                <th>Cut</th>
+                <th>Stone Color</th>
+                <th>Clarity</th>
+                <th>Supplier</th>
+                <th>Setter</th>
+                <th>Price</th>
+                <th>Stone Cost</th>
+                <th>C.S</th>
+                <th>Duty</th>
+                <th>Remarks</th>
+              </tr>
+            </thead>
+
+            <tbody id="jewel3Body">
+              <tr class="jewel3-row">
+                <td><input type="text" class="j3-lot" /></td>
+
+                <td>
+                  <select class="j3-stone-type">
+                    <option value="">Select</option>
+                  </select>
+                </td>
+
+                <td>
+                  <select class="select_shape">
+                    <option value="">Select Shape</option>
+                  </select>
+                </td>
+
+                <td><input type="text" class="j3-quality" /></td>
+
+                <td><input type="text" class="j3-range" /></td>
+
+                <td><input type="number" class="j3-no-stones" /></td>
+
+                <td><input type="number" class="j3-wt-stone" /></td>
+
+                <td><input type="number" class="j3-ctwt" /></td>
+
+                <td>
+                  <select class="select_unit j3-unit">
+                    <option value="">Select Unit</option>
+                  </select>
+                </td>
+
+                <td><input type="text" class="j3-cut" /></td>
+
+                <td><input type="text" class="j3-color" /></td>
+
+                <td><input type="text" class="j3-clarity" /></td>
+
+                <td><input type="text" class="j3-supplier" /></td>
+
+                <td><input type="text" class="j3-setter" /></td>
+
+                <td><input type="text" class="j3-price" /></td>
+
+                <td><input type="text" class="j3-cost" /></td>
+
+                <td><input type="checkbox" class="j3-cs" /></td>
+
+                <td><input type="checkbox" class="j3-duty" /></td>
+
+                <td><textarea class="j3-remarks"></textarea></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <button type="button" class="btn-outline" onclick="addJewellery3Row()">
+          + Add Row
+        </button>
+      </div>
+
+      <!-- ========================================= -->
+      <!-- JEWELLERY 4 – LABOUR -->
+      <!-- ========================================= -->
+
+      <div id="Jewellery_4_Labour" class="card metal-subform-card">
+        <div class="card-subtitle">Jewellery 4 – Labour</div>
+
+        <div class="table-scroll">
+          <table class="subform-table">
+            <thead>
+              <tr>
+                <th>Labor #</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Qty</th>
+                <th>Duty</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+
+            <tbody id="jewel4Body">
+              <tr class="jewel4-row">
+                <td><input type="text" class="j4-labor-no" /></td>
+
+                <td><textarea class="j4-description"></textarea></td>
+
+                <td><input type="text" class="j4-price" /></td>
+
+                <td><input type="number" class="j4-qty" /></td>
+
+                <td><input type="checkbox" class="j4-duty" /></td>
+
+                <td><input type="text" class="j4-amount" /></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <button type="button" class="btn-outline" onclick="addJewellery4Row()">
+          + Add Row
+        </button>
+      </div>
+      <div id="Jewellery_Partnership" class="card metal-subform-card">
+        <div class="card-subtitle">Jewellery Partnership</div>
+
+        <div class="table-scroll">
+          <table class="subform-table">
+            <thead>
+              <tr>
+                <th>Partner</th>
+                <th>Shares</th>
+                <th>Partnership %</th>
+                <th>Commission %</th>
+                <th>Commission Itemization</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody id="jewelleryPartnershipBody">
+              <tr class="jewellery-partnership-row">
+                <!-- Partner -->
+                <td>
+                  <select class="jp_partner select_contact">
+                    <option value="">Select Partner</option>
+                  </select>
+                </td>
+
+                <!-- Shares -->
+                <td>
+                  <input type="text" class="jp_shares" />
+                </td>
+
+                <!-- Partnership % -->
+                <td>
+                  <input type="text" class="jp_partnership_percentage" />
+                </td>
+
+                <!-- Commission % -->
+                <td>
+                  <input type="text" class="jp_commission_percentage" />
+                </td>
+
+                <!-- Commission Itemization -->
+                <td class="checkbox-cell">
+                  <input type="checkbox" class="jp_commission_itemization" />
+                </td>
+
+                <!-- Description -->
+                <td>
+                  <textarea class="jp_description"></textarea>
+                </td>
+
+                <!-- Delete Button -->
+                <td>
+                  <button
+                    type="button"
                     class="btn-delete-row"
-                    onclick="removeJewelleryPartnershipRow(this)">
-              Remove
-            </button>
-          </td>
+                    onclick="removeJewelleryPartnershipRow(this)"
+                  >
+                    Remove
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Add Row Button -->
-  <button type="button"
+        <!-- Add Row Button -->
+        <button
+          type="button"
           id="addRowBtn"
           class="btn-outline"
-          onclick="addJewelleryPartnershipRow()">
-    + Add Row
-  </button>
-</div>
+          onclick="addJewelleryPartnershipRow()"
+        >
+          + Add Row
+        </button>
+      </div>
       <!-- ========== SAVE BUTTON ========== -->
       <div class="save-container">
         <button

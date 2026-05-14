@@ -1,16 +1,17 @@
   /* ================= LOOKUP LOADS ================= */
 
-  document.addEventListener("DOMContentLoaded", function () {
-    loadJewelleryTypeLookup();
-    loadOriginCountryDropdown();
-    loadContactLookup();
-    loadMetalTypeLookup();
-    loadColorLookup();
-    loadDiamondLookup();
-    loadUnitLookup();
-    loadBrandLookup();
-    loadPurityLookup();
-  });
+document.addEventListener("DOMContentLoaded", function () {
+  loadJewelleryTypeLookup();
+  loadOriginCountryDropdown();
+  loadContactLookup();
+  loadMetalTypeLookup();
+  loadColorLookup();
+  loadDiamondLookup();
+  loadUnitLookup();
+  loadBrandLookup();
+  loadPurityLookup();
+  loadShapeLookup();
+});
 
   /* ================= LOOKUP LOADS ================= */
 
@@ -2217,31 +2218,31 @@
   function getJewelleryColorStoneRowsData() {
     const jewelColorStoneRows = [];
 
-    document
-      .querySelectorAll("#jewel3Body .jewel3-row")
-      .forEach(function (row) {
-        jewelColorStoneRows.push({
-          Lot: row.querySelector(".j3-lot")?.value || "",
-          Stone_Type: row.querySelector(".j3-stone-type")?.value || "",
-          Shape: row.querySelector(".j3-shape")?.value || "",
-          Quality: row.querySelector(".j3-quality")?.value || "",
-          Range: row.querySelector(".j3-range")?.value || "",
-          No_Stones: row.querySelector(".j3-no-stones")?.value || "",
-          Wt_Per_Stone: row.querySelector(".j3-wt-stone")?.value || "",
-          CT_WT: row.querySelector(".j3-ctwt")?.value || "",
-          Unit: row.querySelector(".j3-unit")?.value || "",
-          Cut: row.querySelector(".j3-cut")?.value || "",
-          Stone_Color: row.querySelector(".j3-color")?.value || "",
-          Stone_Clarity: row.querySelector(".j3-clarity")?.value || "",
-          Supplier: row.querySelector(".j3-supplier")?.value || "",
-          Setter: row.querySelector(".j3-setter")?.value || "",
-          Price: row.querySelector(".j3-price")?.value || "",
-          Stone_Cost: row.querySelector(".j3-cost")?.value || "",
-          C_S: row.querySelector(".j3-cs")?.checked || false,
-          Duty: row.querySelector(".j3-duty")?.checked || false,
-          Remarks: row.querySelector(".j3-remarks")?.value || "",
-        });
+  document
+    .querySelectorAll("#jewel3Body .jewel3-row")
+    .forEach(function (row) {
+      jewelColorStoneRows.push({
+        Lot: row.querySelector(".j3-lot")?.value || "",
+        Stone_Type: row.querySelector(".j3-stone-type")?.value || "",
+        Shape: row.querySelector(".j3-shape")?.value || "",
+        Quality: row.querySelector(".j3-quality")?.value || "",
+        Range: row.querySelector(".j3-range")?.value || "",
+        No_Stones: row.querySelector(".j3-no-stones")?.value || "",
+        Wt_Per_Stone: row.querySelector(".j3-wt-stone")?.value || "",
+        CT_WT: row.querySelector(".j3-ctwt")?.value || "",
+        Unit: row.querySelector(".j3-unit")?.value || "",
+        Cut: row.querySelector(".j3-cut")?.value || "",
+        Stone_Color: row.querySelector(".j3-color")?.value || "",
+        Stone_Clarity: row.querySelector(".j3-clarity")?.value || "",
+        Supplier: row.querySelector(".j3-supplier")?.value || "",
+        Setter: row.querySelector(".j3-setter")?.value || "",
+        Price: row.querySelector(".j3-price")?.value || "",
+        Stone_Cost: row.querySelector(".j3-cost")?.value || "",
+        C_S: row.querySelector(".j3-cs")?.checked || false,
+        Duty: row.querySelector(".j3-duty")?.checked || false,
+        Remarks: row.querySelector(".j3-remarks")?.value || "",
       });
+    });
 
     return jewelColorStoneRows;
   }

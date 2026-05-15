@@ -1483,25 +1483,25 @@ function addJewellery4Row() {
   tbody.appendChild(tr);
 }
 
-function addJewelleryPartnershipRow() {
-  const tbody = document.getElementById("jewelleryPartnershipBody");
-  if (!tbody) return;
+// function addJewelleryPartnershipRow() {
+//   const tbody = document.getElementById("jewelleryPartnershipBody");
+//   if (!tbody) return;
 
-  const tr = document.createElement("tr");
-  tr.classList.add("jewellery-partnership-row");
+//   const tr = document.createElement("tr");
+//   tr.classList.add("jewellery-partnership-row");
 
-  tr.innerHTML = `
-      <td><select class="jp_partner select_contact"><option value="">Select Partner</option></select></td>
-      <td><input type="text" class="jp_shares"></td>
-      <td><input type="text" class="jp_partnership_percentage"></td>
-      <td><input type="text" class="jp_commission_percentage"></td>
-      <td class="checkbox-cell"><input type="checkbox" class="jp_commission_itemization"></td>
-      <td><textarea class="jp_description"></textarea></td>
-      <td><button type="button" class="btn-delete-row" onclick="removeJewelleryPartnershipRow(this)">Remove</button></td>
-    `;
+//   tr.innerHTML = `
+//       <td><select class="jp_partner select_contact"><option value="">Select Partner</option></select></td>
+//       <td><input type="text" class="jp_shares"></td>
+//       <td><input type="text" class="jp_partnership_percentage"></td>
+//       <td><input type="text" class="jp_commission_percentage"></td>
+//       <td class="checkbox-cell"><input type="checkbox" class="jp_commission_itemization"></td>
+//       <td><textarea class="jp_description"></textarea></td>
+//       <td><button type="button" class="btn-delete-row" onclick="removeJewelleryPartnershipRow(this)">Remove</button></td>
+//     `;
 
-  tbody.appendChild(tr);
-}
+//   tbody.appendChild(tr);
+// }
 
 function removeJewelleryPartnershipRow(btn) {
   btn.closest("tr").remove();

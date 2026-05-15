@@ -13,7 +13,7 @@ function loadBrandLookup() {
           const option = document.createElement("option");
           option.value = record.ID;
           option.text = record.Description1;
-          console.log(option);
+          // console.log(option);
           select.appendChild(option.cloneNode(true));
         });
       });

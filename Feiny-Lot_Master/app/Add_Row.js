@@ -136,15 +136,15 @@ function addJewellery4Row() {
 }
 
 // Add Row Function for Jewellery Partnership Details
-function addJewellerypartnershipRow() {
+function addJewelleryPartnershipRow() {
   // console.log("Adding Jewellery 5 row...");
-  const tbody = document.getElementById("subform-body");
+  const tbody = document.getElementById("jewelleryPartnershipBody");
 
   const newRow = document.createElement("tr");
   newRow.className = "partner-row";
   newRow.innerHTML = `
               <td>
-                                        <select id="select_contact">
+                  <select id="select_contact">
                         <option value="">Select Contact</option>
                       </select>
                   </td>

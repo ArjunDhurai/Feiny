@@ -26,7 +26,7 @@ function renderContactOptions(targetElement) {
   const selects = targetElement
     ? [targetElement]
     : document.querySelectorAll(
-        "#select_contact, .select_contact, #selectcontact, .selectcontact, .select_contact_j1_vendor",
+        "#select_contact, .select_contact, #selectcontact, .selectcontact, .select_contact_j1_vendor , .jp_partner_select_contact",
       );
 
   selects.forEach(function (select) {

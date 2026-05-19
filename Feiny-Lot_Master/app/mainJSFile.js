@@ -2853,6 +2853,3 @@ function loadCertificateSubform(recordID) {
       addCertificateRow();
     });
 }
-//
-//
-//

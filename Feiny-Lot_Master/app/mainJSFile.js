@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", function () {
   loadDiamondLookup();
   loadUnitLookup();
   loadBrandLookup();
-  loadCodeLookup();
   loadPurityLookup();
   loadShapeLookup();
 });
@@ -54,13 +53,13 @@ document.addEventListener("DOMContentLoaded", function () {
       certificateuploadsec: document.getElementById("certificateuploadsec"),
       partnershipsec: document.getElementById("partnershipsec"),
       Jewellery_1_Metal_Details: document.getElementById(
-        "Jewellery_1_Metal_Details"
+        "Jewellery_1_Metal_Details",
       ),
       Jewellery_2_Diamond_Details: document.getElementById(
-        "Jewellery_2_Diamond_Details"
+        "Jewellery_2_Diamond_Details",
       ),
       Jewellery_3_Color_Stone: document.getElementById(
-        "Jewellery_3_Color_Stone"
+        "Jewellery_3_Color_Stone",
       ),
       Jewellery_4_Labour: document.getElementById("Jewellery_4_Labour"),
       Jewellery_Cost_Summary: document.getElementById("Jewellery_Cost_Summary"),
@@ -103,6 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
     hide(pricingSection);
     hide(Dimensionssection);
     hide(neededcertificatesec);
+    hide(certificateuploadsec);
     hide(partnershipsec);
     hide(Jewellery_1_Metal_Details);
     hide(Jewellery_2_Diamond_Details);
@@ -135,7 +135,6 @@ document.addEventListener("DOMContentLoaded", function () {
       show(Jewellery_1_Metal_Details);
       show(Jewellery_2_Diamond_Details);
       show(Jewellery_3_Color_Stone);
-      show(certificateuploadsec);
       show(Jewellery_4_Labour);
       show(Jewellery_Cost_Summary);
       show(Jewellery_Partnership);
@@ -185,8 +184,6 @@ document.addEventListener("DOMContentLoaded", function () {
   typeof loadJewellery2ShapeLookup === "function" &&
     loadJewellery2ShapeLookup();
   typeof loadPartnerLookup === "function" && loadPartnerLookup();
-  typeof loadJewelleryPartnerLookup === "function" &&
-    loadJewelleryPartnerLookup();
   typeof loadPartnerdataLookup === "function" && loadPartnerdataLookup();
   typeof initTotalCalculation === "function" && initTotalCalculation();
   typeof initRapportPriceTriggers === "function" && initRapportPriceTriggers();
@@ -259,7 +256,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const diaculetEl = document.getElementById("dia_culet");
   const diafluorescenceEl = document.getElementById("dia_fluorescence");
   const diafluorescencecolorEl = document.getElementById(
-    "dia_colour_fluorescence"
+    "dia_colour_fluorescence",
   );
   const diashortDescEl = document.getElementById("diashort_description");
   const dialongDescEl = document.getElementById("dialong_description");
@@ -479,13 +476,13 @@ function populateRowSelects(row) {
     fillSelect(
       labDescSelect,
       certificateLookupCache.descriptors,
-      "Lab_Descriptor"
+      "Lab_Descriptor",
     );
   if (labSupSelect && labSupSelect.options.length <= 1)
     fillSelect(
       labSupSelect,
       certificateLookupCache.supplements,
-      "Laboratory_Supplement"
+      "Laboratory_Supplement",
     );
 }
 
@@ -867,105 +864,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
-/* ================= JEWELLERY PARTNER LOOKUP ================= */
-
-let jewelPartnerList = [];
-
-function loadJewelleryPartnerLookup() {
-  ZOHO.CREATOR.DATA.getRecords({
-    app_name: "feiny-app",
-    report_name: "All_Customers1",
-  })
-    .then(function (response) {
-      if (!response.data || response.data.length === 0) {
-        console.warn("No Jewellery Partner records found");
-        return;
-      }
-      jewelPartnerList = response.data;
-      populateJewelleryPartnerDropdowns();
-    })
-    .catch(function (error) {
-      console.error("Jewellery Partner lookup error:", error);
-      alert("Unable to load Jewellery Partner lookup");
-    });
-}
-
-function populateJewelleryPartnerDropdowns() {
-  document.querySelectorAll(".jp_partner").forEach(function (dropdown) {
-    const selectedValue = dropdown.value;
-    dropdown.innerHTML = '<option value="">Select Partner</option>';
-
-    jewelPartnerList.forEach(function (record) {
-      const option = document.createElement("option");
-      option.value = record.ID;
-      option.text =
-        record.LegalName ||
-        record.Legal_Name ||
-        record.zc_display_value ||
-        "No Name";
-
-      if (selectedValue == record.ID) {
-        option.selected = true;
-      }
-
-      dropdown.appendChild(option);
-    });
-  });
-}
-
-function addJewelleryPartnershipRow() {
-  const tbody = document.getElementById("jewelleryPartnershipBody");
-
-  if (!tbody) {
-    console.log("jewelleryPartnershipBody not found");
-    return;
-  }
-
-  const newRow = document.createElement("tr");
-  newRow.className = "jewellery-partnership-row";
-
-  newRow.innerHTML = `
-      <td>
-          <select class="jp_partner">
-              <option value="">Select Partner</option>
-          </select>
-      </td>
-      <td>
-          <input type="text" class="jp_shares">
-      </td>
-      <td>
-          <input type="text" class="jp_partnership_percentage">
-      </td>
-      <td>
-          <input type="text" class="jp_commission_percentage">
-      </td>
-      <td style="text-align:center">
-          <input type="checkbox" class="jp_commission_itemization">
-      </td>
-      <td>
-          <textarea class="jp_description"></textarea>
-      </td>
-      <td>
-          <button type="button" class="btn-delete-row" onclick="removeJewelleryPartnershipRow(this)">Remove</button>
-      </td>
-  `;
-
-  tbody.appendChild(newRow);
-
-  if (typeof populateJewelleryPartnerDropdowns === "function") {
-    populateJewelleryPartnerDropdowns();
-  }
-}
-
-// Button Click for Jewellery Partnership
-document.addEventListener("DOMContentLoaded", function () {
-  const addJewPartnerBtn = document.getElementById("addJewelleryPartnerBtn");
-
-  if (addJewPartnerBtn) {
-    addJewPartnerBtn.addEventListener("click", addJewelleryPartnershipRow);
-  }
-});
-
 /* ================= UNIT LOOKUP ================= */
 function loadUnitLookup() {
   ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Unit" })
@@ -1212,10 +1110,7 @@ function loadDiaPolishLookup() {
 
 /* ================= DIAMOND SYMMETRY LOOKUP ================= */
 function loadDiaSymmetryLookup() {
-  ZOHO.CREATOR.DATA.getRecords({
-    app_name: "feiny-app",
-    report_name: "Symmetry",
-  })
+  ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Polish" })
     .then(function (response) {
       const select = document.getElementById("dia_symmetry");
       if (!select) return;
@@ -1235,10 +1130,7 @@ function loadDiaSymmetryLookup() {
 
 /* ================= DIAMOND CULET LOOKUP ================= */
 function loadDiaCuletLookup() {
-  ZOHO.CREATOR.DATA.getRecords({
-    app_name: "feiny-app",
-    report_name: "Cutlet",
-  })
+  ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Cutlet" })
     .then(function (response) {
       const select = document.getElementById("dia_culet");
       if (!select) return;
@@ -1357,52 +1249,6 @@ function setupSpeciesAutoFill() {
   });
 }
 
-/* ================= BRAND LOOKUP ================= */
-function loadBrandLookup() {
-  ZOHO.CREATOR.DATA.getRecords({
-    app_name: "feiny-app",
-    report_name: "Brand",
-  })
-    .then(function (response) {
-      const brandSelect = document.getElementById("brand");
-      if (!brandSelect) return;
-      brandSelect.innerHTML = `<option value="">Select Brand</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Description1;
-        brandSelect.appendChild(option);
-      });
-    })
-    .catch(function (error) {
-      console.error("Brand lookup error:", error);
-    });
-}
-
-/* ================= CODE LOOKUP ================= */
-function loadCodeLookup() {
-  ZOHO.CREATOR.DATA.getRecords({
-    app_name: "feiny-app",
-    report_name: "Code",
-  })
-    .then(function (response) {
-      const codeSelect = document.getElementById("code_field");
-      if (!codeSelect) return;
-      codeSelect.innerHTML = `<option value="">Select Code</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Description1 || record.Code;
-        codeSelect.appendChild(option);
-      });
-    })
-    .catch(function (error) {
-      console.error("Code lookup error:", error);
-    });
-}
-
 /* ================= RAPPORT PRICE ================= */
 function fetchRapportPrice() {
   const shapeId = document.getElementById("dia_shape")?.value;
@@ -1442,7 +1288,7 @@ function fetchRapportPrice() {
         response.data.length === 0
       ) {
         console.warn(
-          "No Rapaport records returned — check IDs match Rapaport Master lookup IDs"
+          "No Rapaport records returned — check IDs match Rapaport Master lookup IDs",
         );
         if (priceEl) priceEl.value = "";
         return;
@@ -1465,7 +1311,7 @@ function fetchRapportPrice() {
 
       const sorted = [...filtered].sort(
         (a, b) =>
-          parseFloat(a.Weight_high_size1) - parseFloat(b.Weight_high_size1)
+          parseFloat(a.Weight_high_size1) - parseFloat(b.Weight_high_size1),
       );
 
       const price = sorted[0].Rapaport_Price || "";
@@ -1554,7 +1400,6 @@ function addJewellery1Row() {
       <td><input type="text" class="j1-price"></td>
       <td><input type="text" class="j1-gold-cost"></td>
       <td><textarea class="j1-remarks"></textarea></td>
-      <td><button type="button" onclick="removeRow(this)">❌</button></td>
     `;
 
   tbody.appendChild(tr);
@@ -1580,7 +1425,6 @@ function addJewellery2Row() {
       <td><input type="text" class="j2-price"></td>
       <td><input type="text" class="j2-cost"></td>
       <td><textarea class="j2-remarks"></textarea></td>
-      <td><button type="button" onclick="removeRow(this)">❌</button></td>
     `;
 
   tbody.appendChild(tr);
@@ -1615,7 +1459,6 @@ function addJewellery3Row() {
       <td><input type="checkbox" class="j3-cs"></td>
       <td><input type="checkbox" class="j3-duty"></td>
       <td><textarea class="j3-remarks"></textarea></td>
-      <td><button type="button" onclick="removeRow(this)">❌</button></td>
     `;
 
   tbody.appendChild(tr);
@@ -1635,11 +1478,30 @@ function addJewellery4Row() {
       <td><input type="number" class="j4-qty"></td>
       <td><input type="checkbox" class="j4-duty"></td>
       <td><input type="text" class="j4-amount"></td>
-      <td><button type="button" onclick="removeRow(this)">❌</button></td>
     `;
 
   tbody.appendChild(tr);
 }
+
+// function addJewelleryPartnershipRow() {
+//   const tbody = document.getElementById("jewelleryPartnershipBody");
+//   if (!tbody) return;
+
+//   const tr = document.createElement("tr");
+//   tr.classList.add("jewellery-partnership-row");
+
+//   tr.innerHTML = `
+//       <td><select class="jp_partner select_contact"><option value="">Select Partner</option></select></td>
+//       <td><input type="text" class="jp_shares"></td>
+//       <td><input type="text" class="jp_partnership_percentage"></td>
+//       <td><input type="text" class="jp_commission_percentage"></td>
+//       <td class="checkbox-cell"><input type="checkbox" class="jp_commission_itemization"></td>
+//       <td><textarea class="jp_description"></textarea></td>
+//       <td><button type="button" class="btn-delete-row" onclick="removeJewelleryPartnershipRow(this)">Remove</button></td>
+//     `;
+
+//   tbody.appendChild(tr);
+// }
 
 function removeJewelleryPartnershipRow(btn) {
   btn.closest("tr").remove();
@@ -1699,6 +1561,7 @@ function saveRecord() {
     Minimum_Price: getNumber("MinimumPrice"),
     Unit: document.getElementById("unit_lookup")?.value || "",
     Partnership_Details: getPartnerRowsData(),
+    Partnership_Details: getJewelleryPartnershipRowsData(),
     Diamond_Details: getDiamondRowsData(),
     Color_Stone1: getColorStoneRowsData(),
     Shape3: document.getElementById("dia_shape")?.value || "",
@@ -1721,8 +1584,10 @@ function saveRecord() {
     Total_Price: getNumber("total_price"),
     Rapport_Price1: getNumber("rapport_price"),
     Quantity: getNumber("quantity"),
-    Short_Description1:document.getElementById("diashort_description")?.value || "",
-    Long_Description2:document.getElementById("dialong_description")?.value || "",
+    Short_Description1:
+      document.getElementById("diashort_description")?.value || "",
+    Long_Description2:
+      document.getElementById("dialong_description")?.value || "",
     Style: document.getElementById("style")?.value || "",
     Jewellery_Type: document.getElementById("jewellery_type")?.value || "",
     Platinum: document.getElementById("platinum")?.value || "",
@@ -1731,7 +1596,8 @@ function saveRecord() {
     Gold: document.getElementById("gold")?.value || "",
     Production: document.getElementById("production")?.value || "",
     Instructions: document.getElementById("instruction")?.value || "",
-    Country_Of_Origin1:document.getElementById("countries_origin")?.value || "",
+    Country_Of_Origin1:
+      document.getElementById("countries_origin")?.value || "",
     Size: document.getElementById("size")?.value || "",
     Weight_grams: getNumber("weight_grams"),
     Circa: document.getElementById("circa")?.value || "",
@@ -1746,13 +1612,15 @@ function saveRecord() {
     Amount: getNumber("duty_amount"),
     Final_Cost: getNumber("final_cost"),
     Selling_price_per_piece: getNumber("selling_price_piece"),
-    Jewel_Short_Description:document.getElementById("description")?.value || "",
-    Jewel_Long_Description:document.getElementById("instruction")?.value || "",
+    Jewel_Short_Description:
+      document.getElementById("description")?.value || "",
+    Jewel_Long_Description: document.getElementById("instruction")?.value || "",
     Metal_Details: getMetalDetailsRowsData(),
     Jewellery_Diamond_Details: getJewelleryDiamondRowsData(),
     Jewellery_Color_Stone: getJewelleryColorStoneRowsData(),
-    Labour_Details: getLabourDetailsRowsData(),
-    Jewellery_Partnership_Details: getJewelleryPartnershipRowsData(),
+    // IMPORTANT: Replace field names with your actual Zoho Creator form field names
+    Labour_Details: getLabourDetailsRowsData(), // UPDATE THIS FIELD NAME
+    // Partnership_Details: getJewelleryPartnershipRowsData(),  // UPDATE THIS FIELD NAME
   };
 
   console.log("Saving config:", recordData);
@@ -1791,7 +1659,7 @@ function saveRecord() {
 
           if (!recordId)
             throw new Error(
-              "Record created but ID not found: " + JSON.stringify(response)
+              "Record created but ID not found: " + JSON.stringify(response),
             );
 
           let uploadPromises = [];
@@ -1807,7 +1675,7 @@ function saveRecord() {
         } else {
           throw new Error(
             "Failed to create record: " +
-              (response.message || JSON.stringify(response))
+              (response.message || JSON.stringify(response)),
           );
         }
       })
@@ -1871,7 +1739,7 @@ function saveRecord() {
           return Promise.all(uploadPromises);
         } else {
           throw new Error(
-            "Failed to update record: " + (res.message || JSON.stringify(res))
+            "Failed to update record: " + (res.message || JSON.stringify(res)),
           );
         }
       })
@@ -2013,7 +1881,7 @@ function uploadCertificateFile(recordId, file) {
             .catch((e) => console.error("Cert custom API ERROR:", e));
         } else {
           reject(
-            new Error(response.message || "Certificate file upload failed")
+            new Error(response.message || "Certificate file upload failed"),
           );
         }
       })
@@ -2042,7 +1910,7 @@ function createCertificateRecords(skuValue, lotRecordID) {
     const labSupSelect = row.querySelector(".cert-lab-sup");
     const rowUniqueID = row.querySelector(".cert-rowUnique-id");
     console.log(
-      "rowUniqueID -- " + rowUniqueID + " --- labDescSelect" + labDescSelect
+      "rowUniqueID -- " + rowUniqueID + " --- labDescSelect" + labDescSelect,
     );
     const idValue = idInput?.value || "";
     const fileExists = fileInput?.files && fileInput.files.length > 0;
@@ -2156,7 +2024,7 @@ function createCertificateRecords(skuValue, lotRecordID) {
                     index,
                     sku: skuValue,
                     recordId: certRecordId,
-                  })
+                  }),
                 )
                 .catch((err) =>
                   resolve({
@@ -2165,7 +2033,7 @@ function createCertificateRecords(skuValue, lotRecordID) {
                     fileUploadFailed: true,
                     index,
                     error: err.message,
-                  })
+                  }),
                 );
             } else {
               resolve({
@@ -2201,25 +2069,27 @@ function createCertificateRecords(skuValue, lotRecordID) {
 function getPartnerRowsData() {
   const partnerRows = [];
 
-  document.querySelectorAll("#partnerBody .partner-row").forEach(function (row) {
-    partnerRows.push({
-      Partner_Name:
-        row.querySelector(".partnerdatalookup")?.ID ||
-        row.querySelector(".partnerdatalookup")?.value ||
-        "",
+  document
+    .querySelectorAll("#partnerBody .partner-row")
+    .forEach(function (row) {
+      partnerRows.push({
+        Partner_Name:
+          row.querySelector(".partnerdatalookup")?.ID ||
+          row.querySelector(".partnerdatalookup")?.value ||
+          "",
 
-      Partnership_shares: row.querySelector(".partner-share")?.value || "",
+        Partnership_shares: row.querySelector(".partner-share")?.value || "",
 
-      Partnership: row.querySelector(".partner-percent")?.value || "",
+        Partnership: row.querySelector(".partner-percent")?.value || "",
 
-      Commission: row.querySelector(".commission-percent")?.value || "",
+        Commission: row.querySelector(".commission-percent")?.value || "",
 
-      Description: row.querySelector(".partner-desc")?.value || "",
+        Description: row.querySelector(".partner-desc")?.value || "",
 
-      Commission_Itemized_on_Invoice:
-        row.querySelector(".commission-itemized")?.checked || false,
+        Commission_Itemized_on_Invoice:
+          row.querySelector(".commission-itemized")?.checked || false,
+      });
     });
-  });
 
   return partnerRows;
 }
@@ -2382,36 +2252,28 @@ function getLabourDetailsRowsData() {
 
 /* ================= GET JEWELLERY PARTNERSHIP SUBFORM DATA ================= */
 
-function getJewelleryPartnershipRowsData() {
-  const jewelPartnerRows = [];
+// function getJewelleryPartnershipRowsData() {
+//   const jewelPartnerRows = [];
 
-  document
-    .querySelectorAll(
-      "#jewelleryPartnershipBody .jewellery-partnership-row"
-    )
-    .forEach(function (row) {
-      jewelPartnerRows.push({
-        Partner_Name:
-          row.querySelector(".jp_partner")?.value ||
-          row.querySelector(".jp_partner")?.ID ||
-          "",
-        Partnership_shares: row.querySelector(".jp_shares")?.value || "",
+//   document
+//     .querySelectorAll("#jewelleryPartnershipBody .jewellery-partnership-row")
+//     .forEach(function (row) {
+//       jewelPartnerRows.push({
+//         Partner_Name:row.querySelector(".jp_partner select_contact")?.value ||row.querySelector(".jp_partner select_contact")?.ID ||"",
+//         Partnership_shares: row.querySelector(".jp_shares")?.value || "",
 
-        Partnership:
-          row.querySelector(".jp_partnership_percentage")?.value || "",
+//         Partnership: row.querySelector(".jp_partnership_percentage")?.value || "",
 
-        Commission:
-          row.querySelector(".jp_commission_percentage")?.value || "",
+//         Commission:row.querySelector(".jp_commission_percentage")?.value || "",
 
-        Description: row.querySelector(".jp_description")?.value || "",
+//         Description: row.querySelector(".jp_description")?.value || "",
 
-        Commission_Itemized_on_Invoice:
-          row.querySelector(".jp_commission_itemization")?.checked || false,
-      });
-    });
+//         Commission_Itemized_on_Invoice:row.querySelector(".jp_commission_itemization")?.checked || false,
+//       });
+//     });
 
-  return jewelPartnerRows;
-}
+//   return jewelPartnerRows;
+// }
 
 /* ================= CLEAR FULL PAGE AFTER SAVE ================= */
 
@@ -2482,14 +2344,6 @@ function clearPageAfterSave() {
   if (partnerBody) {
     partnerBody.innerHTML = "";
     addPartnerRow();
-  }
-
-  let jewelleryPartnerBody = document.getElementById(
-    "jewelleryPartnershipBody"
-  );
-  if (jewelleryPartnerBody) {
-    jewelleryPartnerBody.innerHTML = "";
-    addJewelleryPartnershipRow();
   }
 
   [
@@ -2567,14 +2421,16 @@ function loadExistingRecord(recordID) {
       document.getElementById("itemType").value = data.Select || "";
       document.getElementById("surface_lookup").value = data.Surface?.ID || "";
       document.getElementById("species_lookup").value = data.Species?.ID || "";
-      document.getElementById("treatment_lookup").value = data.Treatment?.ID || "";
+      document.getElementById("treatment_lookup").value =
+        data.Treatment?.ID || "";
       document.getElementById("shape_lookup").value = data.Shape?.ID || "";
       document.getElementById("origin_country").value = data.Origin || "";
       document.getElementById("country_cut").value = data.Country_of_Cut || "";
       document.getElementById("hts_field").value = data.HTS || "";
       document.getElementById("code_field").value = data.Code || "";
       document.getElementById("cs_short_description").value = data.Name1 || "";
-      document.getElementById("cs_long_description").value = data.Long_Description || "";
+      document.getElementById("cs_long_description").value =
+        data.Long_Description || "";
       document.getElementById("min_length").value = data.length_field || "";
       document.getElementById("min_width").value = data.Width || "";
       document.getElementById("min_height").value = data.Height || "";
@@ -2592,7 +2448,6 @@ function loadExistingRecord(recordID) {
       document.getElementById("Price4").value = data.Price4 || "";
       document.getElementById("MinimumPrice").value = data.Minimum_Price || "";
       document.getElementById("unit_lookup").value = data.Unit?.ID || "";
-      document.getElementById("brand").value = data.Brand?.ID || "";
 
       document.getElementById("dia_shape").value = data.Shape3?.ID || "";
       document.getElementById("dia_color").value = data.Color?.ID || "";
@@ -2635,7 +2490,7 @@ function loadExistingRecord(recordID) {
       document.getElementById("size").value = data.Size || "";
       document.getElementById("weight_grams").value = data.Weight_grams || "";
       document.getElementById("circa").value = data.Circa || "";
-      document.getElementById("brand").value = data.Brand?.ID || "";
+      document.getElementById("brand").value = data.Brand || "";
       document.getElementById("hts").value = data.HTS1 || "";
       document.getElementById("note").value = data.Notes || "";
 
@@ -2721,7 +2576,6 @@ function loadExistingRecord(recordID) {
               <td><textarea class="j2-remarks">${
                 item.Remarks || ""
               }</textarea></td>
-              <td><button type="button" onclick="removeRow(this)">❌</button></td>
             `;
 
           diamondTbody.appendChild(tr);
@@ -2799,7 +2653,6 @@ function loadExistingRecord(recordID) {
               <td><textarea class="j3-remarks">${
                 item.Remarks || ""
               }</textarea></td>
-              <td><button type="button" onclick="removeRow(this)">❌</button></td>
             `;
 
           colorsTbody.appendChild(tr);
@@ -2809,187 +2662,11 @@ function loadExistingRecord(recordID) {
         addJewellery3Row();
       }
 
-      //-----------METAL DETAILS SUBFORM (JEWELLERY 1)-----------//
-      var metalData = data.Metal_Details;
-      var metalTbody = document.getElementById("jewel1Body");
-
-      metalTbody.innerHTML = "";
-
-      if (metalData && metalData.length > 0) {
-        metalData.forEach(function (item) {
-          var tr = document.createElement("tr");
-          tr.classList.add("jewel1-row");
-
-          tr.innerHTML = `
-              <td><input type="text" class="j1-cast-no" value="${
-                item.Cast_No || ""
-              }"></td>
-              <td><select class="select_contact j1-vendor"><option value="">Select Contact</option></select></td>
-              <td><select class="select_metal_type j1-metal-type"><option value="">Select Metal Type</option></select></td>
-              <td><select class="select_color j1-metal-color"><option value="">Select Color</option></select></td>
-              <td><select class="select_purity j1-metal-purity"><option value="">Select Purity</option></select></td>
-              <td><select class="select_unit j1-unit"><option value="">Select Unit</option></select></td>
-              <td><input type="number" class="j1-weight" value="${
-                item.Weight || ""
-              }"></td>
-              <td><input type="number" class="j1-qty" value="${
-                item.Quantity || ""
-              }"></td>
-              <td><input type="number" class="j1-market" value="${
-                item.Metal_Market || ""
-              }"></td>
-              <td><input type="text" class="j1-price" value="${
-                item.Price || ""
-              }"></td>
-              <td><input type="text" class="j1-gold-cost" value="${
-                item.Gold_Cost || ""
-              }"></td>
-              <td><textarea class="j1-remarks">${
-                item.Remarks || ""
-              }</textarea></td>
-              <td><button type="button" onclick="removeRow(this)">❌</button></td>
-            `;
-
-          metalTbody.appendChild(tr);
-        });
-      } else {
-        console.log("⚠️ No metal data found");
-        addJewellery1Row();
-      }
-
-      //-----------LABOUR DETAILS SUBFORM (JEWELLERY 4)-----------//
-      var labourData = data.Labour_Details;
-      var labourTbody = document.getElementById("jewel4Body");
-
-      labourTbody.innerHTML = "";
-
-      if (labourData && labourData.length > 0) {
-        labourData.forEach(function (item) {
-          var tr = document.createElement("tr");
-          tr.classList.add("jewel4-row");
-
-          tr.innerHTML = `
-              <td><input type="text" class="j4-labor-no" value="${
-                item.Labor || ""
-              }"></td>
-              <td><textarea class="j4-description">${
-                item.Description || ""
-              }</textarea></td>
-              <td><input type="text" class="j4-price" value="${
-                item.Price || ""
-              }"></td>
-              <td><input type="number" class="j4-qty" value="${
-                item.Qty || ""
-              }"></td>
-              <td><input type="checkbox" class="j4-duty" ${
-                item.Duty ? "checked" : ""
-              }></td>
-              <td><input type="text" class="j4-amount" value="${
-                item.Amount || ""
-              }"></td>
-              <td><button type="button" onclick="removeRow(this)">❌</button></td>
-            `;
-
-          labourTbody.appendChild(tr);
-        });
-      } else {
-        console.log("⚠️ No labour data found");
-        addJewellery4Row();
-      }
-
-      //-----------METAL DETAILS SUBFORM (JEWELLERY 1)-----------//
-      var metalData = data.Metal_Details;
-      var metalTbody = document.getElementById("jewel1Body");
-
-      metalTbody.innerHTML = "";
-
-      if (metalData && metalData.length > 0) {
-        metalData.forEach(function (item) {
-          var tr = document.createElement("tr");
-          tr.classList.add("jewel1-row");
-
-          tr.innerHTML = `
-              <td><input type="text" class="j1-cast-no" value="${
-                item.Cast_No || ""
-              }"></td>
-              <td><select class="select_contact j1-vendor"><option value="">Select Contact</option></select></td>
-              <td><select class="select_metal_type j1-metal-type"><option value="">Select Metal Type</option></select></td>
-              <td><select class="select_color j1-metal-color"><option value="">Select Color</option></select></td>
-              <td><select class="select_purity j1-metal-purity"><option value="">Select Purity</option></select></td>
-              <td><select class="select_unit j1-unit"><option value="">Select Unit</option></select></td>
-              <td><input type="number" class="j1-weight" value="${
-                item.Weight || ""
-              }"></td>
-              <td><input type="number" class="j1-qty" value="${
-                item.Quantity || ""
-              }"></td>
-              <td><input type="number" class="j1-market" value="${
-                item.Metal_Market || ""
-              }"></td>
-              <td><input type="text" class="j1-price" value="${
-                item.Price || ""
-              }"></td>
-              <td><input type="text" class="j1-gold-cost" value="${
-                item.Gold_Cost || ""
-              }"></td>
-              <td><textarea class="j1-remarks">${
-                item.Remarks || ""
-              }</textarea></td>
-              <td><button type="button" onclick="removeRow(this)">❌</button></td>
-            `;
-
-          metalTbody.appendChild(tr);
-        });
-      } else {
-        console.log("⚠️ No metal data found");
-        addJewellery1Row();
-      }
-
-      //-----------LABOUR DETAILS SUBFORM (JEWELLERY 4)-----------//
-      var labourData = data.Labour_Details;
-      var labourTbody = document.getElementById("jewel4Body");
-
-      labourTbody.innerHTML = "";
-
-      if (labourData && labourData.length > 0) {
-        labourData.forEach(function (item) {
-          var tr = document.createElement("tr");
-          tr.classList.add("jewel4-row");
-
-          tr.innerHTML = `
-              <td><input type="text" class="j4-labor-no" value="${
-                item.Labor || ""
-              }"></td>
-              <td><textarea class="j4-description">${
-                item.Description || ""
-              }</textarea></td>
-              <td><input type="text" class="j4-price" value="${
-                item.Price || ""
-              }"></td>
-              <td><input type="number" class="j4-qty" value="${
-                item.Qty || ""
-              }"></td>
-              <td><input type="checkbox" class="j4-duty" ${
-                item.Duty ? "checked" : ""
-              }></td>
-              <td><input type="text" class="j4-amount" value="${
-                item.Amount || ""
-              }"></td>
-              <td><button type="button" onclick="removeRow(this)">❌</button></td>
-            `;
-
-          labourTbody.appendChild(tr);
-        });
-      } else {
-        console.log("⚠️ No labour data found");
-        addJewellery4Row();
-      }
-
       //-----------JEWELLERY PARTNERSHIP SUBFORM-----------//
 
       var JewelleryPartnerData = data.Jewellery_Partnership_Details;
       var JewelleryPartnerbody = document.getElementById(
-        "jewelleryPartnershipBody"
+        "jewelleryPartnershipBody",
       );
 
       JewelleryPartnerbody.innerHTML = "";
@@ -3001,8 +2678,8 @@ function loadExistingRecord(recordID) {
 
           tr.innerHTML = `
               <td>
-                <select class="jp_partner">
-                  <option value="">Select Partner</option>
+                <select class="jp_partner select_contact">
+                  <option value="">Select Contact</option>
                 </select>
               </td>
               <td><input type="text" class="jp_shares" value="${
@@ -3176,4 +2853,3 @@ function loadCertificateSubform(recordID) {
       addCertificateRow();
     });
 }
-// 

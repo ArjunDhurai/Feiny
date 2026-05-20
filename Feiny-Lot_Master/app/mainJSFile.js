@@ -1,5 +1,3 @@
-const e = require("express");
-
 // Date: 2024-06-20 time: 12:00 PM  ddddyy
 let certificateLookupCache = {
   labs: [],
@@ -33,18 +31,23 @@ document.addEventListener("DOMContentLoaded", function () {
       itemTypeEl: document.getElementById("itemType"),
       colorStoneSection: document.getElementById("colorStoneSection"),
       diamondSection: document.getElementById("diamondSection"),
+      jewelleryWrapper: document.getElementById("jewelleryWrapper"),
       pricingSection: document.getElementById("pricingSection"),
       Dimensionssection: document.getElementById("Dimensionssection"),
       neededcertificatesec: document.getElementById("neededcertificatesec"),
       certificateuploadsec: document.getElementById("certificateuploadsec"),
       partnershipsec: document.getElementById("partnershipsec"),
-      jewelleryWrapper: document.getElementById("jewelleryWrapper"),
-      Jewellery_1_Metal_Details: document.getElementById("Jewellery_1_Metal_Details"),
-      jewel1Body: document.getElementById("jewel1Body"),
-      Jewellery_2_Diamond_Details: document.getElementById("Jewellery_2_Diamond_Details"),
-      Jewellery_3_Color_Stone: document.getElementById("Jewellery_3_Color_Stone"),
-      Jewellery_Cost_Summary: document.getElementById("Jewellery_Cost_Summary"),
+      Jewellery_1_Metal_Details: document.getElementById(
+        "Jewellery_1_Metal_Details",
+      ),
+      Jewellery_2_Diamond_Details: document.getElementById(
+        "Jewellery_2_Diamond_Details",
+      ),
+      Jewellery_3_Color_Stone: document.getElementById(
+        "Jewellery_3_Color_Stone",
+      ),
       Jewellery_4_Labour: document.getElementById("Jewellery_4_Labour"),
+      Jewellery_Cost_Summary: document.getElementById("Jewellery_Cost_Summary"),
       Jewellery_Partnership: document.getElementById("Jewellery_Partnership"),
     };
   }
@@ -64,36 +67,33 @@ document.addEventListener("DOMContentLoaded", function () {
       itemTypeEl,
       colorStoneSection,
       diamondSection,
+      jewelleryWrapper,
       pricingSection,
       Dimensionssection,
       neededcertificatesec,
       certificateuploadsec,
       partnershipsec,
-      jewelleryWrapper,
       Jewellery_1_Metal_Details,
-      jewel1Body,
       Jewellery_2_Diamond_Details,
       Jewellery_3_Color_Stone,
-      Jewellery_Cost_Summary,
       Jewellery_4_Labour,
+      Jewellery_Cost_Summary,
       Jewellery_Partnership,
     } = getElements();
 
-    // HIDE ALL SECTIONS FIRST
     hide(colorStoneSection);
     hide(diamondSection);
+    hide(jewelleryWrapper);
     hide(pricingSection);
     hide(Dimensionssection);
     hide(neededcertificatesec);
     hide(certificateuploadsec);
     hide(partnershipsec);
-    hide(jewelleryWrapper);
     hide(Jewellery_1_Metal_Details);
-    hide(jewel1Body);
     hide(Jewellery_2_Diamond_Details);
     hide(Jewellery_3_Color_Stone);
-    hide(Jewellery_Cost_Summary);
     hide(Jewellery_4_Labour);
+    hide(Jewellery_Cost_Summary);
     hide(Jewellery_Partnership);
 
     if (!itemTypeEl) {
@@ -115,7 +115,16 @@ document.addEventListener("DOMContentLoaded", function () {
       show(certificateuploadsec);
       show(neededcertificatesec);
       show(partnershipsec);
+    } else if (selectedValue === "Jewellery") {
+      show(jewelleryWrapper);
+      show(Jewellery_1_Metal_Details);
+      show(Jewellery_2_Diamond_Details);
+      show(Jewellery_3_Color_Stone);
+      show(Jewellery_4_Labour);
+      show(Jewellery_Cost_Summary);
+      show(Jewellery_Partnership);
     }
+
     setTimeout(() => {
       isApplying = false;
     }, 50);
@@ -158,7 +167,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadDiaFluorescenceColorLookup();
   typeof loaddiaShapeLookup === "function" && loaddiaShapeLookup();
   typeof loadPartnerLookup === "function" && loadPartnerLookup();
-  typeof loadPartnerdataLookup === "function" && loadPartnerdataLookup();
+  // typeof loadPartnerdataLookup === "function" && loadPartnerdataLookup();
   typeof initTotalCalculation === "function" && initTotalCalculation();
   typeof initRapportPriceTriggers === "function" && initRapportPriceTriggers();
   typeof loadCertificateSubformLookups === "function" &&
@@ -577,13 +586,19 @@ function loadPartnerLookup() {
   ZOHO.CREATOR.DATA.getRecords({
     app_name: "feiny-app",
     report_name: "All_Customers1",
+    max_records: 200
   })
     .then(function (response) {
+
+      console.log("Partner Response:", response);
+
       if (!response.data || response.data.length === 0) {
         console.warn("No Partner records found");
         return;
       }
+
       partnerList = response.data;
+
       populatePartnerDropdowns();
     })
     .catch(function (error) {
@@ -593,19 +608,30 @@ function loadPartnerLookup() {
 }
 
 function populatePartnerDropdowns() {
+
   document
     .querySelectorAll(".partnerlookup, .partnerdatalookup")
     .forEach(function (dropdown) {
+
       const selectedValue = dropdown.value;
-      dropdown.innerHTML = '<option value="">Select Partner</option>';
+
+      dropdown.innerHTML =
+        `<option value="">Select Contact</option>`;
 
       partnerList.forEach(function (record) {
+
         const option = document.createElement("option");
+
         option.value = record.ID;
+
+        // AUTO FIND DISPLAY VALUE
         option.text =
-          record.LegalName ||
-          record.Legal_Name ||
           record.zc_display_value ||
+          record.Name ||
+          record.Customer_Name ||
+          record.Legal_Name ||
+          record.Full_Name ||
+          record.Display_Name ||
           "No Name";
 
         if (selectedValue == record.ID) {
@@ -616,57 +642,6 @@ function populatePartnerDropdowns() {
       });
     });
 }
-
-function addPartnerRow() {
-  const tbody = document.getElementById("partnerBody");
-
-  if (!tbody) {
-    console.log("partnerBody not found");
-    return;
-  }
-
-  const newRow = document.createElement("tr");
-  newRow.className = "partner-row";
-
-  newRow.innerHTML = `
-        <td>
-            <select class="partnerdatalookup">
-                <option value="">Select Partner</option>
-            </select>
-        </td>
-        <td>
-            <input type="text" class="partner-share">
-        </td>
-        <td>
-            <input type="text" class="partner-percent">
-        </td>
-        <td>
-            <input type="text" class="commission-percent">
-        </td>
-        <td style="text-align:center">
-            <input type="checkbox" class="commission-itemized">
-        </td>
-        <td>
-            <textarea class="partner-desc"></textarea>
-        </td>
-    `;
-
-  tbody.appendChild(newRow);
-
-  // Refill partner lookup for new row if function exists
-  if (typeof populatePartnerDropdowns === "function") {
-    populatePartnerDropdowns();
-  }
-}
-
-// Button Click
-document.addEventListener("DOMContentLoaded", function () {
-  const addBtn = document.getElementById("addRowBtn");
-  if (addBtn) {
-    addBtn.addEventListener("click", addPartnerRow);
-  }
-});
-
 /* ================= UNIT LOOKUP ================= */
 function loadUnitLookup() {
   ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Unit" })

@@ -508,31 +508,27 @@
           <div class="table-scroll">
             <table class="subform-table">
               <thead>
-                <tr>
-                  <th>Partner</th>
-                  <th>Share</th>
-                  <th>Partnership %</th>
-                  <th>Commission %</th>
-                  <th>Commission Itemization</th>
-                  <th>Description</th>
-                </tr>
-              </thead>
-              <tbody id="partnerBody">
-                <tr class="partner-row">
-                  <td>
-                    <select class="partnerdatalookup">
-                      <option value="">Select Contact</option>
-                    </select>
-                  </td>
-                  <td><input type="text" class="partner-share" /></td>
-                  <td><input type="text" class="partner-percent" /></td>
-                  <td><input type="text" class="commission-percent" /></td>
-                  <td style="text-align: center">
-                    <input type="checkbox" class="commission-itemized" />
-                  </td>
-                  <td><textarea class="partner-desc"></textarea></td>
-                </tr>
-              </tbody>
+  <tr>
+    <th>Partner</th>
+    <th>Share</th>
+    <th>Partnership %</th>
+    <th>Commission %</th>
+    <th>Commission Itemization</th>
+    <th>Description</th>
+    <th>Action</th>  <!-- ADD THIS -->
+  </tr>
+</thead>
+<tbody id="partnerBody">
+  <tr class="partner-row">
+    <td><select class="partnerdatalookup"><option value="">Select Contact</option></select></td>
+    <td><input type="text" class="partner-share" /></td>
+    <td><input type="text" class="partner-percent" /></td>
+    <td><input type="text" class="commission-percent" /></td>
+    <td style="text-align:center"><input type="checkbox" class="commission-itemized" /></td>
+    <td><textarea class="partner-desc"></textarea></td>
+    <td><button type="button" class="btn-remove" onclick="removePartnerRow(this)">❌</button></td>
+  </tr>
+</tbody>
             </table>
           </div>
           <button type="button" class="btn-outline" onclick="addPartnerRow()">

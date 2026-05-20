@@ -1,3 +1,5 @@
+const e = require("express");
+
 // Date: 2024-06-20 time: 12:00 PM  ddddyy
 let certificateLookupCache = {
   labs: [],
@@ -36,6 +38,14 @@ document.addEventListener("DOMContentLoaded", function () {
       neededcertificatesec: document.getElementById("neededcertificatesec"),
       certificateuploadsec: document.getElementById("certificateuploadsec"),
       partnershipsec: document.getElementById("partnershipsec"),
+      jewelleryWrapper: document.getElementById("jewelleryWrapper"),
+      Jewellery_1_Metal_Details: document.getElementById("Jewellery_1_Metal_Details"),
+      jewel1Body: document.getElementById("jewel1Body"),
+      Jewellery_2_Diamond_Details: document.getElementById("Jewellery_2_Diamond_Details"),
+      Jewellery_3_Color_Stone: document.getElementById("Jewellery_3_Color_Stone"),
+      Jewellery_Cost_Summary: document.getElementById("Jewellery_Cost_Summary"),
+      Jewellery_4_Labour: document.getElementById("Jewellery_4_Labour"),
+      Jewellery_Partnership: document.getElementById("Jewellery_Partnership"),
     };
   }
 
@@ -59,6 +69,14 @@ document.addEventListener("DOMContentLoaded", function () {
       neededcertificatesec,
       certificateuploadsec,
       partnershipsec,
+      jewelleryWrapper,
+      Jewellery_1_Metal_Details,
+      jewel1Body,
+      Jewellery_2_Diamond_Details,
+      Jewellery_3_Color_Stone,
+      Jewellery_Cost_Summary,
+      Jewellery_4_Labour,
+      Jewellery_Partnership,
     } = getElements();
 
     // HIDE ALL SECTIONS FIRST
@@ -69,6 +87,14 @@ document.addEventListener("DOMContentLoaded", function () {
     hide(neededcertificatesec);
     hide(certificateuploadsec);
     hide(partnershipsec);
+    hide(jewelleryWrapper);
+    hide(Jewellery_1_Metal_Details);
+    hide(jewel1Body);
+    hide(Jewellery_2_Diamond_Details);
+    hide(Jewellery_3_Color_Stone);
+    hide(Jewellery_Cost_Summary);
+    hide(Jewellery_4_Labour);
+    hide(Jewellery_Partnership);
 
     if (!itemTypeEl) {
       isApplying = false;
@@ -90,7 +116,6 @@ document.addEventListener("DOMContentLoaded", function () {
       show(neededcertificatesec);
       show(partnershipsec);
     }
-
     setTimeout(() => {
       isApplying = false;
     }, 50);

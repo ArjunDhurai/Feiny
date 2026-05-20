@@ -1049,10 +1049,10 @@ function getNumber(id) {
    Record Creation / Updatation - data Mapping
 ================================================================================= */
 function saveRecord() {
-  const itemType = document.getElementById("itemType").value;
+  const Category1 = document.getElementById("itemType").value;
   const In_SKU = document.getElementById("In_SKU").value;
 
-  if (!itemType || !In_SKU) {
+  if (!Category1 || !In_SKU) {
     alert("Please select Item Type and enter SKU");
     return;
   }
@@ -1066,7 +1066,7 @@ function saveRecord() {
 
   // Common record data
   const recordData = {
-    Select: itemType,
+    Select: Category1,
     In_SKU: In_SKU,
     Stock_On_Hand: getNumber("Stock_On_Hand"),
     Status: document.getElementById("Status")?.value || "",

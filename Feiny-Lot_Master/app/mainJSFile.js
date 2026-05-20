@@ -940,7 +940,30 @@ function loadSpeciesLookup() {
       console.error("Species lookup error:", error);
     });
 }
+/* ================= AUTO FILL SUB SPECIES ================= */
+function setupSpeciesAutoFill() {
+  const speciesSelect = document.getElementById("species_lookup");
+  const subSpeciesField = document.getElementById("sub_species");
 
+  if (!speciesSelect || !subSpeciesField) return;
+
+  speciesSelect.addEventListener("change", function () {
+    const selectedId = this.value;
+
+    if (!selectedId) {
+      subSpeciesField.value = "";
+      return;
+    }
+
+    const selectedRecord = speciesMap[selectedId];
+
+    if (selectedRecord && selectedRecord.Sub_species) {
+      subSpeciesField.value = selectedRecord.Sub_species;
+    } else {
+      subSpeciesField.value = "";
+    }
+  });
+}
 /* ================= RAPPORT PRICE ================= */
 function initRapportPriceTriggers() {
   ["dia_shape", "dia_color", "dia_clarity", "dia_weight"].forEach(

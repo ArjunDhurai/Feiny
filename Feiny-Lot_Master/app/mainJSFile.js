@@ -610,7 +610,7 @@ function loadPartnerLookup() {
 function populatePartnerDropdowns() {
 
   document
-    .querySelectorAll(".partnerlookup, .partnerdatalookup")
+    .querySelectorAll(".partnerdatalookup")
     .forEach(function (dropdown) {
 
       const selectedValue = dropdown.value;
@@ -926,15 +926,21 @@ function loadSpeciesLookup() {
     .then(function (response) {
       const select = document.getElementById("species_lookup");
       if (!select) return;
+
       select.innerHTML = `<option value="">None</option>`;
+
       if (!response.data || response.data.length === 0) return;
+
       response.data.forEach(function (record) {
         speciesMap[record.ID] = record;
+
         const option = document.createElement("option");
         option.value = record.ID;
         option.text = record.Species;
         select.appendChild(option);
       });
+
+      setupSpeciesAutoFill();
     })
     .catch(function (error) {
       console.error("Species lookup error:", error);
@@ -1142,7 +1148,9 @@ function saveRecord() {
     Quantity: getNumber("quantity"),
     Short_Description1: document.getElementById("diashort_description")?.value || "",
     Long_Description2: document.getElementById("dialong_description")?.value || "",
-    Cost_Amount: getNumber("cost_amount_stone"),
+    cost_amount: getNumber("Cost_Amount"),
+    sub_species: document.getElementById("sub_species")?.value || "",
+
   };
 
   console.log("Saving config:", recordData);

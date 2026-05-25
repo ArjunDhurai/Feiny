@@ -13,6 +13,7 @@ let speciesMap = {};
 let isApplying = false;
 let lot_edit = false;
 let recId = null;
+let unitLookupData = null;
 
 document.addEventListener("DOMContentLoaded", function () {
   /* ================= GET RECORD ID FROM URL ================= */
@@ -130,7 +131,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }, 50);
   }
 
-  setTimeout(applyVisibility, 300);
+  // Removed: setTimeout(applyVisibility, 300); - Visibility will be applied after itemType is loaded or changed.
 
   document.addEventListener("change", function (e) {
     if (e.target && e.target.id === "itemType") {
@@ -139,8 +140,8 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   const observer = new MutationObserver(function () {
-    if (document.getElementById("itemType")) {
-      setTimeout(applyVisibility, 100);
+    if (document.getElementById("itemType") && !isApplying) {
+      applyVisibility();
     }
   });
 
@@ -414,6 +415,48 @@ function updateDiamondDescriptions() {
 updateDiamondDescriptions();
 
 /* =================================================================================
+   FILE PREVIEW MODAL FUNCTIONS
+================================================================================= */
+
+function openFilePreview(url, fileName) {
+  const modal = document.getElementById("filePreviewModal");
+  const content = document.getElementById("previewContent");
+  
+  if (!modal || !content) return;
+
+  // Determine file type
+  const fileExtension = fileName.split('.').pop().toLowerCase();
+  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+  const pdfExtension = 'pdf';
+
+  if (imageExtensions.includes(fileExtension)) {
+    content.innerHTML = `<img src="${url}" alt="${fileName}" style="max-width: 100%; max-height: 85vh; border-radius: 4px;">`;
+  } else if (fileExtension === pdfExtension) {
+    content.innerHTML = `<iframe src="${url}" style="width: 100%; height: 85vh; border: none; border-radius: 4px;"></iframe>`;
+  } else {
+    content.innerHTML = `<div style="padding: 40px; text-align: center;">
+      <p>Preview not available for this file type</p>
+      <a href="${url}" target="_blank" style="color: #007bff; text-decoration: underline;">Download File</a>
+    </div>`;
+  }
+
+  modal.style.display = "flex";
+}
+
+function closeFilePreview() {
+  const modal = document.getElementById("filePreviewModal");
+  if (modal) modal.style.display = "none";
+}
+
+// Close modal when clicking outside content
+document.addEventListener("click", function (e) {
+  const modal = document.getElementById("filePreviewModal");
+  if (modal && e.target === modal) {
+    closeFilePreview();
+  }
+});
+
+/* =================================================================================
    CERTIFICATE SUBFORM LOOKUPS
 ================================================================================= */
 
@@ -492,15 +535,20 @@ function addCertificateRow() {
   tr.classList.add("cert-row");
 
   tr.innerHTML = `
-    <td><button type="button" class="btn-remove" onclick="removeRow(this)">❌</button></td>
     <td><input class="cert-id"></td>
-    <td><input type="file" class="cert-file"></td>
+    <td class="cert-file-cell">
+      <input type="file" class="cert-file" accept=".pdf,.jpg,.jpeg,.png,.gif">
+      <div class="existing-file-display" style="margin-top:5px;"></div>
+    </td>
     <td><input type="date" class="cert-date"></td>
     <td><textarea class="cert-notes"></textarea></td>
     <td><select class="cert-lab"></select></td>
     <td><select class="cert-lab-desc"></select></td>
     <td><select class="cert-lab-sup"></select></td>
     <td><select class="cert-rowUnique-id"></select></td>
+    <td>
+      <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
+    </td>
   `;
 
   tbody.appendChild(tr);
@@ -607,59 +655,80 @@ function loadPartnerLookup() {
     });
 }
 
-function populatePartnerDropdowns() {
+function populatePartnerDropdowns(targetElement = null) {
+  const selects = targetElement
+    ? [targetElement]
+    : document.querySelectorAll(".partnerdatalookup, .jp_partner_select_contact");
 
-  document
-    .querySelectorAll(".partnerdatalookup")
-    .forEach(function (dropdown) {
+  selects.forEach(function (dropdown) {
+    const selectedValue = dropdown.value;
 
-      const selectedValue = dropdown.value;
+    dropdown.innerHTML = `<option value="">Select Contact</option>`;
 
-      dropdown.innerHTML =
-        `<option value="">Select Contact</option>`;
+    partnerList.forEach(function (record) {
+      const option = document.createElement("option");
 
-      partnerList.forEach(function (record) {
+      option.value = record.ID;
 
-        const option = document.createElement("option");
+      // AUTO FIND DISPLAY VALUE
+      option.text =
+        record.zc_display_value ||
+        record.Name ||
+        record.Customer_Name ||
+        record.Legal_Name ||
+        record.Full_Name ||
+        record.Display_Name ||
+        "No Name";
 
-        option.value = record.ID;
+      if (selectedValue == record.ID) {
+        option.selected = true;
+      }
 
-        // AUTO FIND DISPLAY VALUE
-        option.text =
-          record.zc_display_value ||
-          record.Name ||
-          record.Customer_Name ||
-          record.Legal_Name ||
-          record.Full_Name ||
-          record.Display_Name ||
-          "No Name";
-
-        if (selectedValue == record.ID) {
-          option.selected = true;
-        }
-
-        dropdown.appendChild(option);
-      });
+      dropdown.appendChild(option);
     });
+  });
 }
+
 /* ================= UNIT LOOKUP ================= */
-function loadUnitLookup() {
-  ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Unit" })
+function loadUnitLookup(targetElement = null) {
+  if (unitLookupData) {
+    renderUnitOptions(targetElement);
+    return;
+  }
+
+  ZOHO.CREATOR.DATA.getRecords({
+    app_name: "feiny-app",
+    report_name: "Unit",
+  })
     .then(function (response) {
-      const unitSelect = document.getElementById("unit_lookup");
-      if (!unitSelect) return;
-      unitSelect.innerHTML = `<option value="">None</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Description1;
-        unitSelect.appendChild(option);
-      });
+      unitLookupData = response.data || [];
+      renderUnitOptions(targetElement);
     })
     .catch(function (error) {
       console.error("Unit lookup error:", error);
     });
+}
+
+function renderUnitOptions(targetElement = null) {
+  const selects = targetElement
+    ? [targetElement]
+    : document.querySelectorAll("#unit_lookup, .select_unit, .j1-unit, .j3-unit");
+
+  selects.forEach(function (select) {
+    const selectedValue = select.value;
+    select.innerHTML = `<option value="">Select Unit</option>`;
+
+    unitLookupData.forEach(function (record) {
+      const option = document.createElement("option");
+      option.value = record.ID;
+      option.text = record.Description1 || record.zc_display_value || "No Name";
+
+      if (selectedValue && selectedValue == record.ID) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+  });
 }
 
 /* ================= SURFACE LOOKUP ================= */
@@ -1081,6 +1150,11 @@ function saveRecord() {
   const Category1 = document.getElementById("itemType").value;
   const In_SKU = document.getElementById("In_SKU").value;
 
+  // Determine correct cost value based on category
+  let costVal = getNumber("cost_amount"); // Color Stone
+  if (Category1 === "Diamond") costVal = getNumber("dia_cost_amount");
+  else if (Category1 === "Jewellery") costVal = getNumber("cost_amount_summary");
+
   if (!Category1 || !In_SKU) {
     alert("Please select Item Type and enter SKU");
     return;
@@ -1096,6 +1170,7 @@ function saveRecord() {
   // Common record data
   const recordData = {
     Select: Category1,
+    Category1: Category1,
     In_SKU: In_SKU,
     Stock_On_Hand: getNumber("Stock_On_Hand"),
     Status: document.getElementById("Status")?.value || "",
@@ -1138,7 +1213,7 @@ function saveRecord() {
     Fluorescence_Color: document.getElementById("dia_colour_fluorescence")?.value || "",
     Length_mm: getNumber("dia_length"),
     Width_mm: getNumber("dia_width"),
-    Depth1: getNumber("dia_depth"),
+    Depth1: getNumber("dia_depth"), // Assuming Depth1 is the correct API name for dia_depth
     Table: getNumber("dia_table"),
     Depth2: getNumber("dia_depth_percent"),
     Weight_Ct: getNumber("dia_weight"),
@@ -1148,9 +1223,8 @@ function saveRecord() {
     Quantity: getNumber("quantity"),
     Short_Description1: document.getElementById("diashort_description")?.value || "",
     Long_Description2: document.getElementById("dialong_description")?.value || "",
-    cost_amount: getNumber("Cost_Amount"),
-    sub_species: document.getElementById("sub_species")?.value || "",
-
+    Cost_Amount: costVal,
+    Sub_species: document.getElementById("sub_species")?.value || "",
   };
 
   console.log("Saving config:", recordData);
@@ -1597,21 +1671,43 @@ function createCertificateRecords(skuValue, lotRecordID) {
 /* ================= GET PARTNERSHIP SUBFORM DATA ================= */
 
 function getPartnerRowsData() {
+  const category = document.getElementById("itemType")?.value;
   const partnerRows = [];
+  const isJewellery = category === "Jewellery";
+  const selector = isJewellery ? "#jewelleryPartnershipBody tr" : "#partnerBody tr";
 
-  document.querySelectorAll("#partnerBody .partner-row").forEach(function (row) {
-    const partnerSelect = row.querySelector(".partnerdatalookup");
-    const partnerValue = partnerSelect?.value || "";
+  document.querySelectorAll(selector).forEach(function (row) {
+    let partnerValue, shares, percent, commission, itemized, desc;
 
-    partnerRows.push({
-      Partner_Name: partnerValue,
-      Partnership_shares: row.querySelector(".partner-share")?.value || "",
-      Partnership: row.querySelector(".partner-percent")?.value || "",
-      Commission: row.querySelector(".commission-percent")?.value || "",
-      Description: row.querySelector(".partner-desc")?.value || "",
-      Commission_Itemized_on_Invoice:
-        row.querySelector(".commission-itemized")?.checked || false,
-    });
+    if (isJewellery) {
+      partnerValue = row.querySelector(".jp_partner_select_contact")?.value || "";
+      shares = row.querySelector(".jp_shares")?.value || "";
+      percent = row.querySelector(".jp_partnership_percentage")?.value || "";
+      commission = row.querySelector(".jp_commission_percentage")?.value || "";
+      itemized = row.querySelector(".jp_commission_itemization")?.checked || false;
+      desc = row.querySelector(".jp_description")?.value || "";
+    } else {
+      partnerValue = row.querySelector(".partnerdatalookup")?.value || "";
+      shares = row.querySelector(".partner-share")?.value || "";
+      percent = row.querySelector(".partner-percent")?.value || "";
+      commission = row.querySelector(".commission-percent")?.value || "";
+      itemized = row.querySelector(".commission-itemized")?.checked || false;
+      desc = row.querySelector(".partner-desc")?.value || "";
+    }
+
+    if (partnerValue) {
+      const rowData = {
+        Partner_Name: partnerValue,
+        Partnership_shares: shares,
+        Partnership: percent,
+        Commission: commission,
+        Description: desc,
+        Commission_Itemized_on_Invoice: itemized,
+      };
+      // Include row ID if it exists (crucial for updates)
+      if (row.dataset.rowId) rowData.ID = row.dataset.rowId;
+      partnerRows.push(rowData);
+    }
   });
 
   return partnerRows;
@@ -1770,7 +1866,7 @@ function loadExistingRecord(recordID) {
 
       // Load basic fields
       document.getElementById("In_SKU").value = data.In_SKU || "";
-      document.getElementById("itemType").value = data.Select || "";
+      document.getElementById("itemType").value = data.Category1 || "";
       document.getElementById("Stock_On_Hand").value = data.Stock_On_Hand || "1";
       document.getElementById("Status").value = data.Status || "";
 
@@ -1807,7 +1903,8 @@ function loadExistingRecord(recordID) {
       document.getElementById("Price4").value = data.Price4 || "";
       document.getElementById("MinimumPrice").value = data.Minimum_Price || "";
       document.getElementById("unit_lookup").value = data.Unit?.ID || "";
-      document.getElementById("cost_amount_stone").value = data.Cost_Amount || "";
+      document.getElementById("cost_amount").value = data.Cost_Amount || "";
+      document.getElementById("sub_species").value = data.Sub_species || "";
 
       // DIAMOND FIELDS
       document.getElementById("dia_shape").value = data.Shape3?.ID || "";
@@ -1836,40 +1933,50 @@ function loadExistingRecord(recordID) {
       loadCertificateSubform(recordID);
 
       /* ─── PARTNERSHIP DETAILS SUBFORM ─── */
-      var partnerData = data.Partnership_Details;
-      var partnerTbody = document.getElementById("partnerBody");
-      partnerTbody.innerHTML = "";
+      const partnerData = data.Partnership_Details || [];
+      const isJewel = data.Category1 === "Jewellery";
+      const tbody = document.getElementById(isJewel ? "jewelleryPartnershipBody" : "partnerBody");
+      tbody.innerHTML = "";
 
-      if (partnerData && partnerData.length > 0) {
+      if (partnerData.length > 0) {
         partnerData.forEach(function (item) {
-          var tr = document.createElement("tr");
-          tr.classList.add("partner-row");
+          const tr = document.createElement("tr");
+          tr.dataset.rowId = item.ID; // Store ID for updates
+          
+          if (isJewel) {
+            tr.className = "jewellery-partnership-row";
+            tr.innerHTML = `
+              <td><select class="jp_partner_select_contact"><option value="">Select Contact</option></select></td>
+              <td><input type="text" class="jp_shares" value="${item.Partnership_shares || ""}"></td>
+              <td><input type="text" class="jp_partnership_percentage" value="${item.Partnership || ""}"></td>
+              <td><input type="text" class="jp_commission_percentage" value="${item.Commission || ""}"></td>
+              <td class="checkbox-cell"><input type="checkbox" class="jp_commission_itemization" ${item.Commission_Itemized_on_Invoice === "true" || item.Commission_Itemized_on_Invoice === true ? "checked" : ""}></td>
+              <td><textarea class="jp_description">${item.Description || ""}</textarea></td>
+              <td>
+                <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
+              </td>`;
+          } else {
+            tr.className = "partner-row";
+            tr.innerHTML = `
+              <td><select class="partnerdatalookup"><option value="">Select Partner</option></select></td>
+              <td><input type="text" class="partner-share" value="${item.Partnership_shares || ""}"></td>
+              <td><input type="text" class="partner-percent" value="${item.Partnership || ""}"></td>
+              <td><input type="text" class="commission-percent" value="${item.Commission || ""}"></td>
+              <td style="text-align:center"><input type="checkbox" class="commission-itemized" ${item.Commission_Itemized_on_Invoice === "true" || item.Commission_Itemized_on_Invoice === true ? "checked" : ""}></td>
+              <td><textarea class="partner-desc">${item.Description || ""}</textarea></td>
+              <td>
+                <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
+              </td>`;
+          }
 
-          tr.innerHTML = `
-    <td>
-      <select class="partnerdatalookup">
-        <option value="">Select Partner</option>
-      </select>
-    </td>
-    <td><input type="text" class="partner-share" value="${item.Partnership_shares || ""}"></td>
-    <td><input type="text" class="partner-percent" value="${item.Partnership || ""}"></td>
-    <td><input type="text" class="commission-percent" value="${item.Commission || ""}"></td>
-    <td style="text-align:center">
-      <input type="checkbox" class="commission-itemized" ${item.Commission_Itemized_on_Invoice === "true" || item.Commission_Itemized_on_Invoice === true ? "checked" : ""}>
-    </td>
-    <td><textarea class="partner-desc">${item.Description || ""}</textarea></td>
-  `;
-
-          partnerTbody.appendChild(tr);
-          populatePartnerDropdowns();
-
-          // Set the partner value after populating dropdowns
+          tbody.appendChild(tr);
+          const selectEl = tr.querySelector("select");
+          
+          // Set value after a short delay to ensure lookup data is ready
           setTimeout(function () {
-            const selectEl = tr.querySelector(".partnerdatalookup");
-            if (item.Partner_Name && item.Partner_Name.ID) {
+            if (typeof populatePartnerDropdowns === 'function') populatePartnerDropdowns(selectEl);
+            if (item.Partner_Name?.ID) { // Use optional chaining for safety
               selectEl.value = item.Partner_Name.ID;
-            } else if (item.Partner_Name) {
-              selectEl.value = item.Partner_Name;
             }
           }, 300);
         });
@@ -1878,11 +1985,7 @@ function loadExistingRecord(recordID) {
         addPartnerRow();
       }
 
-      // Apply visibility based on selected category
-      setTimeout(function () {
-        const event = new Event("change");
-        document.getElementById("itemType").dispatchEvent(event);
-      }, 500);
+      applyVisibility(); // Apply visibility directly after itemType is set
     })
     .catch(function (err) {
       console.error("loadExistingRecord error:", err);
@@ -1958,59 +2061,89 @@ function loadCertificateSubform(recordID) {
           tr.dataset.certRecordId = item.ID || "";
 
           tr.innerHTML = `
-        <td>
-          <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
-        </td>
-        <td>
-          <input class="cert-id" value="${item.ID1 || ""}">
-        </td>
-        <td class="cert-file-cell"></td>
-        <td><input type="date" class="cert-date" value="${formattedDate}"></td>
-        <td>
-          <textarea class="cert-notes">${item.Notes || ""}</textarea>
-        </td>
-        <td><select class="cert-lab"></select></td>
-        <td><select class="cert-lab-desc"></select></td>
-        <td><select class="cert-lab-sup"></select></td>
-        <td>
-          <input type="text" class="cert-rowUnique-id" value="${item.ID || ""}">
-        </td>
-      `;
+            <td>
+              <input class="cert-id" value="${item.ID1 || ""}">
+            </td>
+            <td class="cert-file-cell">
+              <input type="file" class="cert-file" accept=".pdf,.jpg,.jpeg,.png,.gif">
+              <div class="existing-file-display" style="margin-top:5px;"></div>
+            </td>
+            <td><input type="date" class="cert-date" value="${formattedDate}"></td>
+            <td>
+              <textarea class="cert-notes">${item.Notes || ""}</textarea>
+            </td>
+            <td><select class="cert-lab"></select></td>
+            <td><select class="cert-lab-desc"></select></td>
+            <td><select class="cert-lab-sup"></select></td>
+            <td> 
+              <input type="text" class="cert-rowUnique-id" value="${item.ID || ""}" style="display:none;">
+            </td>
+            <td>
+              <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
+            </td>
+          `;
 
           certTbody.appendChild(tr);
 
-          const fileCell = tr.querySelector(".cert-file-cell");
+          const existingFileDisplay = tr.querySelector(".existing-file-display");
 
           if (item.Certificate_Single) {
             const fullUrl =
               "https://creator.zoho.com" + item.Certificate_Single;
 
-            function getFileNameFromUrl(url) {
+            // Helper function to get file name and extension
+            function getFileNameAndExtension(url) {
               try {
                 const decodedUrl = decodeURIComponent(url);
                 const match = decodedUrl.match(/[?&]filepath=([^&]+)/);
-
-                let fileName =
-                  match && match[1] ? match[1] : decodedUrl.split("/").pop();
-
+                let fileName = match && match[1] ? match[1] : decodedUrl.split("/").pop();
                 fileName = fileName || "Download File";
                 fileName = fileName.replace(/^\d+_/, "");
-
-                return fileName;
+                
+                const parts = fileName.split('.');
+                const extension = parts.length > 1 ? parts.pop().toLowerCase() : '';
+                return { fileName, extension };
               } catch (e) {
-                return "Download File";
+                return { fileName: "Download File", extension: "" };
               }
             }
 
-            const fileName = getFileNameFromUrl(fullUrl);
+            const { fileName, extension } = getFileNameAndExtension(fullUrl);
 
-            fileCell.innerHTML = `
-  <a href="${fullUrl}" target="_blank" rel="noopener noreferrer">
-    ${fileName}
-  </a>
-`;
+            if (['jpg', 'jpeg', 'png', 'gif'].includes(extension)) {
+              existingFileDisplay.innerHTML = `
+                <div style="cursor: pointer; padding: 10px; background: #f0f0f0; border-radius: 4px;" onclick="openFilePreview('${fullUrl}', '${fileName}')">
+                  <img src="${fullUrl}" alt="${fileName}" style="max-width: 80px; max-height: 80px; display: block; margin-bottom: 5px; border-radius: 3px;">
+                  <small style="color: #666;">Click to preview</small>
+                <div style="cursor: pointer; padding: 5px; border: 1px solid #ddd; border-radius: 4px; display: inline-block; background: #fff;" onclick="openFilePreview('${fullUrl}', '${fileName}')">
+                  <img src="${fullUrl}" alt="${fileName}" style="max-width: 100px; max-height: 100px; display: block; margin-bottom: 3px; border-radius: 2px;">
+                  <small style="color: #0066cc; display: block; text-align: center;">Preview Image</small>
+                </div>
+              `;
+            } else if (extension === 'pdf') {
+              existingFileDisplay.innerHTML = `
+                <div style="cursor: pointer; padding: 10px; background: #f0f0f0; border-radius: 4px;" onclick="openFilePreview('${fullUrl}', '${fileName}')">
+                <div style="cursor: pointer; padding: 8px; border: 1px solid #ddd; border-radius: 4px; display: inline-block; background: #fff; text-align: center;" onclick="openFilePreview('${fullUrl}', '${fileName}')">
+                  <div style="color: #d32f2f; font-size: 24px; text-align: center; margin-bottom: 5px;">📄</div>
+                  <small style="color: #666;">Click to preview</small><br>
+                  <small style="color: #666;">${fileName}</small>
+                  <small style="color: #0066cc; font-weight: bold;">Preview PDF</small><br>
+                  <small style="color: #888; font-size: 10px;">${fileName}</small>
+                </div>
+              `;
+            } else {
+              existingFileDisplay.innerHTML = `
+                <div style="cursor: pointer; padding: 10px; background: #f0f0f0; border-radius: 4px;" onclick="openFilePreview('${fullUrl}', '${fileName}')">
+                  <small style="color: #666;">📎 ${fileName}</small><br>
+                  <small style="color: #0066cc;">Click to preview</small>
+                <div style="cursor: pointer; padding: 8px; border: 1px solid #ddd; border-radius: 4px; display: inline-block; background: #fff;" onclick="openFilePreview('${fullUrl}', '${fileName}')">
+                  <small style="color: #333;">📎 ${fileName}</small><br>
+                  <small style="color: #0066cc;">Click to view</small>
+                </div>
+              `;
+            }
           } else {
-            fileCell.innerHTML = "No file";
+            existingFileDisplay.innerHTML = "<small>No file uploaded</small>";
           }
 
           populateRowSelects(tr);

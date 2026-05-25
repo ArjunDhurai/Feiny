@@ -162,17 +162,24 @@ document.addEventListener("DOMContentLoaded", function () {
   typeof loadDiaPolishLookup === "function" && loadDiaPolishLookup();
   typeof loadDiaSymmetryLookup === "function" && loadDiaSymmetryLookup();
   typeof loadDiaCuletLookup === "function" && loadDiaCuletLookup();
-  typeof loadDiaFluorescenceLookup === "function" &&
-    loadDiaFluorescenceLookup();
-  typeof loadDiaFluorescenceColorLookup === "function" &&
-    loadDiaFluorescenceColorLookup();
+  typeof loadDiaFluorescenceLookup === "function" && loadDiaFluorescenceLookup();
+  typeof loadDiaFluorescenceColorLookup === "function" && loadDiaFluorescenceColorLookup();
   typeof loaddiaShapeLookup === "function" && loaddiaShapeLookup();
   typeof loadPartnerLookup === "function" && loadPartnerLookup();
   // typeof loadPartnerdataLookup === "function" && loadPartnerdataLookup();
   typeof initTotalCalculation === "function" && initTotalCalculation();
   typeof initRapportPriceTriggers === "function" && initRapportPriceTriggers();
-  typeof loadCertificateSubformLookups === "function" &&
-    loadCertificateSubformLookups();
+  typeof loadCertificateSubformLookups === "function" && loadCertificateSubformLookups();
+  typeof loadJewelleryTypeLookup === "function" && loadJewelleryTypeLookup();
+  typeof loadBrandLookup === "function" && loadBrandLookup();
+  typeof loadContactLookup === "function" && loadContactLookup();
+  typeof loadDiamondLookup === "function" && loadDiamondLookup();
+  typeof loadUnitLookup === "function" && loadUnitLookup();
+  typeof loadMetalTypeLookup === "function" && loadMetalTypeLookup();
+  typeof loadPurityLookup === "function" && loadPurityLookup();
+  typeof loadColorLookup === "function" && loadColorLookup();
+  typeof loadJ3ColorLookup === "function" && loadJ3ColorLookup();
+  typeof loadOriginCountryDropdown === "function" && loadOriginCountryDropdown();
 
   /* ================= COLOR STONE AUTO DESCRIPTION ================= */
 

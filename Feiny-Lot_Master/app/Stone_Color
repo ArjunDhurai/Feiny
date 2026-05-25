@@ -1,0 +1,48 @@
+/* ================= j3Color LOOKUP ================= */
+let j3ColorLookupData = null;
+
+function loadJ3ColorLookup(targetElement = null) {
+  if (j3ColorLookupData) {
+    renderJ3ColorOptions(targetElement);
+    return;
+  }
+
+  ZOHO.CREATOR.DATA.getRecords({
+    app_name: "feiny-app",
+    report_name: "Color",
+  })
+    .then(function (response) {
+      if (response.data && response.data.length > 0) {
+        j3ColorLookupData = response.data;
+        renderJ3ColorOptions(targetElement);
+      }
+    })
+    .catch(function (error) {
+      console.error("J3 Color lookup error:", error);
+    });
+}
+
+function renderJ3ColorOptions(targetElement = null) {
+  const selects = targetElement
+    ? [targetElement]
+    : document.querySelectorAll("#j3-color, .j3-color, #select_color, .select_color, .j1-metal-color");
+
+  selects.forEach(function (select) {
+    if (!select) return;
+
+    const selectedValue = select.value;
+    select.innerHTML = `<option value="">Select Stone Color</option>`;
+
+    j3ColorLookupData.forEach(function (record) {
+      const option = document.createElement("option");
+      option.value = record.ID;
+      option.text = record.Description1;
+
+      if (selectedValue && selectedValue == record.ID) {
+        option.selected = true;
+      }
+
+      select.appendChild(option);
+    });
+  });
+}

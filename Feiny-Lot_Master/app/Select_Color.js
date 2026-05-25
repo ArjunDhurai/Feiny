@@ -9,7 +9,7 @@ function loadColorLookup(targetElement) {
 
   ZOHO.CREATOR.DATA.getRecords({
     app_name: "feiny-app",
-    report_name: "Gold_Metal_Color",
+    report_name: "Color",
   })
     .then(function (response) {
       if (response.data && response.data.length > 0) {

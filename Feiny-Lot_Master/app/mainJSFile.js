@@ -178,7 +178,7 @@ document.addEventListener("DOMContentLoaded", function () {
   typeof loadMetalTypeLookup === "function" && loadMetalTypeLookup();
   typeof loadPurityLookup === "function" && loadPurityLookup();
   typeof loadColorLookup === "function" && loadColorLookup();
-  typeof loadJ3ColorLookup === "function" && loadJ3ColorLookup();
+  // typeof loadJ3ColorLookup === "function" && loadJ3ColorLookup();
   typeof loadOriginCountryDropdown === "function" && loadOriginCountryDropdown();
 
   /* ================= COLOR STONE AUTO DESCRIPTION ================= */

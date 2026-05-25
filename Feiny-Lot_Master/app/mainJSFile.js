@@ -1719,6 +1719,30 @@ function getPartnerRowsData() {
 
   return partnerRows;
 }
+//METAL DETAILS SUBFORM DATA (JEWELLERY 1) ================= *//
+
+function getMetalDetailsRowsData() {
+  const metalRows = [];
+
+  document.querySelectorAll("#jewel1Body .jewel1-row").forEach(function (row) {
+    metalRows.push({
+      Cast_No: row.querySelector(".j1-cast-no")?.value || "",
+      Vendor: row.querySelector(".j1-vendor")?.value || "",
+      Metal_Type: row.querySelector(".j1-metal-type")?.value || "",
+      Metal_Colour: row.querySelector(".j1-metal-color")?.value || "",
+      Metal_Purity: row.querySelector(".j1-metal-purity")?.value || "",
+      Unit: row.querySelector(".j1-unit")?.value || "",
+      Weight: row.querySelector(".j1-weight")?.value || "",
+      Quantity: row.querySelector(".j1-qty")?.value || "",
+      Metal_Market: row.querySelector(".j1-market")?.value || "",
+      Price: row.querySelector(".j1-price")?.value || "",
+      Gold_Cost: row.querySelector(".j1-gold-cost")?.value || "",
+      Remarks: row.querySelector(".j1-remarks")?.value || "",
+    });
+  });
+
+  return metalRows;
+}
 
 /* ================= CLEAR FULL PAGE AFTER SAVE ================= */
 

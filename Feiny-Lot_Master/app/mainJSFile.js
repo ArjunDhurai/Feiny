@@ -1106,14 +1106,14 @@ function saveRecord() {
     Jewel_Short_Description: document.getElementById("description")?.value || "",
     Jewel_Long_Description: document.getElementById("instruction")?.value || "",
     // ── Jewellery Cost Summary fields ──
-    Diamond_Price: getNumber("diamond_price"),
+    Diamond_price: getNumber("diamond_price"),
     Semi_Mount_Price: getNumber("semi_mount_price"),
     Other_Cost: getNumber("other_cost"),
     Total_Cost: getNumber("total_cost"),
-    Duty_Percentage: getNumber("duty_percentage"),
-    Duty_Amount: getNumber("duty_amount"),
+    Duty2: getNumber("duty_percentage"),
+    Amount: getNumber("duty_amount"),
     Final_Cost: getNumber("final_cost"),
-    Selling_Price_Piece: getNumber("selling_price_piece"),
+    Selling_price_per_piece: getNumber("selling_price_piece"),
     // ── Jewellery Subforms ──
     Metal_Details: getMetalDetailsRowsData(),
     Diamond_Details: getDiamondDetailsRowsData(),
@@ -1600,14 +1600,14 @@ function getMetalDetailsRowsData() {
     // Only push rows that have at least one value filled
     if (castNo || vendor || metalType || metalColor || metalPurity || unit || weight || qty || price) {
       const rowData = {
-        Cast_No: castNo,
-        Vendor: vendor,
-        Metal_Type: metalType,
-        Metal_Colour: metalColor,
+        Cast: castNo,
+        Vendor1: vendor,
+        Metal_Type1: metalType,
+        Metal_Color: metalColor,
         Metal_Purity: metalPurity,
-        Unit: unit,
-        Weight: weight,
-        Quantity: qty,
+        Unit1: unit,
+        Wt: weight,
+        Qty: qty,
         Metal_Market: market,
         Price: price,
         Gold_Cost: goldCost,
@@ -1625,8 +1625,7 @@ function getDiamondDetailsRowsData() {
   const diamondRows = [];
   document.querySelectorAll("#jewel2Body .jewel2-row").forEach(function (row) {
     const lot = row.querySelector(".j2-lot")?.value || "";
-    const shape = row.querySelector(".select_shape")?.value
-      || row.querySelector(".j2-shape")?.value || "";
+    const shape = row.querySelector(".select_shape")?.IDvalue ||"";
     const quality = row.querySelector(".j2-quality")?.value || "";
     const stones = row.querySelector(".j2-stones")?.value || "";
     const totalCt = row.querySelector(".j2-total-ct")?.value || "";
@@ -1636,13 +1635,14 @@ function getDiamondDetailsRowsData() {
 
     if (lot || shape || quality || stones || totalCt || price || cost) {
       const rowData = {
-        Diamond_Lot_No: lot,
+        Diamond_Lot: lot,
+        Shape1: shape,
         Shape: shape,
-        Quality: quality,
+        Diamond_Quality: quality,
         No_of_Stones: stones,
         Total_Ct_Wt: totalCt,
         Price: price,
-        Diamond_Cost: cost,
+        Diamond_cost: cost,
         Remarks: remarks,
       };
       if (row.dataset.rowId) rowData.ID = row.dataset.rowId;
@@ -1683,23 +1683,23 @@ function getColorStoneDetailsRowsData() {
 
     if (lot || stoneType || shape || quality || price || cost) {
       const rowData = {
-        Lot_No: lot,
+        Colorstone_Lot: lot,
         Stone_Type: stoneType,
-        Shape: shape,
-        Quality: quality,
-        Range: range,
-        No_Stones: noStones,
-        Wt_Stone: wtStone,
+        Stone_Shape: shape,
+        Stone_Quality: quality,
+        Range_Sieve_Mm: range,
+        No_Of_Stones: noStones,
+        Wt_Per_Stone: wtStone,
         CT_WT: ctwt,
-        Unit: unit,
-        Cut: cut,
+        Stone_Unit: unit,
+        Stone_Cut: cut,
         Stone_Color: color,
-        Clarity: clarity,
+        Stone_Clarity: clarity,
         Supplier: supplier,
         Setter: setter,
-        Price: price,
+        Stone_Price: price,
         Stone_Cost: cost,
-        CS: cs,
+        C_S: cs,
         Duty: duty,
         Remarks: remarks,
       };
@@ -1723,10 +1723,10 @@ function getLabourDetailsRowsData() {
 
     if (laborNo || description || price || qty || amount) {
       const rowData = {
-        Labour_No: laborNo,
+        Labor: laborNo,
         Description: description,
         Price: price,
-        Quantity: qty,
+        Qty: qty,
         Duty: duty,
         Amount: amount,
       };
@@ -2139,7 +2139,7 @@ function loadJewelleryColorStoneSubform(recordID, data) {
   if (!tbody) return;
   tbody.innerHTML = "";
 
-  const rows = data.Color_Stone_Details || [];
+  const rows = data.Color_Stone1 || [];
   if (rows.length === 0) {
     if (typeof addJewellery3Row === "function") addJewellery3Row();
     return;

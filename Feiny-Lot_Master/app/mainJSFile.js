@@ -118,6 +118,7 @@ document.addEventListener("DOMContentLoaded", function () {
       show(partnershipsec);
     } else if (selectedValue === "Jewellery") {
       show(jewelleryWrapper);
+      show(certificateuploadsec);
       show(Jewellery_1_Metal_Details);
       show(Jewellery_2_Diamond_Details);
       show(Jewellery_3_Color_Stone);
@@ -178,7 +179,8 @@ document.addEventListener("DOMContentLoaded", function () {
   typeof loadMetalTypeLookup === "function" && loadMetalTypeLookup();
   typeof loadPurityLookup === "function" && loadPurityLookup();
   typeof loadColorLookup === "function" && loadColorLookup();
-  // typeof loadJ3ColorLookup === "function" && loadJ3ColorLookup();
+  typeof loadCutLookup === "function" && loadCutLookup();
+  typeof loadClarityLookup === "function" && loadClarityLookup();
   typeof loadOriginCountryDropdown === "function" && loadOriginCountryDropdown();
 
   /* ================= COLOR STONE AUTO DESCRIPTION ================= */
@@ -1232,6 +1234,22 @@ function saveRecord() {
     Long_Description2: document.getElementById("dialong_description")?.value || "",
     Cost_Amount: costVal,
     Sub_species: document.getElementById("sub_species")?.value || "",
+    Style: document.getElementById("style")?.value || "",
+    Jewellery_Type: document.getElementById("jewellery_type")?.value || "",
+    Platinum:document.getElementById("platinum")?.value || "",
+    Gold:document.getElementById("gold")?.value || "",
+    Production: document.getElementById("production")?.value || "",
+    Instructions: document.getElementById("instructions")?.value || "",
+    Country_Of_Origin1: document.getElementById("country_of_origin")?.value || "",
+    Size: document.getElementById("size")?.value || "",
+    Weight_grams: getNumber("weight_grams"),
+    Circa: document.getElementById("circa")?.value || "",
+    Order: document.getElementById("order")?.value || "",
+    HTS1: document.getElementById("hts")?.value || "",
+    Notes: document.getElementById("note")?.value || "",
+    Brand: document.getElementById("brand")?.value || "",
+    Jewel_Short_Description: document.getElementById("jewel_short_description")?.value || "",
+    Jewel_Long_Description: document.getElementById("jewel_long_description")?.value || "",
   };
 
   console.log("Saving config:", recordData);

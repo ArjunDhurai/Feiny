@@ -39,6 +39,8 @@
     <script defer src="Select_Purity.js"></script>
     <script defer src="Jewellery_on_creation.js"></script>
     <script defer src="Select_Shape.js"></script>
+    <script defer src="Select_Cut.js"></script>
+    <script defer src="Select_Clarity.js"></script>
   </head>
 
   <body>
@@ -183,7 +185,7 @@
               </div>
               <div class="field">
                 <label>Cost Amount</label
-                ><input type="number" id="cost_amount" step="0.01" />
+                ><input type="currency" id="dia_cost_amount" step="0.01" />
               </div>
             </div>
 
@@ -331,7 +333,7 @@
                 </div>
                 <div class="field">
                   <label>Cost Amount</label
-                  ><input type="number" id="cost_amount" step="0.01" />
+                  ><input type="currency" id="cost_amount" step="0.01" />
                 </div>
                 <div class="field">
                   <label>Short Description</label
@@ -455,7 +457,6 @@
             <table class="subform-table">
               <thead>
                 <tr>
-                  <th>Action</th>
                   <th>ID</th>
                   <th>Certificate</th>
                   <th>Date</th>
@@ -464,19 +465,11 @@
                   <th>Lab Descriptor</th>
                   <th>Laboratory Supplement</th>
                   <th>RecordID</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody id="certificateBody">
                 <tr class="cert-row">
-                  <td>
-                    <button
-                      type="button"
-                      class="btn-remove"
-                      onclick="removeRow(this)"
-                    >
-                      ❌
-                    </button>
-                  </td>
                   <td><input class="cert-id" /></td>
                   <td>
                     <input
@@ -491,6 +484,15 @@
                   <td><select class="cert-lab-desc"></select></td>
                   <td><select class="cert-lab-sup"></select></td>
                   <td><select class="cert-rowUnique-id"></select></td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn-remove"
+                      onclick="removeRow(this)"
+                    >
+                      ❌
+                    </button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -504,6 +506,7 @@
           </button>
         </div>
       </div>
+
       <!-- ========== PARTNERSHIP DETAILS (Color Stone + Diamond) ========== -->
       <div id="partnershipsec" style="display: none">
         <div class="card">
@@ -518,22 +521,20 @@
                   <th>Commission %</th>
                   <th>Commission Itemization</th>
                   <th>Description</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody id="partnerBody">
                 <tr class="partner-row">
-                  <td>
-                    <select class="partnerdatalookup">
-                      <option value="">Select Contact</option>
-                    </select>
-                  </td>
+                  <td><select class="partnerdatalookup"><option value="">Select Contact</option></select></td>
                   <td><input type="text" class="partner-share" /></td>
                   <td><input type="text" class="partner-percent" /></td>
                   <td><input type="text" class="commission-percent" /></td>
-                  <td style="text-align: center">
-                    <input type="checkbox" class="commission-itemized" />
-                  </td>
+                  <td style="text-align:center"><input type="checkbox" class="commission-itemized" /></td>
                   <td><textarea class="partner-desc"></textarea></td>
+                  <td>
+                    <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -894,15 +895,32 @@
                   </select>
                 </td>
 
-                <td><input type="text" class="j3-cut" /></td>
+                <td>
+                  <select class="Select_Cut j3-cut">
+                    <option value="">Select Cut</option>
+                  </select>
+                </td>
 
-                <td><input type="text" class="j3-color" /></td>
-
-                <td><input type="text" class="j3-clarity" /></td>
-
-                <td><input type="text" class="j3-supplier" /></td>
-
-                <td><input type="text" class="j3-setter" /></td>
+                <td>
+                  <select class="Select_Stone_Color j3-color">
+                    <option value="">Select Stone Color</option>
+                  </select>
+                </td>
+                 <td>
+                  <select class="Select_Clarity_j3-clarity">
+                    <option value="">Select Clarity</option>
+                  </select>
+                </td>
+                <td>
+                  <select class="j3-supplier">
+                    <option value="">Select Supplier</option>
+                  </select>
+                </td>
+                <td>
+                  <select class="j3-setter">
+                    <option value="">Select Setter</option>
+                  </select>
+                </td>
 
                 <td><input type="text" class="j3-price" /></td>
 
@@ -972,7 +990,7 @@
 
           <div class="cost-field">
             <label for="cost_amount_summary">Cost Amount</label>
-            <input type="number" id="cost_amount_summary" step="0.01" />
+            <input type="currency" id="cost_amount_summary" step="0.01" />
           </div>
         </div>
       </div>
@@ -1018,6 +1036,7 @@
           + Add Row
         </button>
       </div>
+
       <div id="Jewellery_Partnership" class="card metal-subform-card">
         <div class="card-subtitle">Jewellery Partnership</div>
 
@@ -1037,14 +1056,6 @@
 
             <tbody id="jewelleryPartnershipBody">
               <tr class="jewellery-partnership-row">
-                <!-- Partner -->
-
-                <!-- <td>
-                  <select class="select_contact_j1_vendor">
-                    <option value="">Select Contact</option>
-                  </select>
-                </td> -->
-
                 <td>
                   <select class="jp_partner_select_contact">
                     <option value="">Select Contact</option>
@@ -1076,14 +1087,14 @@
                   <textarea class="jp_description"></textarea>
                 </td>
 
-                <!-- Delete Button -->
+                <!-- Action -->
                 <td>
                   <button
                     type="button"
-                    class="btn-delete-row"
-                    onclick="removeJewelleryPartnershipRow(this)"
+                    class="btn-remove"
+                    onclick="removeRow(this)"
                   >
-                    Remove
+                    ❌
                   </button>
                 </td>
               </tr>
@@ -1101,6 +1112,15 @@
           + Add Row
         </button>
       </div>
+
+      <!-- ========== FILE PREVIEW MODAL ========== -->
+      <div id="filePreviewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="position: relative; max-width: 90vw; max-height: 90vh; background: white; border-radius: 8px; padding: 20px; overflow: auto;">
+          <button type="button" onclick="closeFilePreview()" style="position: absolute; top: 10px; right: 10px; background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 16px;">✕</button>
+          <div id="previewContent" style="text-align: center;"></div>
+        </div>
+      </div>
+
       <!-- ========== SAVE BUTTON ========== -->
       <div class="save-container">
         <button

@@ -9,7 +9,7 @@ function loadColorLookup(targetElement) {
 
   ZOHO.CREATOR.DATA.getRecords({
     app_name: "feiny-app",
-    report_name: "Gold_Metal_Color",
+    report_name: "Color",
   })
     .then(function (response) {
       if (response.data && response.data.length > 0) {
@@ -23,7 +23,7 @@ function loadColorLookup(targetElement) {
 }
 
 function renderColorOptions(targetElement) {
-  const selects = targetElement ? [targetElement] : document.querySelectorAll("#select_color, .select_color");
+  const selects = targetElement ? [targetElement] : document.querySelectorAll("#select_color, .select_color, .Select_Stone_Color");
 
   selects.forEach(function (select) {
     const selectedValue = select.value;

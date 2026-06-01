@@ -1,51 +1,5 @@
 /* ================= JEWELLERY PARTNER LOOKUP ================= */
 
-  let jewelpartnerList = [];
-
-  function loadPartnerLookup() {
-    ZOHO.CREATOR.DATA.getRecords({
-      app_name: "feiny-app",
-      report_name: "All_Customers1",
-    })
-      .then(function (response) {
-        if (!response.data || response.data.length === 0) {
-          console.warn("No Partner records found");
-          return;
-        }
-        jewelpartnerList = response.data;
-        populatePartnerDropdowns();
-      })
-      .catch(function (error) {
-        console.error("Partner lookup error:", error);
-        alert("Unable to load Partner lookup");
-      });
-  }
-
-  function populatePartnerDropdowns() {
-    document
-      .querySelectorAll(".jp_partner select_contact, .jp_partner select_contact")
-      .forEach(function (dropdown) {
-        const selectedValue = dropdown.value;
-        dropdown.innerHTML = '<option value="">Select Partner</option>';
-
-        jewelpartnerList.forEach(function (record) {
-          const option = document.createElement("option");
-          option.value = record.ID;
-          option.text =
-            record.LegalName ||
-            record.Legal_Name ||
-            record.zc_display_value ||
-            "No Name";
-
-          if (selectedValue == record.ID) {
-            option.selected = true;
-          }
-
-          dropdown.appendChild(option);
-        });
-      });
-  }
-
   function addPartnerRow() {
     const tbody = document.getElementById("partnerBody");
 
@@ -58,37 +12,40 @@
     newRow.className = "partner-row";
 
     newRow.innerHTML = `
+          
           <td>
-              <select class="jp_partner select_contact">
-                  <option value="">Select Partner</option>
+              <select class="partnerdatalookup">
+                  <option value="">Select Contact</option>
               </select>
           </td>
 
           <td>
-              <input type="text" class="jp_shares">
+              <input type="text" class="partner-share">
           </td>
 
           <td>
-              <input type="text" class="jp_partnership_percentage">
+              <input type="text" class="partner-percent">
           </td>
 
           <td>
-              <input type="text" class="jp_commission_percentage">
+              <input type="text" class="commission-percent">
           </td>
 
           <td style="text-align:center">
-              <input type="checkbox" class="jp_commission_itemization">
+              <input type="checkbox" class="commission-itemized">
           </td>
 
           <td>
               <textarea class="jp_description"></textarea>
           </td>
+          <td><button type="button" class="btn-remove" onclick="removeRow(this)">❌</button></td>
       `;
 
     tbody.appendChild(newRow);
 
-    if (typeof populatePartnerDropdowns === "function") {
-      populatePartnerDropdowns();
+    // Assuming populatePartnerDropdowns is globally available from mainJSFile.js
+    if (typeof populatePartnerDropdowns === 'function') {
+      populatePartnerDropdowns(newRow.querySelector('.partnerdatalookup'));
     }
   }
 
@@ -97,6 +54,6 @@
     const addBtn = document.getElementById("addRowBtn");
 
     if (addBtn) {
-      addBtn.addEventListener("click", addPartnerRow);
+      // addBtn.addEventListener("click", addPartnerRow); // This event listener is likely for Jewellery Partnership, not general partnerBody. addPartnerRow is called directly from HTML.
     }
   });

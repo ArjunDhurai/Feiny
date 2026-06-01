@@ -1,2389 +1,2472 @@
-// Date: 2024-06-20 time: 12:00 PM  ddddyy
-let certificateLookupCache = {
-  labs: [],
-  descriptors: [],
-  supplements: [],
-};
+  // Date: 2024-06-20 time: 12:00 PM  ddddyy
+  let certificateLookupCache = {
+    labs: [],
+    descriptors: [],
+    supplements: [],
+  };
 
-let certificateFiles = new Map();
-let certificateFilesToUpload = [];
-let diaImageFile = null;
-let stoneImageFile = null;
-let speciesMap = {};
-let isApplying = false;
-let lot_edit = false;
-let recId = null;
-let unitLookupData = null;
+  let certificateFiles = new Map();
+  let certificateFilesToUpload = [];
+  let diaImageFile = null;
+  let stoneImageFile = null;
+  let speciesMap = {};
+  let isApplying = false;
+  let lot_edit = false;
+  let recId = null;
+  let unitLookupData = null;
 
-document.addEventListener("DOMContentLoaded", function () {
-  /* ================= GET RECORD ID FROM URL ================= */
-  ZOHO.CREATOR.UTIL.getQueryParams().then(function (params) {
-    recId = params.recId;
-    if (recId) {
-      lot_edit = true;
-      loadExistingRecord(recId);
-    }
-  });
+  /* ─── Cached lookup data for the four fixed lookups ─── */
+  let culetLookupData = null;
+  let fluorescenceLookupData = null;
+  let fluorescenceColorLookupData = null;
+  let speciesLookupData = null;
 
-  /* ================= SECTION VISIBILITY ================= */
+  /* ─── Safe error message extractor ─── */
+  function getErrorMessage(err) {
+    if (!err) return "Unknown error";
+    if (typeof err === "string") return err;
 
-  function getElements() {
-    return {
-      itemTypeEl: document.getElementById("itemType"),
-      colorStoneSection: document.getElementById("colorStoneSection"),
-      diamondSection: document.getElementById("diamondSection"),
-      jewelleryWrapper: document.getElementById("jewelleryWrapper"),
-      pricingSection: document.getElementById("pricingSection"),
-      Dimensionssection: document.getElementById("Dimensionssection"),
-      neededcertificatesec: document.getElementById("neededcertificatesec"),
-      certificateuploadsec: document.getElementById("certificateuploadsec"),
-      partnershipsec: document.getElementById("partnershipsec"),
-      Jewellery_1_Metal_Details: document.getElementById(
-        "Jewellery_1_Metal_Details",
-      ),
-      Jewellery_2_Diamond_Details: document.getElementById(
-        "Jewellery_2_Diamond_Details",
-      ),
-      Jewellery_3_Color_Stone: document.getElementById(
-        "Jewellery_3_Color_Stone",
-      ),
-      Jewellery_4_Labour: document.getElementById("Jewellery_4_Labour"),
-      Jewellery_Cost_Summary: document.getElementById("Jewellery_Cost_Summary"),
-      Jewellery_Partnership: document.getElementById("Jewellery_Partnership"),
-    };
-  }
-
-  function hide(el) {
-    if (el) el.style.setProperty("display", "none", "important");
-  }
-
-  function show(el) {
-    if (el) el.style.setProperty("display", "block", "important");
-  }
-
-  function applyVisibility() {
-    isApplying = true;
-
-    const {
-      itemTypeEl,
-      colorStoneSection,
-      diamondSection,
-      jewelleryWrapper,
-      pricingSection,
-      Dimensionssection,
-      neededcertificatesec,
-      certificateuploadsec,
-      partnershipsec,
-      Jewellery_1_Metal_Details,
-      Jewellery_2_Diamond_Details,
-      Jewellery_3_Color_Stone,
-      Jewellery_4_Labour,
-      Jewellery_Cost_Summary,
-      Jewellery_Partnership,
-    } = getElements();
-
-    hide(colorStoneSection);
-    hide(diamondSection);
-    hide(jewelleryWrapper);
-    hide(pricingSection);
-    hide(Dimensionssection);
-    hide(neededcertificatesec);
-    hide(certificateuploadsec);
-    hide(partnershipsec);
-    hide(Jewellery_1_Metal_Details);
-    hide(Jewellery_2_Diamond_Details);
-    hide(Jewellery_3_Color_Stone);
-    hide(Jewellery_4_Labour);
-    hide(Jewellery_Cost_Summary);
-    hide(Jewellery_Partnership);
-
-    if (!itemTypeEl) {
-      isApplying = false;
-      return;
+    if (err.responseText) {
+      try {
+        const parsed = JSON.parse(err.responseText);
+        return parsed.message || parsed.code || err.responseText;
+      } catch (e) {
+        return err.responseText;
+      }
     }
 
-    const selectedValue = itemTypeEl.value.trim();
-
-    if (selectedValue === "Color Stone") {
-      show(colorStoneSection);
-      show(pricingSection);
-      show(Dimensionssection);
-      show(neededcertificatesec);
-      show(certificateuploadsec);
-      show(partnershipsec);
-    } else if (selectedValue === "Diamond") {
-      show(diamondSection);
-      show(certificateuploadsec);
-      show(neededcertificatesec);
-      show(partnershipsec);
-    } else if (selectedValue === "Jewellery") {
-      show(jewelleryWrapper);
-      show(certificateuploadsec);
-      show(Jewellery_1_Metal_Details);
-      show(Jewellery_2_Diamond_Details);
-      show(Jewellery_3_Color_Stone);
-      show(Jewellery_4_Labour);
-      show(Jewellery_Cost_Summary);
-      show(Jewellery_Partnership);
-    }
-
-    setTimeout(() => {
-      isApplying = false;
-    }, 50);
+    if (err.message) return err.message;
+    if (err.error) return err.error;
+    return JSON.stringify(err);
   }
 
-  document.addEventListener("change", function (e) {
-    if (e.target && e.target.id === "itemType") {
-      setTimeout(applyVisibility, 100);
-    }
-  });
-
-  const observer = new MutationObserver(function () {
-    if (document.getElementById("itemType") && !isApplying) {
-      applyVisibility();
-    }
-  });
-
-  observer.observe(document.body, { childList: true, subtree: true });
-
-  /* ================= LOOKUP LOADS ================= */
-
-  typeof loadUnitLookup === "function" && loadUnitLookup();
-  typeof loadTreatmentLookup === "function" && loadTreatmentLookup();
-  typeof loadShapeLookup === "function" && loadShapeLookup();
-  typeof loadSpeciesLookup === "function" && loadSpeciesLookup();
-  typeof loadSurfaceLookup === "function" && loadSurfaceLookup();
-  typeof loadCountryDropdown === "function" && loadCountryDropdown();
-  typeof loadCountrycutDropdown === "function" && loadCountrycutDropdown();
-  typeof loadDiaColorLookup === "function" && loadDiaColorLookup();
-  typeof loadDiaClarityLookup === "function" && loadDiaClarityLookup();
-  typeof loadDiaCutLookup === "function" && loadDiaCutLookup();
-  typeof loadDiaPolishLookup === "function" && loadDiaPolishLookup();
-  typeof loadDiaSymmetryLookup === "function" && loadDiaSymmetryLookup();
-  typeof loadDiaCuletLookup === "function" && loadDiaCuletLookup();
-  typeof loadDiaFluorescenceLookup === "function" && loadDiaFluorescenceLookup();
-  typeof loadDiaFluorescenceColorLookup === "function" && loadDiaFluorescenceColorLookup();
-  typeof loaddiaShapeLookup === "function" && loaddiaShapeLookup();
-  typeof loadPartnerLookup === "function" && loadPartnerLookup();
-  typeof initTotalCalculation === "function" && initTotalCalculation();
-  typeof initRapportPriceTriggers === "function" && initRapportPriceTriggers();
-  typeof loadCertificateSubformLookups === "function" && loadCertificateSubformLookups();
-  typeof loadJewelleryTypeLookup === "function" && loadJewelleryTypeLookup();
-  typeof loadBrandLookup === "function" && loadBrandLookup();
-  typeof loadContactLookup === "function" && loadContactLookup();
-  typeof loadDiamondLookup === "function" && loadDiamondLookup();
-  typeof loadUnitLookup === "function" && loadUnitLookup();
-  typeof loadMetalTypeLookup === "function" && loadMetalTypeLookup();
-  typeof loadPurityLookup === "function" && loadPurityLookup();
-  typeof loadColorLookup === "function" && loadColorLookup();
-  typeof loadCutLookup === "function" && loadCutLookup();
-  typeof loadClarityLookup === "function" && loadClarityLookup();
-  typeof loadOriginCountryDropdown === "function" && loadOriginCountryDropdown();
-
-  /* ================= COLOR STONE AUTO DESCRIPTION ================= */
-
-  const treatmentEl = document.getElementById("treatment_lookup");
-  const speciesEl = document.getElementById("species_lookup");
-  const surfaceEl = document.getElementById("surface_lookup");
-  const shapeEl = document.getElementById("shape_lookup");
-  const shortDescEl = document.getElementById("cs_short_description");
-  const longDescEl = document.getElementById("cs_long_description");
-
-  function stoneupdateDescriptions() {
-    const treatment = treatmentEl?.selectedOptions[0]?.text || "";
-    const species = speciesEl?.selectedOptions[0]?.text || "";
-    const surface = surfaceEl?.selectedOptions[0]?.text || "";
-    const shape = shapeEl?.selectedOptions[0]?.text || "";
-    const shortText = [treatment, species, surface, shape]
-      .filter(Boolean)
-      .join(" ");
-    const longText = [treatment, species, surface, shape]
-      .filter(Boolean)
-      .join(", ");
-    if (shortDescEl) shortDescEl.value = shortText;
-    if (longDescEl) longDescEl.value = longText;
+  /* ─── Clean null/undefined top-level fields ─── */
+  function cleanRecordData(obj) {
+    const cleaned = {};
+    Object.keys(obj).forEach(function (key) {
+      const val = obj[key];
+      // Keep booleans (false is valid), keep 0, skip only null/undefined
+      if (val === null || val === undefined) return;
+      cleaned[key] = val;
+    });
+    return cleaned;
   }
 
-  [treatmentEl, speciesEl, surfaceEl, shapeEl].forEach((el) => {
-    if (el) el.addEventListener("change", stoneupdateDescriptions);
-  });
-
-  stoneupdateDescriptions();
-
-  /* ================= AUTO TOTAL PRICE (ZOHO FIX) ================= */
-
-  function initTotalCalculation() {
-    const weightField = document.getElementById("dia_weight");
-    const priceField = document.getElementById("price_per_carat");
-    const totalField = document.getElementById("total_price");
-
-    if (!weightField || !priceField || !totalField) {
-      setTimeout(initTotalCalculation, 500);
-      return;
-    }
-
-    function calculateTotal() {
-      const weight = parseFloat(weightField.value) || 0;
-      const price = parseFloat(priceField.value) || 0;
-      const total = weight * price;
-      totalField.value = total ? total.toFixed(2) : "";
-    }
-
-    weightField.addEventListener("input", calculateTotal);
-    priceField.addEventListener("input", calculateTotal);
+  /* ─── Clean subform rows: remove nulls inside each row, skip fully empty rows ─── */
+  function cleanSubformRows(rows) {
+    if (!Array.isArray(rows)) return [];
+    return rows
+      .map(function (row) {
+        const cleaned = {};
+        Object.keys(row).forEach(function (key) {
+          const val = row[key];
+          if (val === null || val === undefined) return;
+          if (typeof val === "string" && val.trim() === "" && key !== "ID") return;
+          cleaned[key] = val;
+        });
+        return cleaned;
+      })
+      .filter(function (row) {
+        const meaningfulKeys = Object.keys(row).filter(function (k) {
+          return k !== "ID";
+        });
+        return meaningfulKeys.length > 0;
+      });
   }
 
-  initTotalCalculation();
+  document.addEventListener("DOMContentLoaded", function () {
+    /* ================= GET RECORD ID FROM URL ================= */
+    ZOHO.CREATOR.UTIL.getQueryParams().then(function (params) {
+      recId = params.recId;
+      if (recId) {
+        lot_edit = true;
+        loadExistingRecord(recId);
+      }
+    });
 
-  /* ================= DIAMOND AUTO DESCRIPTION ================= */
+    /* ================= SECTION VISIBILITY ================= */
 
-  const diashapeEl = document.getElementById("dia_shape");
-  const diacolorEl = document.getElementById("dia_color");
-  const diaclarityEl = document.getElementById("dia_clarity");
-  const diacutEl = document.getElementById("dia_cut");
-  const diapolishEl = document.getElementById("dia_polish");
-  const diasymmetryEl = document.getElementById("dia_symmetry");
-  const diaculetEl = document.getElementById("dia_culet");
-  const diafluorescenceEl = document.getElementById("dia_fluorescence");
-  const diafluorescencecolorEl = document.getElementById(
-    "dia_colour_fluorescence",
-  );
-  const diashortDescEl = document.getElementById("diashort_description");
-  const dialongDescEl = document.getElementById("dialong_description");
+    function getElements() {
+      return {
+        itemTypeEl: document.getElementById("itemType"),
+        colorStoneSection: document.getElementById("colorStoneSection"),
+        diamondSection: document.getElementById("diamondSection"),
+        jewelleryWrapper: document.getElementById("jewelleryWrapper"),
+        pricingSection: document.getElementById("pricingSection"),
+        Dimensionssection: document.getElementById("Dimensionssection"),
+        neededcertificatesec: document.getElementById("neededcertificatesec"),
+        certificateuploadsec: document.getElementById("certificateuploadsec"),
+        partnershipsec: document.getElementById("partnershipsec"),
+        Jewellery_1_Metal_Details: document.getElementById("Jewellery_1_Metal_Details"),
+        Jewellery_2_Diamond_Details: document.getElementById("Jewellery_2_Diamond_Details"),
+        Jewellery_3_Color_Stone: document.getElementById("Jewellery_3_Color_Stone"),
+        Jewellery_4_Labour: document.getElementById("Jewellery_4_Labour"),
+        Jewellery_Cost_Summary: document.getElementById("Jewellery_Cost_Summary"),
+        Jewellery_Partnership: document.getElementById("Jewellery_Partnership"),
+      };
+    }
 
-  function updateDescriptions() {
-    const diashape = diashapeEl?.selectedOptions[0]?.text || "";
-    const diacolor = diacolorEl?.selectedOptions[0]?.text || "";
-    const diaclarity = diaclarityEl?.selectedOptions[0]?.text || "";
-    const diacut = diacutEl?.selectedOptions[0]?.text || "";
-    const diapolish = diapolishEl?.selectedOptions[0]?.text || "";
-    const diasymmetry = diasymmetryEl?.selectedOptions[0]?.text || "";
-    const diaculet = diaculetEl?.selectedOptions[0]?.text || "";
-    const diafluorescence = diafluorescenceEl?.selectedOptions[0]?.text || "";
-    const diafluorescencecolor =
-      diafluorescencecolorEl?.selectedOptions[0]?.text || "";
+    function hide(el) {
+      if (el) el.style.setProperty("display", "none", "important");
+    }
 
-    const parts = [
-      diashape,
-      diacolor,
-      diaclarity,
-      diacut,
-      diapolish,
-      diasymmetry,
-      diaculet,
-      diafluorescence,
-      diafluorescencecolor,
-    ].filter(Boolean);
-    if (diashortDescEl) diashortDescEl.value = parts.join(" ");
-    if (dialongDescEl) dialongDescEl.value = parts.join(", ");
-  }
+    function show(el) {
+      if (el) el.style.setProperty("display", "block", "important");
+    }
 
-  [
-    diashapeEl,
-    diacolorEl,
-    diaclarityEl,
-    shapeEl,
-    diacutEl,
-    diapolishEl,
-    diasymmetryEl,
-    diaculetEl,
-    diafluorescenceEl,
-    diafluorescencecolorEl,
-  ].forEach((el) => {
-    if (el) el.addEventListener("change", updateDescriptions);
-  });
+    function applyVisibility() {
+      isApplying = true;
 
-  updateDescriptions();
+      const {
+        itemTypeEl,
+        colorStoneSection,
+        diamondSection,
+        jewelleryWrapper,
+        pricingSection,
+        Dimensionssection,
+        neededcertificatesec,
+        certificateuploadsec,
+        partnershipsec,
+        Jewellery_1_Metal_Details,
+        Jewellery_2_Diamond_Details,
+        Jewellery_3_Color_Stone,
+        Jewellery_4_Labour,
+        Jewellery_Cost_Summary,
+        Jewellery_Partnership,
+      } = getElements();
 
-  /* ================= DIAMOND IMAGE UPLOAD ================= */
+      hide(colorStoneSection);
+      hide(diamondSection);
+      hide(jewelleryWrapper);
+      hide(pricingSection);
+      hide(Dimensionssection);
+      hide(neededcertificatesec);
+      hide(certificateuploadsec);
+      hide(partnershipsec);
+      hide(Jewellery_1_Metal_Details);
+      hide(Jewellery_2_Diamond_Details);
+      hide(Jewellery_3_Color_Stone);
+      hide(Jewellery_4_Labour);
+      hide(Jewellery_Cost_Summary);
+      hide(Jewellery_Partnership);
 
-  const diaInput = document.getElementById("dia_image");
-  const preview = document.getElementById("imagePreview");
-  const clearBtn = document.getElementById("clearImage");
+      if (!itemTypeEl) {
+        isApplying = false;
+        return;
+      }
 
-  if (diaInput && preview && clearBtn) {
-    diaInput.addEventListener("change", function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
-        alert("File must be under 5MB");
+      const selectedValue = itemTypeEl.value.trim();
+
+      if (selectedValue === "Color Stone") {
+        show(colorStoneSection);
+        show(pricingSection);
+        show(Dimensionssection);
+        show(neededcertificatesec);
+        show(certificateuploadsec);
+        show(partnershipsec);
+      } else if (selectedValue === "Diamond") {
+        show(diamondSection);
+        show(certificateuploadsec);
+        show(neededcertificatesec);
+        show(partnershipsec);
+      } else if (selectedValue === "Jewellery") {
+        show(jewelleryWrapper);
+        show(certificateuploadsec);
+        show(Jewellery_1_Metal_Details);
+        show(Jewellery_2_Diamond_Details);
+        show(Jewellery_3_Color_Stone);
+        show(Jewellery_4_Labour);
+        show(Jewellery_Cost_Summary);
+        show(Jewellery_Partnership);
+      }
+
+      setTimeout(() => {
+        isApplying = false;
+      }, 50);
+    }
+
+    document.addEventListener("change", function (e) {
+      if (e.target && e.target.id === "itemType") {
+        setTimeout(applyVisibility, 100);
+      }
+    });
+
+    const observer = new MutationObserver(function () {
+      if (document.getElementById("itemType") && !isApplying) {
+        applyVisibility();
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    /* ================= LOOKUP LOADS ================= */
+
+    typeof loadUnitLookup === "function" && loadUnitLookup();
+    typeof loadTreatmentLookup === "function" && loadTreatmentLookup();
+    typeof loadShapeLookup === "function" && loadShapeLookup();
+    typeof loadSpeciesLookup === "function" && loadSpeciesLookup();
+    typeof loadSurfaceLookup === "function" && loadSurfaceLookup();
+    typeof loadCountryDropdown === "function" && loadCountryDropdown();
+    typeof loadCountrycutDropdown === "function" && loadCountrycutDropdown();
+    typeof loadDiaColorLookup === "function" && loadDiaColorLookup();
+    typeof loadDiaClarityLookup === "function" && loadDiaClarityLookup();
+    typeof loadDiaCutLookup === "function" && loadDiaCutLookup();
+    typeof loadDiaPolishLookup === "function" && loadDiaPolishLookup();
+    typeof loadDiaSymmetryLookup === "function" && loadDiaSymmetryLookup();
+    typeof loadDiaCuletLookup === "function" && loadDiaCuletLookup();
+    typeof loadDiaFluorescenceLookup === "function" && loadDiaFluorescenceLookup();
+    typeof loadDiaFluorescenceColorLookup === "function" && loadDiaFluorescenceColorLookup();
+    typeof loaddiaShapeLookup === "function" && loaddiaShapeLookup();
+    typeof loadPartnerLookup === "function" && loadPartnerLookup();
+    typeof initTotalCalculation === "function" && initTotalCalculation();
+    typeof initRapportPriceTriggers === "function" && initRapportPriceTriggers();
+    typeof loadCertificateSubformLookups === "function" && loadCertificateSubformLookups();
+    typeof loadJewelleryTypeLookup === "function" && loadJewelleryTypeLookup();
+    typeof loadBrandLookup === "function" && loadBrandLookup();
+    typeof loadContactLookup === "function" && loadContactLookup();
+    typeof loadDiamondLookup === "function" && loadDiamondLookup();
+    typeof loadUnitLookup === "function" && loadUnitLookup();
+    typeof loadMetalTypeLookup === "function" && loadMetalTypeLookup();
+    typeof loadPurityLookup === "function" && loadPurityLookup();
+    typeof loadColorLookup === "function" && loadColorLookup();
+    typeof loadCutLookup === "function" && loadCutLookup();
+    typeof loadClarityLookup === "function" && loadClarityLookup();
+    typeof loadOriginCountryDropdown === "function" && loadOriginCountryDropdown();
+
+    /* ================= COLOR STONE AUTO DESCRIPTION ================= */
+
+    const treatmentEl = document.getElementById("treatment_lookup");
+    const speciesEl = document.getElementById("species_lookup");
+    const surfaceEl = document.getElementById("surface_lookup");
+    const shapeEl = document.getElementById("shape_lookup");
+    const shortDescEl = document.getElementById("cs_short_description");
+    const longDescEl = document.getElementById("cs_long_description");
+
+    function stoneupdateDescriptions() {
+      const treatment = treatmentEl?.selectedOptions[0]?.text || "";
+      const species = speciesEl?.selectedOptions[0]?.text || "";
+      const surface = surfaceEl?.selectedOptions[0]?.text || "";
+      const shape = shapeEl?.selectedOptions[0]?.text || "";
+      const shortText = [treatment, species, surface, shape].filter(Boolean).join(" ");
+      const longText = [treatment, species, surface, shape].filter(Boolean).join(", ");
+      if (shortDescEl) shortDescEl.value = shortText;
+      if (longDescEl) longDescEl.value = longText;
+    }
+
+    [treatmentEl, speciesEl, surfaceEl, shapeEl].forEach((el) => {
+      if (el) el.addEventListener("change", stoneupdateDescriptions);
+    });
+
+    stoneupdateDescriptions();
+
+    /* ================= AUTO TOTAL PRICE (ZOHO FIX) ================= */
+
+    function initTotalCalculation() {
+      const weightField = document.getElementById("dia_weight");
+      const priceField = document.getElementById("price_per_carat");
+      const totalField = document.getElementById("total_price");
+
+      if (!weightField || !priceField || !totalField) {
+        setTimeout(initTotalCalculation, 500);
+        return;
+      }
+
+      function calculateTotal() {
+        const weight = parseFloat(weightField.value) || 0;
+        const price = parseFloat(priceField.value) || 0;
+        const total = weight * price;
+        totalField.value = total ? total.toFixed(2) : "";
+      }
+
+      weightField.addEventListener("input", calculateTotal);
+      priceField.addEventListener("input", calculateTotal);
+    }
+
+    initTotalCalculation();
+
+    /* ================= DIAMOND AUTO DESCRIPTION ================= */
+
+    const diashapeEl = document.getElementById("dia_shape");
+    const diacolorEl = document.getElementById("dia_color");
+    const diaclarityEl = document.getElementById("dia_clarity");
+    const diacutEl = document.getElementById("dia_cut");
+    const diapolishEl = document.getElementById("dia_polish");
+    const diasymmetryEl = document.getElementById("dia_symmetry");
+    const diaculetEl = document.getElementById("dia_culet");
+    const diafluorescenceEl = document.getElementById("dia_fluorescence");
+    const diafluorescencecolorEl = document.getElementById("dia_colour_fluorescence");
+    const diashortDescEl = document.getElementById("diashort_description");
+    const dialongDescEl = document.getElementById("dialong_description");
+
+    function updateDescriptions() {
+      const diashape = diashapeEl?.selectedOptions[0]?.text || "";
+      const diacolor = diacolorEl?.selectedOptions[0]?.text || "";
+      const diaclarity = diaclarityEl?.selectedOptions[0]?.text || "";
+      const diacut = diacutEl?.selectedOptions[0]?.text || "";
+      const diapolish = diapolishEl?.selectedOptions[0]?.text || "";
+      const diasymmetry = diasymmetryEl?.selectedOptions[0]?.text || "";
+      const diaculet = diaculetEl?.selectedOptions[0]?.text || "";
+      const diafluorescence = diafluorescenceEl?.selectedOptions[0]?.text || "";
+      const diafluorescencecolor = diafluorescencecolorEl?.selectedOptions[0]?.text || "";
+
+      const parts = [
+        diashape, diacolor, diaclarity, diacut, diapolish,
+        diasymmetry, diaculet, diafluorescence, diafluorescencecolor,
+      ].filter(Boolean);
+      if (diashortDescEl) diashortDescEl.value = parts.join(" ");
+      if (dialongDescEl) dialongDescEl.value = parts.join(", ");
+    }
+
+    [
+      diashapeEl, diacolorEl, diaclarityEl, shapeEl, diacutEl,
+      diapolishEl, diasymmetryEl, diaculetEl, diafluorescenceEl, diafluorescencecolorEl,
+    ].forEach((el) => {
+      if (el) el.addEventListener("change", updateDescriptions);
+    });
+
+    updateDescriptions();
+
+    /* ================= DIAMOND IMAGE UPLOAD ================= */
+
+    const diaInput = document.getElementById("dia_image");
+    const preview = document.getElementById("imagePreview");
+    const clearBtn = document.getElementById("clearImage");
+
+    if (diaInput && preview && clearBtn) {
+      diaInput.addEventListener("change", function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+          alert("File must be under 5MB");
+          diaInput.value = "";
+          return;
+        }
+        diaImageFile = file;
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+          preview.src = ev.target.result;
+          preview.style.display = "block";
+          clearBtn.style.display = "inline-block";
+          document.getElementById("diamand_imageText").style.display = "none";
+        };
+        reader.readAsDataURL(file);
+      });
+
+      clearBtn.addEventListener("click", function () {
+        diaImageFile = null;
         diaInput.value = "";
-        return;
-      }
-      diaImageFile = file;
-      const reader = new FileReader();
-      reader.onload = function (ev) {
-        preview.src = ev.target.result;
-        preview.style.display = "block";
-        clearBtn.style.display = "inline-block";
-        document.getElementById("diamand_imageText").style.display = "none";
-      };
-      reader.readAsDataURL(file);
-    });
-
-    clearBtn.addEventListener("click", function () {
-      diaImageFile = null;
-      diaInput.value = "";
-      preview.style.display = "none";
-      clearBtn.style.display = "none";
-      document.getElementById("diamand_imageText").style.display = "block";
-    });
-  }
-
-  /* ================= STONE IMAGE UPLOAD ================= */
-
-  const stoneInput = document.getElementById("stone_image");
-  const stonePreview = document.getElementById("stoneImagePreview");
-  const stoneClearBtn = document.getElementById("clearStoneImage");
-
-  if (stoneInput) {
-    stoneInput.addEventListener("change", function (e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
-        alert("File must be under 5MB");
-        stoneInput.value = "";
-        return;
-      }
-      stoneImageFile = file;
-      const reader = new FileReader();
-      reader.onload = function (ev) {
-        stonePreview.src = ev.target.result;
-        stonePreview.style.display = "block";
-        stoneClearBtn.style.display = "inline-block";
-        document.getElementById("imageText").style.display = "none";
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  if (stoneClearBtn) {
-    stoneClearBtn.addEventListener("click", function () {
-      stoneImageFile = null;
-      stoneInput.value = "";
-      stonePreview.style.display = "none";
-      stoneClearBtn.style.display = "none";
-      document.getElementById("imageText").style.display = "block";
-    });
-  }
-});
-
-/* ================= DIAMOND AUTO DESCRIPTION (GLOBAL) ================= */
-
-const diaShapeEl = document.getElementById("dia_shape");
-const diaColorEl = document.getElementById("dia_color");
-const diaClarityEl = document.getElementById("dia_clarity");
-const diaCutEl = document.getElementById("dia_cut");
-const diaPolishEl = document.getElementById("dia_polish");
-const diaSymmetryEl = document.getElementById("dia_symmetry");
-const diaCuletEl = document.getElementById("dia_culet");
-const diaFluorescenceEl = document.getElementById("dia_fluorescence");
-const shortDescEl = document.getElementById("short_description");
-const longDescEl = document.getElementById("long_description");
-
-function updateDiamondDescriptions() {
-  const shape = diaShapeEl?.selectedOptions[0]?.text || "";
-  const color = diaColorEl?.selectedOptions[0]?.text || "";
-  const clarity = diaClarityEl?.selectedOptions[0]?.text || "";
-  const cut = diaCutEl?.selectedOptions[0]?.text || "";
-  const polish = diaPolishEl?.selectedOptions[0]?.text || "";
-  const symmetry = diaSymmetryEl?.selectedOptions[0]?.text || "";
-  const culet = diaCuletEl?.selectedOptions[0]?.text || "";
-  const fluorescence = diaFluorescenceEl?.selectedOptions[0]?.text || "";
-
-  const parts = [
-    color,
-    clarity,
-    cut,
-    shape,
-    polish,
-    symmetry,
-    culet,
-    fluorescence,
-  ].filter(Boolean);
-  if (shortDescEl) shortDescEl.value = parts.join(" ");
-  if (longDescEl) longDescEl.value = parts.join(", ");
-}
-
-[
-  diaShapeEl,
-  diaColorEl,
-  diaClarityEl,
-  diaCutEl,
-  diaPolishEl,
-  diaSymmetryEl,
-  diaCuletEl,
-  diaFluorescenceEl,
-].forEach((el) => {
-  if (el) el.addEventListener("change", updateDiamondDescriptions);
-});
-
-/* ================= CERTIFICATE SUBFORM LOOKUPS ================= */
-
-function loadCertificateSubformLookups() {
-  Promise.all([
-    ZOHO.CREATOR.DATA.getRecords({
-      app_name: "feiny-app",
-      report_name: "All_Labs",
-    }),
-    ZOHO.CREATOR.DATA.getRecords({
-      app_name: "feiny-app",
-      report_name: "Lab_Descriptor_Report",
-    }),
-    ZOHO.CREATOR.DATA.getRecords({
-      app_name: "feiny-app",
-      report_name: "All_Laboratory_Supplements",
-    }),
-  ])
-    .then(function ([labsRes, descriptorsRes, supplementsRes]) {
-      certificateLookupCache.labs = labsRes.data || [];
-      certificateLookupCache.descriptors = descriptorsRes.data || [];
-      certificateLookupCache.supplements = supplementsRes.data || [];
-
-      const tableBody = document.getElementById("certificateBody");
-      if (!tableBody) return;
-      Array.from(tableBody.rows).forEach(function (row) {
-        populateRowSelects(row);
+        preview.style.display = "none";
+        clearBtn.style.display = "none";
+        document.getElementById("diamand_imageText").style.display = "block";
       });
-    })
-    .catch(function (err) {
-      console.error("Certificate subform lookup error:", err);
-    });
-}
-
-/* ─── POPULATE SELECTS IN A GIVEN ROW ─── */
-function populateRowSelects(row) {
-  const labSelect = row.querySelector(".cert-lab");
-  const labDescSelect = row.querySelector(".cert-lab-desc");
-  const labSupSelect = row.querySelector(".cert-lab-sup");
-
-  if (labSelect && labSelect.options.length <= 1)
-    fillSelect(labSelect, certificateLookupCache.labs, "Lab");
-  if (labDescSelect && labDescSelect.options.length <= 1)
-    fillSelect(
-      labDescSelect,
-      certificateLookupCache.descriptors,
-      "Lab_Descriptor",
-    );
-  if (labSupSelect && labSupSelect.options.length <= 1)
-    fillSelect(
-      labSupSelect,
-      certificateLookupCache.supplements,
-      "Laboratory_Supplement",
-    );
-}
-
-/* ─── FILL A SINGLE SELECT ─── */
-function fillSelect(select, data, fieldName) {
-  if (select.options.length > 1) return;
-  select.innerHTML = `<option value="">Select</option>`;
-  data.forEach(function (rec) {
-    const opt = document.createElement("option");
-    opt.value = rec.ID;
-    opt.text = rec[fieldName] || "";
-    select.appendChild(opt);
-  });
-}
-
-/* ─── ADD NEW CERTIFICATE ROW ─── */
-function addCertificateRow() {
-  const tbody = document.getElementById("certificateBody");
-  if (!tbody) return;
-
-  const tr = document.createElement("tr");
-  tr.classList.add("cert-row");
-
-  tr.innerHTML = `
-    <td><input class="cert-id"></td>
-    <td class="cert-file-cell">
-      <input type="file" class="cert-file" accept=".pdf,.jpg,.jpeg,.png,.gif">
-      <div class="existing-file-display" style="margin-top:5px;"></div>
-    </td>
-    <td><input type="date" class="cert-date"></td>
-    <td><textarea class="cert-notes"></textarea></td>
-    <td><select class="cert-lab"></select></td>
-    <td><select class="cert-lab-desc"></select></td>
-    <td><select class="cert-lab-sup"></select></td>
-    <td><input type="text" class="cert-rowUnique-id" value="" style="display:none;"></td>
-    <td>
-      <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
-    </td>
-  `;
-
-  tbody.appendChild(tr);
-  populateRowSelects(tr);
-}
-
-/* ─── REMOVE ROW ─── */
-function removeRow(btn) {
-  btn.closest("tr").remove();
-}
-
-/* ================= COUNTRY DROPDOWNS ================= */
-
-function loadCountryDropdown() {
-  const countries = [
-    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina",
-    "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain",
-    "Bangladesh", "Belgium", "Bhutan", "Bolivia", "Brazil", "Bulgaria",
-    "Cambodia", "Cameroon", "Canada", "Chile", "China", "Colombia",
-    "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark",
-    "Dominican Republic", "Ecuador", "Egypt", "Estonia", "Ethiopia",
-    "Finland", "France", "Georgia", "Germany", "Ghana", "Greece", "Greenland",
-    "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland",
-    "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya",
-    "Kuwait", "Laos", "Latvia", "Lebanon", "Lithuania", "Luxembourg",
-    "Malaysia", "Maldives", "Mexico", "Mongolia", "Morocco", "Myanmar",
-    "Nepal", "Netherlands", "New Zealand", "Nigeria", "North Korea",
-    "Norway", "Oman", "Pakistan", "Philippines", "Poland", "Portugal",
-    "Qatar", "Romania", "Russia", "Saudi Arabia", "Singapore",
-    "South Africa", "South Korea", "Spain", "Sri Lanka", "Sweden",
-    "Switzerland", "Thailand", "Turkey", "Ukraine",
-    "United Arab Emirates", "United Kingdom", "United States",
-    "Uruguay", "Uzbekistan", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
-  ];
-  const select = document.getElementById("origin_country");
-  if (!select) return;
-  select.innerHTML = `<option value="">Select Country</option>`;
-  countries.forEach((country) => {
-    const option = document.createElement("option");
-    option.value = country;
-    option.text = country;
-    select.appendChild(option);
-  });
-}
-
-function loadCountrycutDropdown() {
-  const countries = [
-    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina",
-    "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain",
-    "Bangladesh", "Belgium", "Bhutan", "Bolivia", "Brazil", "Bulgaria",
-    "Cambodia", "Cameroon", "Canada", "Chile", "China", "Colombia",
-    "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark",
-    "Dominican Republic", "Ecuador", "Egypt", "Estonia", "Ethiopia",
-    "Finland", "France", "Georgia", "Germany", "Ghana", "Greece", "Greenland",
-    "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland",
-    "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya",
-    "Kuwait", "Laos", "Latvia", "Lebanon", "Lithuania", "Luxembourg",
-    "Malaysia", "Maldives", "Mexico", "Mongolia", "Morocco", "Myanmar",
-    "Nepal", "Netherlands", "New Zealand", "Nigeria", "North Korea",
-    "Norway", "Oman", "Pakistan", "Philippines", "Poland", "Portugal",
-    "Qatar", "Romania", "Russia", "Saudi Arabia", "Singapore",
-    "South Africa", "South Korea", "Spain", "Sri Lanka", "Sweden",
-    "Switzerland", "Thailand", "Turkey", "Ukraine",
-    "United Arab Emirates", "United Kingdom", "United States",
-    "Uruguay", "Uzbekistan", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
-  ];
-  const select = document.getElementById("country_cut");
-  if (!select) return;
-  select.innerHTML = `<option value="">Select Country</option>`;
-  countries.forEach((country) => {
-    const option = document.createElement("option");
-    option.value = country;
-    option.text = country;
-    select.appendChild(option);
-  });
-}
-
-/* ================= PARTNER LOOKUP ================= */
-
-let partnerList = [];
-
-function loadPartnerLookup() {
-  ZOHO.CREATOR.DATA.getRecords({
-    app_name: "feiny-app",
-    report_name: "All_Customers1",
-    max_records: 200
-  })
-    .then(function (response) {
-      console.log("Partner Response:", response);
-      if (!response.data || response.data.length === 0) {
-        console.warn("No Partner records found");
-        return;
-      }
-      partnerList = response.data;
-      populatePartnerDropdowns();
-    })
-    .catch(function (error) {
-      console.error("Partner lookup error:", error);
-      alert("Unable to load Partner lookup");
-    });
-}
-
-function populatePartnerDropdowns(targetElement = null) {
-  const selects = targetElement
-    ? [targetElement]
-    : document.querySelectorAll(".partnerdatalookup, .jp_partner_select_contact");
-
-  selects.forEach(function (dropdown) {
-    const selectedValue = dropdown.value;
-    dropdown.innerHTML = `<option value="">Select Contact</option>`;
-    partnerList.forEach(function (record) {
-      const option = document.createElement("option");
-      option.value = record.ID;
-      option.text =
-        record.zc_display_value ||
-        record.Name ||
-        record.Customer_Name ||
-        record.Legal_Name ||
-        record.Full_Name ||
-        record.Display_Name ||
-        "No Name";
-      if (selectedValue == record.ID) {
-        option.selected = true;
-      }
-      dropdown.appendChild(option);
-    });
-  });
-}
-
-/* ================= UNIT LOOKUP ================= */
-function loadUnitLookup(targetElement = null) {
-  if (unitLookupData) {
-    renderUnitOptions(targetElement);
-    return;
-  }
-
-  ZOHO.CREATOR.DATA.getRecords({
-    app_name: "feiny-app",
-    report_name: "Unit",
-  })
-    .then(function (response) {
-      unitLookupData = response.data || [];
-      renderUnitOptions(targetElement);
-    })
-    .catch(function (error) {
-      console.error("Unit lookup error:", error);
-    });
-}
-
-function renderUnitOptions(targetElement = null) {
-  const selects = targetElement
-    ? [targetElement]
-    : document.querySelectorAll("#unit_lookup, .select_unit, .j1-unit, .j3-unit");
-
-  selects.forEach(function (select) {
-    const selectedValue = select.value;
-    select.innerHTML = `<option value="">Select Unit</option>`;
-    unitLookupData.forEach(function (record) {
-      const option = document.createElement("option");
-      option.value = record.ID;
-      option.text = record.Description1 || record.zc_display_value || "No Name";
-      if (selectedValue && selectedValue == record.ID) {
-        option.selected = true;
-      }
-      select.appendChild(option);
-    });
-  });
-}
-
-/* ================= SURFACE LOOKUP ================= */
-function loadSurfaceLookup() {
-  ZOHO.CREATOR.DATA.getRecords({
-    app_name: "feiny-app",
-    report_name: "All_Surface",
-  })
-    .then(function (response) {
-      const unitSelect = document.getElementById("surface_lookup");
-      if (!unitSelect) return;
-      unitSelect.innerHTML = `<option value="">None</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Description1;
-        unitSelect.appendChild(option);
-      });
-    })
-    .catch(function (error) {
-      console.error("Surface lookup error:", error);
-    });
-}
-
-/* ================= TREATMENT LOOKUP ================= */
-function loadTreatmentLookup() {
-  ZOHO.CREATOR.DATA.getRecords({
-    app_name: "feiny-app",
-    report_name: "Treatment",
-  })
-    .then(function (response) {
-      const select = document.getElementById("treatment_lookup");
-      if (!select) return;
-      select.innerHTML = `<option value="">None</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Description1;
-        select.appendChild(option);
-      });
-    })
-    .catch(function (error) {
-      console.error("Treatment lookup error:", error);
-    });
-}
-
-/* ================= SHAPE LOOKUP ================= */
-function loadShapeLookup() {
-  ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Shape" })
-    .then(function (response) {
-      const select = document.getElementById("shape_lookup");
-      if (!select) return;
-      select.innerHTML = `<option value="">None</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Description1;
-        select.appendChild(option);
-      });
-    })
-    .catch(function (error) {
-      console.error("Shape lookup error:", error);
-    });
-}
-
-/* ================= DIA SHAPE LOOKUP ================= */
-function loaddiaShapeLookup() {
-  ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Shape" })
-    .then(function (response) {
-      const select = document.getElementById("dia_shape");
-      if (!select) return;
-      select.innerHTML = `<option value="">None</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Description1;
-        select.appendChild(option);
-      });
-    })
-    .catch(function (error) {
-      console.error("Dia Shape lookup error:", error);
-    });
-}
-
-/* ================= DIAMOND COLOR LOOKUP ================= */
-function loadDiaColorLookup() {
-  ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Color" })
-    .then(function (response) {
-      const select = document.getElementById("dia_color");
-      if (!select) return;
-      select.innerHTML = `<option value="">None</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Description1;
-        select.appendChild(option);
-      });
-    })
-    .catch(function (error) {
-      console.error("Colour lookup error:", error);
-    });
-}
-
-/* ================= DIAMOND CLARITY LOOKUP ================= */
-function loadDiaClarityLookup() {
-  ZOHO.CREATOR.DATA.getRecords({
-    app_name: "feiny-app",
-    report_name: "Clarity",
-  })
-    .then(function (response) {
-      const select = document.getElementById("dia_clarity");
-      if (!select) return;
-      select.innerHTML = `<option value="">None</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Description1;
-        select.appendChild(option);
-      });
-    })
-    .catch(function (error) {
-      console.error("Clarity lookup error:", error);
-    });
-}
-
-/* ================= DIAMOND CUT LOOKUP ================= */
-function loadDiaCutLookup() {
-  ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Cut" })
-    .then(function (response) {
-      const select = document.getElementById("dia_cut");
-      if (!select) return;
-      select.innerHTML = `<option value="">None</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Description1;
-        select.appendChild(option);
-      });
-    })
-    .catch(function (error) {
-      console.error("Cut lookup error:", error);
-    });
-}
-
-/* ================= DIAMOND POLISH LOOKUP ================= */
-function loadDiaPolishLookup() {
-  ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Polish" })
-    .then(function (response) {
-      const select = document.getElementById("dia_polish");
-      if (!select) return;
-      select.innerHTML = `<option value="">None</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Description1;
-        select.appendChild(option);
-      });
-    })
-    .catch(function (error) {
-      console.error("Polish lookup error:", error);
-    });
-}
-
-/* ================= DIAMOND SYMMETRY LOOKUP ================= */
-function loadDiaSymmetryLookup() {
-  ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Symmetry" })
-    .then(function (response) {
-      const select = document.getElementById("dia_symmetry");
-      if (!select) return;
-      select.innerHTML = `<option value="">None</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Description1;
-        select.appendChild(option);
-      });
-    })
-    .catch(function (error) {
-      console.error("Symmetry lookup error:", error);
-    });
-}
-
-/* ================= DIAMOND CULET LOOKUP ================= */
-function loadDiaCuletLookup() {
-  ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Culet" })
-    .then(function (response) {
-      const select = document.getElementById("dia_culet");
-      if (!select) return;
-      select.innerHTML = `<option value="">None</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Description1;
-        select.appendChild(option);
-      });
-    })
-    .catch(function (error) {
-      console.error("Culet lookup error:", error);
-    });
-}
-
-/* ================= DIAMOND FLUORESCENCE LOOKUP ================= */
-function loadDiaFluorescenceLookup() {
-  ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Fluorescence" })
-    .then(function (response) {
-      const select = document.getElementById("dia_fluorescence");
-      if (!select) return;
-      select.innerHTML = `<option value="">None</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Description1;
-        select.appendChild(option);
-      });
-    })
-    .catch(function (error) {
-      console.error("Fluorescence lookup error:", error);
-    });
-}
-
-/* ================= DIAMOND FLUORESCENCE COLOR LOOKUP ================= */
-function loadDiaFluorescenceColorLookup() {
-  ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Fluorescence_Color" })
-    .then(function (response) {
-      const select = document.getElementById("dia_colour_fluorescence");
-      if (!select) return;
-      select.innerHTML = `<option value="">None</option>`;
-      if (!response.data || response.data.length === 0) return;
-      response.data.forEach(function (record) {
-        const option = document.createElement("option");
-        option.value = record.ID;
-        option.text = record.Description1;
-        select.appendChild(option);
-      });
-    })
-    .catch(function (error) {
-      console.error("Fluorescence Color lookup error:", error);
-    });
-}
-
-/* ================= RAPAPORT PRICE TRIGGERS ================= */
-function initRapportPriceTriggers() {
-  const fields = ["dia_weight", "dia_color", "dia_clarity", "dia_shape"];
-  fields.forEach(function (id) {
-    const el = document.getElementById(id);
-    if (el) el.addEventListener("change", fetchRapportPrice);
-  });
-}
-
-function fetchRapportPrice() {
-  const weight = parseFloat(document.getElementById("dia_weight")?.value) || 0;
-  const color = document.getElementById("dia_color")?.value || "";
-  const clarity = document.getElementById("dia_clarity")?.value || "";
-  const shape = document.getElementById("dia_shape")?.value || "";
-
-  if (!weight || !color || !clarity || !shape) return;
-
-  ZOHO.CREATOR.DATA.getRecords({
-    app_name: "feiny-app",
-    report_name: "All_Rapaport",
-    criteria: `Color == "${color}" && Clarity == "${clarity}" && Shape == "${shape}" && Weight_low_size1 <= ${weight} && Weight_high_size1 >= ${weight}`,
-    max_records: 200,
-  })
-    .then(function (response) {
-      if (response.data && response.data.length > 0) {
-        const sorted = response.data.sort(function (a, b) {
-          return (
-            parseFloat(a.Weight_high_size1) - parseFloat(b.Weight_high_size1)
-          );
-        });
-        document.getElementById("rapport_price").value =
-          sorted[0].Rapaport_Price || "";
-      } else {
-        document.getElementById("rapport_price").value = "";
-      }
-    })
-    .catch(function (error) {
-      console.error("Rapaport price error:", error);
-      document.getElementById("rapport_price").value = "";
-    });
-}
-
-/* ================= SPECIES CHANGE → HTS / CODE ================= */
-const speciesLookupEl = document.getElementById("species_lookup");
-if (speciesLookupEl) {
-  speciesLookupEl.addEventListener("change", function () {
-    const recordId = this.value;
-    if (!recordId) {
-      document.getElementById("hts_field").value = "";
-      document.getElementById("code_field").value = "";
-      return;
     }
-    ZOHO.CREATOR.DATA.getRecordById({
-      app_name: "feiny-app",
-      report_name: "All_Stone_Species",
-      id: recordId,
-    })
-      .then(function (response) {
-        if (response.code !== 3000 || !response.data) return;
-        document.getElementById("hts_field").value = response.data.HTS || "";
-        document.getElementById("code_field").value =
-          response.data.Default_Treatment_Code || "";
-      })
-      .catch(function (error) {
-        console.error("Species record error:", error);
-      });
-  });
-}
 
-/* ================= HELPER FUNCTION - GET NUMBER ================= */
-function getNumber(id) {
-  let val = document.getElementById(id)?.value;
-  if (!val) return null;
-  val = val.trim().replace(",", ".");
-  const num = Number(val);
-  return isNaN(num) ? null : num;
-}
+    /* ================= STONE IMAGE UPLOAD ================= */
 
-/* =================================================================================
-   Record Creation / Updatation - data Mapping
-================================================================================= */
-function saveRecord() {
-  const Category1 = document.getElementById("itemType")?.value || "";
-  const In_SKU = document.getElementById("In_SKU")?.value || "";
+    const stoneInput = document.getElementById("stone_image");
+    const stonePreview = document.getElementById("stoneImagePreview");
+    const stoneClearBtn = document.getElementById("clearStoneImage");
 
-  // Determine correct cost value based on category
-  let costVal = getNumber("cost_amount"); // Color Stone
-  if (Category1 === "Diamond") costVal = getNumber("dia_cost_amount");
-  else if (Category1 === "Jewellery") costVal = getNumber("cost_amount_summary");
-
-  if (!Category1 || !In_SKU) {
-    alert("Please select Item Type and enter SKU");
-    return;
-  }
-
-  const saveBtn = document.getElementById("addRecord");
-  const originalText = saveBtn ? saveBtn.textContent : "Save";
-  if (saveBtn) {
-    saveBtn.textContent = "Saving...";
-    saveBtn.disabled = true;
-  }
-
-  // Common record data
-  const recordData = {
-    Select: Category1,
-    Category1: Category1,
-    In_SKU: In_SKU,
-    Stock_On_Hand: getNumber("Stock_On_Hand"),
-    Status: document.getElementById("Status")?.value || "",
-    Treatment: document.getElementById("treatment_lookup")?.value || "",
-    Species: document.getElementById("species_lookup")?.value || "",
-    Surface: document.getElementById("surface_lookup")?.value || "",
-    Shape: document.getElementById("shape_lookup")?.value || "",
-    Origin: document.getElementById("origin_country")?.value || "",
-    Country_of_Cut: document.getElementById("country_cut")?.value || "",
-    HTS: document.getElementById("hts_field")?.value || "",
-    Code: document.getElementById("code_field")?.value || "",
-    Rapport_Price: getNumber("rapport_price"),
-    Name1: document.getElementById("cs_short_description")?.value || "",
-    Long_Description: document.getElementById("cs_long_description")?.value || "",
-    length_field: getNumber("min_length"),
-    Width: getNumber("min_width"),
-    Height: getNumber("min_height"),
-    Length_field1: getNumber("max_length"),
-    Width1: getNumber("max_width"),
-    Height1: getNumber("max_height"),
-    weight: getNumber("weight"),
-    AGL: document.getElementById("cert_agl")?.checked || false,
-    GIA: document.getElementById("cert_gia")?.checked || false,
-    Gub: document.getElementById("cert_gubelin")?.checked || false,
-    SSEF: document.getElementById("cert_ssef")?.checked || false,
-    Other: document.getElementById("cert_other")?.checked || false,
-    Description2: document.getElementById("certificate_details")?.value || "",
-    Price4: getNumber("Price4"),
-    Minimum_Price: getNumber("MinimumPrice"),
-    Unit: document.getElementById("unit_lookup")?.value || "",
-    Partnership_Details: getPartnerRowsData(),
-    Shape3: document.getElementById("dia_shape")?.value || "",
-    Color: document.getElementById("dia_color")?.value || "",
-    Clarity: document.getElementById("dia_clarity")?.value || "",
-    Cut: document.getElementById("dia_cut")?.value || "",
-    Polish: document.getElementById("dia_polish")?.value || "",
-    Culet: document.getElementById("dia_culet")?.value || "",
-    Symmetry: document.getElementById("dia_symmetry")?.value || "",
-    Fluorescence1: document.getElementById("dia_fluorescence")?.value || "",
-    Fluorescence_Color: document.getElementById("dia_colour_fluorescence")?.value || "",
-    Length_mm: getNumber("dia_length"),
-    Width_mm: getNumber("dia_width"),
-    Depth1: getNumber("dia_depth"),
-    Table: getNumber("dia_table"),
-    Depth2: getNumber("dia_depth_percent"),
-    Weight_Ct: getNumber("dia_weight"),
-    Price_Per_carat: getNumber("price_per_carat"),
-    Total_Price: getNumber("total_price"),
-    Rapport_Price1: getNumber("rapport_price"),
-    Quantity: getNumber("quantity"),
-    Short_Description1: document.getElementById("diashort_description")?.value || "",
-    Long_Description2: document.getElementById("dialong_description")?.value || "",
-    Cost_Amount: costVal,
-    Sub_species: document.getElementById("sub_species")?.value || "",
-    // ── Jewellery main fields ──
-    Style: document.getElementById("style")?.value || "",
-    Jewellery_Type: document.getElementById("jewellery_type")?.value || "",
-    Platinum: document.getElementById("platinum")?.value || "",
-    Gold: document.getElementById("gold")?.value || "",
-    Production: document.getElementById("production")?.value || "",
-    Instructions: document.getElementById("instructions")?.value || "",
-    // FIX: HTML uses id="countries_origin" not "country_of_origin"
-    Country_Of_Origin1: document.getElementById("countries_origin")?.value || "",
-    Size: document.getElementById("size")?.value || "",
-    Weight_grams: getNumber("weight_grams"),
-    Circa: document.getElementById("circa")?.value || "",
-    Order: document.getElementById("order")?.value || "",
-    HTS1: document.getElementById("hts")?.value || "",
-    Notes: document.getElementById("note")?.value || "",
-    Brand: document.getElementById("brand")?.value || "",
-    // FIX: HTML uses id="description" and id="instruction" not "jewel_short_description"/"jewel_long_description"
-    Jewel_Short_Description: document.getElementById("description")?.value || "",
-    Jewel_Long_Description: document.getElementById("instruction")?.value || "",
-    // ── Jewellery Cost Summary fields ──
-    Diamond_price: getNumber("diamond_price"),
-    Semi_Mount_Price: getNumber("semi_mount_price"),
-    Other_Cost: getNumber("other_cost"),
-    Total_Cost: getNumber("total_cost"),
-    Duty2: getNumber("duty_percentage"),
-    Amount: getNumber("duty_amount"),
-    Final_Cost: getNumber("final_cost"),
-    Selling_price_per_piece: getNumber("selling_price_piece"),
-    // ── Jewellery Subforms ──
-    Metal_Details: getMetalDetailsRowsData(),
-    Diamond_Details: getDiamondDetailsRowsData(),
-    Color_Stone_Details: getColorStoneDetailsRowsData(),
-    Labour_Details: getLabourDetailsRowsData(),
-  };
-
-  console.log("Saving config:", recordData);
-
-  if (!recId) {
-    /* ===============================
-        ➕ CREATE - Record Creation - API CALL
-    =============================== */
-    const config = {
-      app_name: "feiny-app",
-      form_name: "Lot_Master",
-      payload: {
-        data: recordData,
-      },
-    };
-
-    ZOHO.CREATOR.DATA.addRecords(config)
-      .then(function (response) {
-        console.log("✅ Created:", response);
-
-        if (response.code === 3000 || response.code === "3000") {
-          alert("✅ Record Saved Successfully");
-
-          let recordId = null;
-          if (
-            response.data &&
-            Array.isArray(response.data) &&
-            response.data.length > 0
-          )
-            recordId = response.data[0].ID;
-          else if (response.data && response.data.ID)
-            recordId = response.data.ID;
-          else if (response.details && response.details.id)
-            recordId = response.details.id;
-          else if (response.id) recordId = response.id;
-
-          if (!recordId)
-            throw new Error(
-              "Record created but ID not found: " + JSON.stringify(response),
-            );
-
-          // Handle file uploads after create
-          let uploadPromises = [];
-          const certPromises = createCertificateRecords(In_SKU, recordId);
-          if (certPromises && certPromises.length > 0)
-            uploadPromises = uploadPromises.concat(certPromises);
-          if (recordId && diaImageFile)
-            uploadPromises.push(uploadDiaImage(recordId, diaImageFile));
-          if (recordId && stoneImageFile)
-            uploadPromises.push(uploadStoneImage(recordId, stoneImageFile));
-
-          return Promise.all(uploadPromises);
-        } else {
-          throw new Error(
-            "Failed to create record: " +
-            (response.message || JSON.stringify(response)),
-          );
+    if (stoneInput) {
+      stoneInput.addEventListener("change", function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+          alert("File must be under 5MB");
+          stoneInput.value = "";
+          return;
         }
-      })
-      .then(function (uploadResults) {
-        console.log("Upload results:", uploadResults);
-        const successCount =
-          uploadResults?.filter((u) => u.type === "certificate" && u.success)
-            .length || 0;
-        let message = "Record created successfully!";
-        if (successCount > 0)
-          message += ` ${successCount} certificate(s) created.`;
-        alert(message);
-        certificateFiles.clear();
-        certificateFilesToUpload = [];
-        clearPageAfterSave();
-        ZOHO.CREATOR.UTIL.navigateTo({
-          url: "#Report:All_Lot_Master",
-          target: "same",
+        stoneImageFile = file;
+        const reader = new FileReader();
+        reader.onload = function (ev) {
+          stonePreview.src = ev.target.result;
+          stonePreview.style.display = "block";
+          stoneClearBtn.style.display = "inline-block";
+          document.getElementById("imageText").style.display = "none";
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    if (stoneClearBtn) {
+      stoneClearBtn.addEventListener("click", function () {
+        stoneImageFile = null;
+        stoneInput.value = "";
+        stonePreview.style.display = "none";
+        stoneClearBtn.style.display = "none";
+        document.getElementById("imageText").style.display = "block";
+      });
+    }
+  });
+
+  /* ================= DIAMOND AUTO DESCRIPTION (GLOBAL) ================= */
+
+  const diaShapeEl = document.getElementById("dia_shape");
+  const diaColorEl = document.getElementById("dia_color");
+  const diaClarityEl = document.getElementById("dia_clarity");
+  const diaCutEl = document.getElementById("dia_cut");
+  const diaPolishEl = document.getElementById("dia_polish");
+  const diaSymmetryEl = document.getElementById("dia_symmetry");
+  const diaCuletEl = document.getElementById("dia_culet");
+  const diaFluorescenceEl = document.getElementById("dia_fluorescence");
+  const shortDescEl = document.getElementById("short_description");
+  const longDescEl = document.getElementById("long_description");
+
+  function updateDiamondDescriptions() {
+    const shape = diaShapeEl?.selectedOptions[0]?.text || "";
+    const color = diaColorEl?.selectedOptions[0]?.text || "";
+    const clarity = diaClarityEl?.selectedOptions[0]?.text || "";
+    const cut = diaCutEl?.selectedOptions[0]?.text || "";
+    const polish = diaPolishEl?.selectedOptions[0]?.text || "";
+    const symmetry = diaSymmetryEl?.selectedOptions[0]?.text || "";
+    const culet = diaCuletEl?.selectedOptions[0]?.text || "";
+    const fluorescence = diaFluorescenceEl?.selectedOptions[0]?.text || "";
+
+    const parts = [color, clarity, cut, shape, polish, symmetry, culet, fluorescence].filter(Boolean);
+    if (shortDescEl) shortDescEl.value = parts.join(" ");
+    if (longDescEl) longDescEl.value = parts.join(", ");
+  }
+
+  [diaShapeEl, diaColorEl, diaClarityEl, diaCutEl, diaPolishEl, diaSymmetryEl, diaCuletEl, diaFluorescenceEl].forEach((el) => {
+    if (el) el.addEventListener("change", updateDiamondDescriptions);
+  });
+
+  /* ================= CERTIFICATE SUBFORM LOOKUPS ================= */
+
+  function loadCertificateSubformLookups() {
+    Promise.all([
+      ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "All_Labs" }),
+      ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Lab_Descriptor_Report" }),
+      ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "All_Laboratory_Supplements" }),
+    ])
+      .then(function ([labsRes, descriptorsRes, supplementsRes]) {
+        certificateLookupCache.labs = labsRes.data || [];
+        certificateLookupCache.descriptors = descriptorsRes.data || [];
+        certificateLookupCache.supplements = supplementsRes.data || [];
+
+        const tableBody = document.getElementById("certificateBody");
+        if (!tableBody) return;
+        Array.from(tableBody.rows).forEach(function (row) {
+          populateRowSelects(row);
         });
       })
-      .catch(function (error) {
-        console.error("❌ Save Error:", error);
-        alert("❌ Error: " + error.message);
-      })
-      .finally(function () {
-        if (saveBtn) {
-          saveBtn.textContent = originalText;
-          saveBtn.disabled = false;
-        }
-      });
-  } else {
-    /* ===============================
-        🔄 Record Updatation - API CALL
-    =============================== */
-    ZOHO.CREATOR.DATA.updateRecordById({
-      app_name: "feiny-app",
-      report_name: "All_Lot_Master",
-      id: String(recId),
-      payload: {
-        data: recordData,
-      },
-    })
-      .then(function (res) {
-        console.log("✅ Updated:", res);
-
-        if (res.code === 3000 || res.code === "3000") {
-          alert("✅ Updated Successfully");
-
-          let uploadPromises = [];
-          const certPromises = createCertificateRecords(In_SKU, recId);
-          if (certPromises && certPromises.length > 0)
-            uploadPromises = uploadPromises.concat(certPromises);
-          if (recId && diaImageFile)
-            uploadPromises.push(uploadDiaImage(recId, diaImageFile));
-          if (recId && stoneImageFile)
-            uploadPromises.push(uploadStoneImage(recId, stoneImageFile));
-
-          return Promise.all(uploadPromises);
-        } else {
-          throw new Error(
-            "Failed to update record: " +
-            (res.message || JSON.stringify(res)),
-          );
-        }
-      })
-      .then(function (uploadResults) {
-        console.log("Upload results:", uploadResults);
-        const successCount =
-          uploadResults?.filter((u) => u.type === "certificate" && u.success)
-            .length || 0;
-        let message = "Record updated successfully!";
-        if (successCount > 0)
-          message += ` ${successCount} certificate(s) created.`;
-        alert(message);
-        certificateFiles.clear();
-        certificateFilesToUpload = [];
-        clearPageAfterSave();
-        ZOHO.CREATOR.UTIL.navigateTo({
-          url: "#Report:All_Lot_Master",
-          target: "same",
-        });
-      })
-      .catch(function (error) {
-        console.error("❌ Save Error:", error);
-        alert("❌ Error: " + error.message);
-      })
-      .finally(function () {
-        if (saveBtn) {
-          saveBtn.textContent = originalText;
-          saveBtn.disabled = false;
-        }
+      .catch(function (err) {
+        console.error("Certificate subform lookup error:", err);
       });
   }
-}
 
-/* ================= DIAMOND IMAGE UPLOAD ================= */
-function uploadDiaImage(recordId, file) {
-  return new Promise(function (resolve, reject) {
-    ZOHO.CREATOR.FILE.uploadFile({
-      app_name: "feiny-app",
-      report_name: "All_Lot_Master",
-      id: recordId,
-      field_name: "item_Image",
-      file: file,
-    })
-      .then(function (response) {
-        if (response.code === 3000 || response.code === "3000") {
-          setImagePreview(file);
-          ZOHO.CREATOR.DATA.invokeCustomApi({
-            api_name: "imageupload",
-            workspace_name: "ankit_feiny",
-            http_method: "POST",
-            content_type: "application/json",
-            payload: { IDd: recordId, fileFormat: file.name },
-            public_key: "2hXJDxEmMyekhJ7yFtrJV5n14",
-          })
-            .then((r) => console.log("Custom API SUCCESS:", r))
-            .catch((e) => console.error("Custom API ERROR:", e));
-          resolve({ type: "image", success: true });
-        } else {
-          reject(new Error(response.message || "Upload failed"));
-        }
-      })
-      .catch(reject);
-  });
-}
-
-function setImagePreview(file) {
-  diaImageFile = file;
-  const preview = document.getElementById("imagePreview");
-  if (preview && file) {
-    preview.src = URL.createObjectURL(file);
-    preview.style.display = "block";
-  }
-}
-
-const preview = document.getElementById("imagePreview");
-if (preview) {
-  preview.style.cursor = "pointer";
-  preview.onclick = function () {
-    if (preview.src) window.open(preview.src, "_blank");
-  };
-}
-
-/* ================= STONE IMAGE UPLOAD ================= */
-function uploadStoneImage(recordId, file) {
-  return new Promise(function (resolve, reject) {
-    ZOHO.CREATOR.FILE.uploadFile({
-      app_name: "feiny-app",
-      report_name: "All_Lot_Master",
-      id: recordId,
-      field_name: "item_Image",
-      file: file,
-    })
-      .then(function (response) {
-        if (response.code === 3000 || response.code === "3000") {
-          return ZOHO.CREATOR.DATA.invokeCustomApi({
-            api_name: "imageupload",
-            workspace_name: "ankit_feiny",
-            http_method: "POST",
-            content_type: "application/json",
-            payload: { IDd: recordId, fileFormat: file.name },
-            public_key: "2hXJDxEmMyekhJ7yFtrJV5n14",
-          });
-        } else {
-          throw new Error(response.message || "Stone image upload failed");
-        }
-      })
-      .then((r) => {
-        console.log("Stone custom API SUCCESS:", r);
-        resolve({ type: "stoneImage", success: true });
-      })
-      .catch(reject);
-  });
-}
-
-/* ── Upload Certificate File ── */
-function uploadCertificateFile(recordId, file) {
-  console.log(uploadCertificateFile, recordId, file);
-  return new Promise(function (resolve, reject) {
-    ZOHO.CREATOR.FILE.uploadFile({
-      app_name: "feiny-app",
-      report_name: "All_Certificate_Details",
-      id: recordId,
-      field_name: "Certificate_Single",
-      file: file,
-    })
-      .then(function (response) {
-        if (response.code === 3000 || response.code === "3000") {
-          resolve(response);
-          ZOHO.CREATOR.DATA.invokeCustomApi({
-            api_name: "asfd",
-            workspace_name: "ankit_feiny",
-            http_method: "POST",
-            content_type: "application/json",
-            payload: { IDd: recordId, fileFormat: response.data.filename },
-            public_key: "yUeF2jG7QJWCHXUaEuCQ91XvA",
-          })
-            .then((r) => console.log("Cert custom API SUCCESS:", r))
-            .catch((e) => console.error("Cert custom API ERROR:", e));
-        } else {
-          reject(
-            new Error(response.message || "Certificate file upload failed"),
-          );
-        }
-      })
-      .catch(reject);
-  });
-}
-
-/* ================= CREATE CERTIFICATE RECORDS ================= */
-function createCertificateRecords(skuValue, lotRecordID) {
-  const promises = [];
-  const rows = document.querySelectorAll("#certificateBody tr");
-  const categoryValue = document.getElementById("itemType")?.value || "";
-  const speciesId = document.getElementById("species_lookup")?.value || "";
-  const speciesValue = speciesMap[speciesId]?.Species || "";
-
-  if (rows.length === 0) return promises;
-
-  rows.forEach(function (row, index) {
-    const idInput = row.querySelector(".cert-id");
-    const fileInput = row.querySelector(".cert-file");
-    const dateInput = row.querySelector(".cert-date");
-    const notesInput = row.querySelector(".cert-notes");
+  function populateRowSelects(row) {
     const labSelect = row.querySelector(".cert-lab");
     const labDescSelect = row.querySelector(".cert-lab-desc");
     const labSupSelect = row.querySelector(".cert-lab-sup");
-    const rowUniqueID = row.querySelector(".cert-rowUnique-id");
 
-    const idValue = idInput?.value || "";
-    const fileExists = fileInput?.files && fileInput.files.length > 0;
+    if (labSelect && labSelect.options.length <= 1)
+      fillSelect(labSelect, certificateLookupCache.labs, "Lab");
+    if (labDescSelect && labDescSelect.options.length <= 1)
+      fillSelect(labDescSelect, certificateLookupCache.descriptors, "Lab_Descriptor");
+    if (labSupSelect && labSupSelect.options.length <= 1)
+      fillSelect(labSupSelect, certificateLookupCache.supplements, "Laboratory_Supplement");
+  }
 
-    let dateValue = "";
-    if (dateInput && dateInput.value) {
-      const dateObj = new Date(dateInput.value);
-      const day = String(dateObj.getDate()).padStart(2, "0");
-      const monthNames = [
-        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-      ];
-      const month = monthNames[dateObj.getMonth()];
-      const year = dateObj.getFullYear();
-      dateValue = `${day}-${month}-${year}`;
-    }
+  function fillSelect(select, data, fieldName) {
+    if (select.options.length > 1) return;
+    select.innerHTML = `<option value="">Select</option>`;
+    data.forEach(function (rec) {
+      const opt = document.createElement("option");
+      opt.value = rec.ID;
+      opt.text = rec[fieldName] || "";
+      select.appendChild(opt);
+    });
+  }
 
-    const notesValue = notesInput?.value || "";
-    const labValue = labSelect?.value || "";
-    const labDescValue = labDescSelect?.value || "";
-    const labSupValue = labSupSelect?.value || "";
+  function addCertificateRow() {
+    const tbody = document.getElementById("certificateBody");
+    if (!tbody) return;
 
-    const hasData =
-      idValue || fileExists || dateValue || notesValue || labValue || labDescValue || labSupValue;
-    if (!hasData) return;
+    const tr = document.createElement("tr");
+    tr.classList.add("cert-row");
 
-    const certData = {
-      ID1: idValue,
-      Date_field: dateValue,
-      Notes: notesValue,
-      Lab: labValue,
-      Lab_Descriptor: labDescValue,
-      Laboratory_Supplement: labSupValue,
-      SKU: skuValue,
-      Categories: categoryValue,
-      Species: speciesValue,
-      Lot_Master_ID: lotRecordID,
-    };
+    tr.innerHTML = `
+      <td><input class="cert-id"></td>
+      <td class="cert-file-cell">
+        <input type="file" class="cert-file" accept=".pdf,.jpg,.jpeg,.png,.gif">
+        <div class="existing-file-display" style="margin-top:5px;"></div>
+      </td>
+      <td><input type="date" class="cert-date"></td>
+      <td><textarea class="cert-notes"></textarea></td>
+      <td><select class="cert-lab"></select></td>
+      <td><select class="cert-lab-desc"></select></td>
+      <td><select class="cert-lab-sup"></select></td>
+      <td><input type="text" class="cert-rowUnique-id" value="" style="display:none;"></td>
+      <td>
+        <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
+      </td>
+    `;
 
-    // ========= Update Existing Row =============
-    if (rowUniqueID && rowUniqueID.value) {
-      const updatePromise = ZOHO.CREATOR.DATA.updateRecordById({
-        app_name: "feiny-app",
-        report_name: "All_Certificate_Details",
-        id: String(rowUniqueID.value),
-        payload: { data: certData },
+    tbody.appendChild(tr);
+    populateRowSelects(tr);
+  }
+
+  function removeRow(btn) {
+    btn.closest("tr").remove();
+  }
+
+  /* ================= COUNTRY DROPDOWNS ================= */
+
+  function loadCountryDropdown() {
+    const countries = [
+      "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina",
+      "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain",
+      "Bangladesh", "Belgium", "Bhutan", "Bolivia", "Brazil", "Bulgaria",
+      "Cambodia", "Cameroon", "Canada", "Chile", "China", "Colombia",
+      "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark",
+      "Dominican Republic", "Ecuador", "Egypt", "Estonia", "Ethiopia",
+      "Finland", "France", "Georgia", "Germany", "Ghana", "Greece", "Greenland",
+      "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland",
+      "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya",
+      "Kuwait", "Laos", "Latvia", "Lebanon", "Lithuania", "Luxembourg",
+      "Malaysia", "Maldives", "Mexico", "Mongolia", "Morocco", "Myanmar",
+      "Nepal", "Netherlands", "New Zealand", "Nigeria", "North Korea",
+      "Norway", "Oman", "Pakistan", "Philippines", "Poland", "Portugal",
+      "Qatar", "Romania", "Russia", "Saudi Arabia", "Singapore",
+      "South Africa", "South Korea", "Spain", "Sri Lanka", "Sweden",
+      "Switzerland", "Thailand", "Turkey", "Ukraine",
+      "United Arab Emirates", "United Kingdom", "United States",
+      "Uruguay", "Uzbekistan", "Vietnam", "Yemen", "Zambia", "Zimbabwe",
+    ];
+    const select = document.getElementById("origin_country");
+    if (!select) return;
+    select.innerHTML = `<option value="">Select Country</option>`;
+    countries.forEach((country) => {
+      const option = document.createElement("option");
+      option.value = country;
+      option.text = country;
+      select.appendChild(option);
+    });
+  }
+
+  function loadCountrycutDropdown() {
+    const countries = [
+      "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Argentina",
+      "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain",
+      "Bangladesh", "Belgium", "Bhutan", "Bolivia", "Brazil", "Bulgaria",
+      "Cambodia", "Cameroon", "Canada", "Chile", "China", "Colombia",
+      "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czech Republic", "Denmark",
+      "Dominican Republic", "Ecuador", "Egypt", "Estonia", "Ethiopia",
+      "Finland", "France", "Georgia", "Germany", "Ghana", "Greece", "Greenland",
+      "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland",
+      "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya",
+      "Kuwait", "Laos", "Latvia", "Lebanon", "Lithuania", "Luxembourg",
+      "Malaysia", "Maldives", "Mexico", "Mongolia", "Morocco", "Myanmar",
+      "Nepal", "Netherlands", "New Zealand", "Nigeria", "North Korea",
+      "Norway", "Oman", "Pakistan", "Philippines", "Poland", "Portugal",
+      "Qatar", "Romania", "Russia", "Saudi Arabia", "Singapore",
+      "South Africa", "South Korea", "Spain", "Sri Lanka", "Sweden",
+      "Switzerland", "Thailand", "Turkey", "Ukraine",
+      "United Arab Emirates", "United Kingdom", "United States",
+      "Uruguay", "Uzbekistan", "Vietnam", "Yemen", "Zambia", "Zimbabwe",
+    ];
+    const select = document.getElementById("country_cut");
+    if (!select) return;
+    select.innerHTML = `<option value="">Select Country</option>`;
+    countries.forEach((country) => {
+      const option = document.createElement("option");
+      option.value = country;
+      option.text = country;
+      select.appendChild(option);
+    });
+  }
+
+  /* ================= PARTNER LOOKUP ================= */
+
+  let partnerList = [];
+
+  function loadPartnerLookup() {
+    ZOHO.CREATOR.DATA.getRecords({
+      app_name: "feiny-app",
+      report_name: "All_Customers1",
+      max_records: 200,
+    })
+      .then(function (response) {
+        console.log("Partner Response:", response);
+        if (!response.data || response.data.length === 0) {
+          console.warn("No Partner records found");
+          return;
+        }
+        partnerList = response.data;
+        populatePartnerDropdowns();
       })
-        .then(function (res) {
-          console.log("Row Update Response", res);
-          if (rowUniqueID && fileExists) {
-            return uploadCertificateFile(rowUniqueID.value, fileInput.files[0]);
-          }
-        })
-        .catch(function (error) {
-          console.error("❌ UpdateRes Save Error:", error);
-          alert("❌ UpdateRes Error: " + error.message);
-        });
-
-      promises.push(updatePromise);
-    } else {
-      // ========= Create New Row =============
-      const promise = new Promise((resolve) => {
-        ZOHO.CREATOR.DATA.addRecords({
-          app_name: "feiny-app",
-          form_name: "Certificate_Uploads",
-          payload: { data: certData },
-        })
-          .then(function (response) {
-            let certRecordId = null;
-            if (response.code === 3000 || response.code === "3000") {
-              if (
-                response.data &&
-                Array.isArray(response.data) &&
-                response.data.length > 0
-              )
-                certRecordId = response.data[0].ID;
-              else if (response.data && response.data.ID)
-                certRecordId = response.data.ID;
-              else if (response.details && response.details.id)
-                certRecordId = response.details.id;
-              else if (response.id) certRecordId = response.id;
-            }
-            if (certRecordId && fileExists) {
-              return uploadCertificateFile(certRecordId, fileInput.files[0])
-                .then(() =>
-                  resolve({
-                    type: "certificate",
-                    success: true,
-                    index,
-                    sku: skuValue,
-                    recordId: certRecordId,
-                  }),
-                )
-                .catch((err) =>
-                  resolve({
-                    type: "certificate",
-                    success: true,
-                    fileUploadFailed: true,
-                    index,
-                    error: err.message,
-                  }),
-                );
-            } else {
-              resolve({
-                type: "certificate",
-                success: true,
-                index,
-                sku: skuValue,
-                recordId: certRecordId,
-                noFile: true,
-              });
-            }
-          })
-          .catch(function (error) {
-            resolve({
-              type: "certificate",
-              success: false,
-              error: error.message,
-              index,
-              sku: skuValue,
-            });
-          });
+      .catch(function (error) {
+        console.error("Partner lookup error:", error);
+        alert("Unable to load Partner lookup");
       });
+  }
 
-      promises.push(promise);
-    }
-  });
+  function populatePartnerDropdowns(targetElement = null) {
+    const selects = targetElement
+      ? [targetElement]
+      : document.querySelectorAll(".partnerdatalookup, .jp_partner_select_contact");
 
-  return promises;
-}
+    selects.forEach(function (dropdown) {
+      const selectedValue = dropdown.value;
+      dropdown.innerHTML = `<option value="">Select Contact</option>`;
+      partnerList.forEach(function (record) {
+        const option = document.createElement("option");
+        option.value = record.ID;
+        option.text =
+          record.zc_display_value ||
+          record.Name ||
+          record.Customer_Name ||
+          record.Legal_Name ||
+          record.Full_Name ||
+          record.Display_Name ||
+          "No Name";
+        if (selectedValue == record.ID) {
+          option.selected = true;
+        }
+        dropdown.appendChild(option);
+      });
+    });
+  }
 
-/* ================= GET PARTNERSHIP SUBFORM DATA ================= */
-
-function getPartnerRowsData() {
-  const category = document.getElementById("itemType")?.value;
-  const partnerRows = [];
-  const isJewellery = category === "Jewellery";
-  const selector = isJewellery ? "#jewelleryPartnershipBody tr" : "#partnerBody tr";
-
-  document.querySelectorAll(selector).forEach(function (row) {
-    let partnerValue, shares, percent, commission, itemized, desc;
-
-    if (isJewellery) {
-      partnerValue = row.querySelector(".jp_partner_select_contact")?.value || "";
-      shares = row.querySelector(".jp_shares")?.value || "";
-      percent = row.querySelector(".jp_partnership_percentage")?.value || "";
-      commission = row.querySelector(".jp_commission_percentage")?.value || "";
-      itemized = row.querySelector(".jp_commission_itemization")?.checked || false;
-      desc = row.querySelector(".jp_description")?.value || "";
-    } else {
-      partnerValue = row.querySelector(".partnerdatalookup")?.value || "";
-      shares = row.querySelector(".partner-share")?.value || "";
-      percent = row.querySelector(".partner-percent")?.value || "";
-      commission = row.querySelector(".commission-percent")?.value || "";
-      itemized = row.querySelector(".commission-itemized")?.checked || false;
-      desc = row.querySelector(".partner-desc")?.value || "";
-    }
-
-    if (partnerValue) {
-      const rowData = {
-        Partner_Name: partnerValue,
-        Partnership_shares: shares,
-        Partnership: percent,
-        Commission: commission,
-        Description: desc,
-        Commission_Itemized_on_Invoice: itemized,
-      };
-      if (row.dataset.rowId) rowData.ID = row.dataset.rowId;
-      partnerRows.push(rowData);
-    }
-  });
-
-  return partnerRows;
-}
-
-/* ================= GET METAL DETAILS SUBFORM DATA (JEWELLERY 1) ================= */
-function getMetalDetailsRowsData() {
-  const metalRows = [];
-  document.querySelectorAll("#jewel1Body .jewel1-row").forEach(function (row) {
-    const castNo = row.querySelector(".j1-cast-no")?.value || "";
-    const vendor = row.querySelector(".j1-vendor")?.value
-      || row.querySelector(".select_contact_j1_vendor")?.value || "";
-    const metalType = row.querySelector(".j1-metal-type")?.value || "";
-    const metalColor = row.querySelector(".j1-metal-color")?.value || "";
-    const metalPurity = row.querySelector(".j1-metal-purity")?.value || "";
-    const unit = row.querySelector(".j1-unit")?.value || "";
-    const weight = row.querySelector(".j1-weight")?.value || "";
-    const qty = row.querySelector(".j1-qty")?.value || "";
-    const market = row.querySelector(".j1-market")?.value || "";
-    const price = row.querySelector(".j1-price")?.value || "";
-    const goldCost = row.querySelector(".j1-gold-cost")?.value || "";
-    const remarks = row.querySelector(".j1-remarks")?.value || "";
-
-    // Only push rows that have at least one value filled
-    if (castNo || vendor || metalType || metalColor || metalPurity || unit || weight || qty || price) {
-      const rowData = {
-        Cast: castNo,
-        Vendor1: vendor,
-        Metal_Type1: metalType,
-        Metal_Color: metalColor,
-        Metal_Purity: metalPurity,
-        Unit1: unit,
-        Wt: weight,
-        Qty: qty,
-        Metal_Market: market,
-        Price: price,
-        Gold_Cost: goldCost,
-        Remarks: remarks,
-      };
-      if (row.dataset.rowId) rowData.ID = row.dataset.rowId;
-      metalRows.push(rowData);
-    }
-  });
-  return metalRows;
-}
-
-/* ================= GET DIAMOND DETAILS SUBFORM DATA (JEWELLERY 2) ================= */
-function getDiamondDetailsRowsData() {
-  const diamondRows = [];
-  document.querySelectorAll("#jewel2Body .jewel2-row").forEach(function (row) {
-    const lot = row.querySelector(".j2-lot")?.value || "";
-    const shape = row.querySelector(".select_shape")?.IDvalue ||"";
-    const quality = row.querySelector(".j2-quality")?.value || "";
-    const stones = row.querySelector(".j2-stones")?.value || "";
-    const totalCt = row.querySelector(".j2-total-ct")?.value || "";
-    const price = row.querySelector(".j2-price")?.value || "";
-    const cost = row.querySelector(".j2-cost")?.value || "";
-    const remarks = row.querySelector(".j2-remarks")?.value || "";
-
-    if (lot || shape || quality || stones || totalCt || price || cost) {
-      const rowData = {
-        Diamond_Lot: lot,
-        Shape1: shape,
-        Shape: shape,
-        Diamond_Quality: quality,
-        No_of_Stones: stones,
-        Total_Ct_Wt: totalCt,
-        Price: price,
-        Diamond_cost: cost,
-        Remarks: remarks,
-      };
-      if (row.dataset.rowId) rowData.ID = row.dataset.rowId;
-      diamondRows.push(rowData);
-    }
-  });
-  return diamondRows;
-}
-
-/* ================= GET COLOR STONE DETAILS SUBFORM DATA (JEWELLERY 3) ================= */
-function getColorStoneDetailsRowsData() {
-  const colorStoneRows = [];
-  // Support both original jewel3-row and partner-row classes used in addJewellery3Row
-  document.querySelectorAll("#jewel3Body tr").forEach(function (row) {
-    const lot = row.querySelector(".j3-lot")?.value || "";
-    const stoneType = row.querySelector(".j3-stone-type")?.value || "";
-    const shape = row.querySelector(".select_shape")?.value || "";
-    const quality = row.querySelector(".j3-quality")?.value || "";
-    const range = row.querySelector(".j3-range")?.value || "";
-    const noStones = row.querySelector(".j3-no-stones")?.value || "";
-    const wtStone = row.querySelector(".j3-wt-stone")?.value || "";
-    const ctwt = row.querySelector(".j3-ctwt")?.value || "";
-    const unit = row.querySelector(".j3-unit")?.value
-      || row.querySelector(".select_unit")?.value || "";
-    const cut = row.querySelector(".j3-cut")?.value
-      || row.querySelector(".Select_Cut")?.value || "";
-    const color = row.querySelector(".j3-color")?.value
-      || row.querySelector(".Select_Stone_Color")?.value || "";
-    const clarity = row.querySelector(".j3-clarity")?.value
-      || row.querySelector(".Select_Clarity_j3-clarity")?.value || "";
-    const supplier = row.querySelector(".j3-supplier")?.value || "";
-    const setter = row.querySelector(".j3-setter")?.value || "";
-    const price = row.querySelector(".j3-price")?.value || "";
-    const cost = row.querySelector(".j3-cost")?.value || "";
-    const cs = row.querySelector(".j3-cs")?.checked || false;
-    const duty = row.querySelector(".j3-duty")?.checked || false;
-    const remarks = row.querySelector(".j3-remarks")?.value || "";
-
-    if (lot || stoneType || shape || quality || price || cost) {
-      const rowData = {
-        Colorstone_Lot: lot,
-        Stone_Type: stoneType,
-        Stone_Shape: shape,
-        Stone_Quality: quality,
-        Range_Sieve_Mm: range,
-        No_Of_Stones: noStones,
-        Wt_Per_Stone: wtStone,
-        CT_WT: ctwt,
-        Stone_Unit: unit,
-        Stone_Cut: cut,
-        Stone_Color: color,
-        Stone_Clarity: clarity,
-        Supplier: supplier,
-        Setter: setter,
-        Stone_Price: price,
-        Stone_Cost: cost,
-        C_S: cs,
-        Duty: duty,
-        Remarks: remarks,
-      };
-      if (row.dataset.rowId) rowData.ID = row.dataset.rowId;
-      colorStoneRows.push(rowData);
-    }
-  });
-  return colorStoneRows;
-}
-
-/* ================= GET LABOUR DETAILS SUBFORM DATA (JEWELLERY 4) ================= */
-function getLabourDetailsRowsData() {
-  const labourRows = [];
-  document.querySelectorAll("#jewel4Body tr").forEach(function (row) {
-    const laborNo = row.querySelector(".j4-labor-no")?.value || "";
-    const description = row.querySelector(".j4-description")?.value || "";
-    const price = row.querySelector(".j4-price")?.value || "";
-    const qty = row.querySelector(".j4-qty")?.value || "";
-    const duty = row.querySelector(".j4-duty")?.checked || false;
-    const amount = row.querySelector(".j4-amount")?.value || "";
-
-    if (laborNo || description || price || qty || amount) {
-      const rowData = {
-        Labor: laborNo,
-        Description: description,
-        Price: price,
-        Qty: qty,
-        Duty: duty,
-        Amount: amount,
-      };
-      if (row.dataset.rowId) rowData.ID = row.dataset.rowId;
-      labourRows.push(rowData);
-    }
-  });
-  return labourRows;
-}
-
-/* ================= CLEAR FULL PAGE AFTER SAVE ================= */
-
-function clearPageAfterSave() {
-  document.querySelectorAll("input, textarea, select").forEach(function (el) {
-    if (el.type === "button" || el.type === "submit" || el.type === "hidden") {
+  /* ================= UNIT LOOKUP ================= */
+  function loadUnitLookup(targetElement = null) {
+    if (unitLookupData) {
+      renderUnitOptions(targetElement);
       return;
     }
-    if (el.type === "checkbox" || el.type === "radio") {
-      el.checked = false;
-    } else if (el.type === "file") {
-      el.value = "";
-    } else {
-      el.value = "";
-    }
-  });
 
-  document.querySelectorAll("select").forEach(function (sel) {
-    sel.selectedIndex = 0;
-  });
-
-  diaImageFile = null;
-  stoneImageFile = null;
-
-  let diaPrev = document.getElementById("imagePreview");
-  if (diaPrev) { diaPrev.src = ""; diaPrev.style.display = "none"; }
-
-  let stonePrev = document.getElementById("stoneImagePreview");
-  if (stonePrev) { stonePrev.src = ""; stonePrev.style.display = "none"; }
-
-  let clearImg = document.getElementById("clearImage");
-  if (clearImg) clearImg.style.display = "none";
-
-  let clearStone = document.getElementById("clearStoneImage");
-  if (clearStone) clearStone.style.display = "none";
-
-  if (document.getElementById("diamand_imageText"))
-    document.getElementById("diamand_imageText").style.display = "block";
-  if (document.getElementById("imageText"))
-    document.getElementById("imageText").style.display = "block";
-
-  let certBody = document.getElementById("certificateBody");
-  if (certBody) {
-    certBody.innerHTML = "";
-    addCertificateRow();
+    ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Unit" })
+      .then(function (response) {
+        unitLookupData = response.data || [];
+        renderUnitOptions(targetElement);
+      })
+      .catch(function (error) {
+        console.error("Unit lookup error:", error);
+      });
   }
 
-  certificateFiles.clear();
-  certificateFilesToUpload = [];
+  function renderUnitOptions(targetElement = null) {
+    const selects = targetElement
+      ? [targetElement]
+      : document.querySelectorAll("#unit_lookup, .select_unit, .j1-unit, .j3-unit");
 
-  let partnerBody = document.getElementById("partnerBody");
-  if (partnerBody) {
-    partnerBody.innerHTML = "";
-    addPartnerRow();
-  }
-
-  // Clear jewellery subform bodies — leave one blank row each
-  ["jewel1Body", "jewel2Body", "jewel3Body", "jewel4Body", "jewelleryPartnershipBody"].forEach(function (id) {
-    const body = document.getElementById(id);
-    if (body) body.innerHTML = "";
-  });
-
-  [
-    "total_price", "rapport_price", "Rapport_Price",
-    "cs_short_description", "cs_long_description",
-    "diashort_description", "dialong_description",
-    "hts_field", "code_field",
-  ].forEach(function (id) {
-    let f = document.getElementById(id);
-    if (f) f.value = "";
-  });
-
-  [
-    "colorStoneSection", "diamondSection", "pricingSection",
-    "Dimensionssection", "neededcertificatesec", "certificateuploadsec",
-    "partnershipsec", "Jewellery_1_Metal_Details", "Jewellery_2_Diamond_Details",
-    "Jewellery_3_Color_Stone", "Jewellery_4_Labour", "Jewellery_Cost_Summary",
-    "Jewellery_Partnership",
-  ].forEach(function (id) {
-    let sec = document.getElementById(id);
-    if (sec) sec.style.display = "none";
-  });
-
-  recId = null;
-  lot_edit = false;
-  window.scrollTo(0, 0);
-  console.log("Form Cleared Successfully");
-}
-
-/* =================================================================================
-   LOAD EXISTING RECORD (EDIT MODE)
-================================================================================= */
-
-function loadExistingRecord(recordID) {
-  ZOHO.CREATOR.DATA.getRecordById({
-    app_name: "feiny-app",
-    report_name: "All_Lot_Master",
-    id: recordID,
-  })
-    .then(function (res) {
-      const data = res.data;
-      console.log("Existing record data:", data);
-
-      // -- Image Stone Preview Code ---
-      if (data.item_Image) {
-        let fullUrl = "https://creator.zoho.com" + data.item_Image;
-        let frame = document.getElementById("stoneImagePreview");
-        if (frame) {
-          frame.src = fullUrl;
-          frame.style.display = "block";
-          document.getElementById("imageText").style.display = "none";
-          document.getElementById("clearStoneImage").style.display = "block";
+    selects.forEach(function (select) {
+      const selectedValue = select.value;
+      select.innerHTML = `<option value="">Select Unit</option>`;
+      unitLookupData.forEach(function (record) {
+        const option = document.createElement("option");
+        option.value = record.ID;
+        option.text = record.Description1 || record.zc_display_value || "No Name";
+        if (selectedValue && selectedValue == record.ID) {
+          option.selected = true;
         }
-        let diaFrame = document.getElementById("imagePreview");
-        if (diaFrame) {
-          diaFrame.src = fullUrl;
-          diaFrame.style.display = "block";
-          document.getElementById("diamand_imageText").style.display = "none";
-          document.getElementById("clearImage").style.display = "block";
-        }
-      }
-
-      // Load basic fields
-      document.getElementById("In_SKU").value = data.In_SKU || "";
-      document.getElementById("itemType").value = data.Category1 || "";
-      document.getElementById("Stock_On_Hand").value = data.Stock_On_Hand || "1";
-      document.getElementById("Status").value = data.Status || "";
-
-      // Color Stone Fields
-      document.getElementById("surface_lookup").value = data.Surface?.ID || "";
-      document.getElementById("species_lookup").value = data.Species?.ID || "";
-      document.getElementById("treatment_lookup").value = data.Treatment?.ID || "";
-      document.getElementById("shape_lookup").value = data.Shape?.ID || "";
-      document.getElementById("origin_country").value = data.Origin || "";
-      document.getElementById("country_cut").value = data.Country_of_Cut || "";
-      document.getElementById("hts_field").value = data.HTS || "";
-      document.getElementById("code_field").value = data.Code || "";
-      document.getElementById("cs_short_description").value = data.Name1 || "";
-      document.getElementById("cs_long_description").value = data.Long_Description || "";
-
-      // Dimensions
-      document.getElementById("min_length").value = data.length_field || "";
-      document.getElementById("min_width").value = data.Width || "";
-      document.getElementById("min_height").value = data.Height || "";
-      document.getElementById("max_length").value = data.Length_field1 || "";
-      document.getElementById("max_width").value = data.Width1 || "";
-      document.getElementById("max_height").value = data.Height1 || "";
-      document.getElementById("weight").value = data.weight || "";
-
-      // Certificates
-      document.getElementById("cert_other").checked = data.Other || false;
-      document.getElementById("cert_gubelin").checked = data.Gub || false;
-      document.getElementById("cert_agl").checked = data.AGL || false;
-      document.getElementById("cert_gia").checked = data.GIA || false;
-      document.getElementById("cert_ssef").checked = data.SSEF || false;
-      document.getElementById("certificate_details").value = data.Description2 || "";
-
-      // Pricing
-      document.getElementById("Price4").value = data.Price4 || "";
-      document.getElementById("MinimumPrice").value = data.Minimum_Price || "";
-      document.getElementById("unit_lookup").value = data.Unit?.ID || "";
-      document.getElementById("cost_amount").value = data.Cost_Amount || "";
-      document.getElementById("sub_species").value = data.Sub_species || "";
-
-      // DIAMOND FIELDS
-      document.getElementById("dia_shape").value = data.Shape3?.ID || "";
-      document.getElementById("dia_color").value = data.Color?.ID || "";
-      document.getElementById("dia_clarity").value = data.Clarity?.ID || "";
-      document.getElementById("dia_cut").value = data.Cut?.ID || "";
-      document.getElementById("dia_polish").value = data.Polish?.ID || "";
-      document.getElementById("dia_symmetry").value = data.Symmetry?.ID || "";
-      document.getElementById("dia_culet").value = data.Culet?.ID || "";
-      document.getElementById("dia_fluorescence").value = data.Fluorescence1?.ID || "";
-      document.getElementById("dia_colour_fluorescence").value = data.Fluorescence_Color?.ID || "";
-      document.getElementById("dia_length").value = data.Length_mm || "";
-      document.getElementById("dia_width").value = data.Width_mm || "";
-      document.getElementById("dia_depth").value = data.Depth1 || "";
-      document.getElementById("dia_table").value = data.Table || "";
-      document.getElementById("dia_depth_percent").value = data.Depth2 || "";
-      document.getElementById("quantity").value = data.Quantity || "";
-      document.getElementById("dia_weight").value = data.Weight_Ct || "";
-      document.getElementById("price_per_carat").value = data.Price_Per_carat || "";
-      document.getElementById("total_price").value = data.Total_Price || "";
-      document.getElementById("rapport_price").value = data.Rapport_Price1 || "";
-      document.getElementById("diashort_description").value = data.Short_Description1 || "";
-      document.getElementById("dialong_description").value = data.Long_Description2 || "";
-
-      // ── JEWELLERY MAIN FIELDS ──
-      document.getElementById("style").value = data.Style || "";
-      document.getElementById("jewellery_type").value = data.Jewellery_Type?.ID || data.Jewellery_Type || "";
-      document.getElementById("platinum").value = data.Platinum || "";
-      document.getElementById("gold").value = data.Gold || "";
-      document.getElementById("production").value = data.Production || "";
-      if (document.getElementById("instructions"))
-        document.getElementById("instructions").value = data.Instructions || "";
-      // FIX: HTML id is "countries_origin"
-      if (document.getElementById("countries_origin"))
-        document.getElementById("countries_origin").value = data.Country_Of_Origin1 || "";
-      document.getElementById("size").value = data.Size || "";
-      document.getElementById("weight_grams").value = data.Weight_grams || "";
-      document.getElementById("circa").value = data.Circa || "";
-      document.getElementById("order").value = data.Order || "";
-      document.getElementById("hts").value = data.HTS1 || "";
-      document.getElementById("note").value = data.Notes || "";
-      document.getElementById("brand").value = data.Brand?.ID || data.Brand || "";
-      // FIX: HTML ids are "description" and "instruction"
-      if (document.getElementById("description"))
-        document.getElementById("description").value = data.Jewel_Short_Description || "";
-      if (document.getElementById("instruction"))
-        document.getElementById("instruction").value = data.Jewel_Long_Description || "";
-
-      // ── JEWELLERY COST SUMMARY ──
-      if (document.getElementById("diamond_price"))
-        document.getElementById("diamond_price").value = data.Diamond_Price || "";
-      if (document.getElementById("semi_mount_price"))
-        document.getElementById("semi_mount_price").value = data.Semi_Mount_Price || "";
-      if (document.getElementById("other_cost"))
-        document.getElementById("other_cost").value = data.Other_Cost || "";
-      if (document.getElementById("total_cost"))
-        document.getElementById("total_cost").value = data.Total_Cost || "";
-      if (document.getElementById("duty_percentage"))
-        document.getElementById("duty_percentage").value = data.Duty_Percentage || "";
-      if (document.getElementById("duty_amount"))
-        document.getElementById("duty_amount").value = data.Duty_Amount || "";
-      if (document.getElementById("final_cost"))
-        document.getElementById("final_cost").value = data.Final_Cost || "";
-      if (document.getElementById("selling_price_piece"))
-        document.getElementById("selling_price_piece").value = data.Selling_Price_Piece || "";
-      if (document.getElementById("cost_amount_summary"))
-        document.getElementById("cost_amount_summary").value = data.Cost_Amount || "";
-
-      /* ─── CERTIFICATE UPLOADS SUBFORM ─── */
-      loadCertificateSubform(recordID);
-
-      /* ─── JEWELLERY SUBFORMS (Metal, Diamond, Color Stone, Labour) ─── */
-      if (data.Category1 === "Jewellery") {
-        loadJewelleryMetalSubform(recordID, data);
-        loadJewelleryDiamondSubform(recordID, data);
-        loadJewelleryColorStoneSubform(recordID, data);
-        loadJewelleryLabourSubform(recordID, data);
-      }
-
-      /* ─── PARTNERSHIP DETAILS SUBFORM ─── */
-      const partnerData = data.Partnership_Details || [];
-      const isJewel = data.Category1 === "Jewellery";
-      const tbody = document.getElementById(isJewel ? "jewelleryPartnershipBody" : "partnerBody");
-      if (tbody) tbody.innerHTML = "";
-
-      if (partnerData.length > 0) {
-        partnerData.forEach(function (item) {
-          const tr = document.createElement("tr");
-          tr.dataset.rowId = item.ID || "";
-
-          if (isJewel) {
-            tr.className = "jewellery-partnership-row";
-            tr.innerHTML = `
-              <td><select class="jp_partner_select_contact"><option value="">Select Contact</option></select></td>
-              <td><input type="text" class="jp_shares" value="${item.Partnership_shares || ""}"></td>
-              <td><input type="text" class="jp_partnership_percentage" value="${item.Partnership || ""}"></td>
-              <td><input type="text" class="jp_commission_percentage" value="${item.Commission || ""}"></td>
-              <td class="checkbox-cell"><input type="checkbox" class="jp_commission_itemization" ${item.Commission_Itemized_on_Invoice === "true" || item.Commission_Itemized_on_Invoice === true ? "checked" : ""}></td>
-              <td><textarea class="jp_description">${item.Description || ""}</textarea></td>
-              <td><button type="button" class="btn-remove" onclick="removeRow(this)">❌</button></td>`;
-          } else {
-            tr.className = "partner-row";
-            tr.innerHTML = `
-              <td><select class="partnerdatalookup"><option value="">Select Partner</option></select></td>
-              <td><input type="text" class="partner-share" value="${item.Partnership_shares || ""}"></td>
-              <td><input type="text" class="partner-percent" value="${item.Partnership || ""}"></td>
-              <td><input type="text" class="commission-percent" value="${item.Commission || ""}"></td>
-              <td style="text-align:center"><input type="checkbox" class="commission-itemized" ${item.Commission_Itemized_on_Invoice === "true" || item.Commission_Itemized_on_Invoice === true ? "checked" : ""}></td>
-              <td><textarea class="partner-desc">${item.Description || ""}</textarea></td>
-              <td><button type="button" class="btn-remove" onclick="removeRow(this)">❌</button></td>`;
-          }
-
-          if (tbody) tbody.appendChild(tr);
-          const selectEl = tr.querySelector("select");
-
-          setTimeout(function () {
-            if (typeof populatePartnerDropdowns === "function") populatePartnerDropdowns(selectEl);
-            if (item.Partner_Name?.ID) {
-              selectEl.value = item.Partner_Name.ID;
-            }
-          }, 300);
-        });
-      } else {
-        console.log("⚠️ No partnership data found");
-        if (typeof addPartnerRow === "function") addPartnerRow();
-      }
-
-      applyVisibility();
-    })
-    .catch(function (err) {
-      console.error("loadExistingRecord error:", err);
+        select.appendChild(option);
+      });
     });
-}
-
-/* =================================================================================
-   LOAD JEWELLERY SUBFORMS (METAL / DIAMOND / COLOR STONE / LABOUR)
-   These attempt to read from inline subform data first (data.Metal_Details etc.)
-   and fall back to fetching child records if needed.
-================================================================================= */
-
-function loadJewelleryMetalSubform(recordID, data) {
-  const tbody = document.getElementById("jewel1Body");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  const rows = data.Metal_Details || [];
-  if (rows.length === 0) {
-    if (typeof addJewellery1Row === "function") addJewellery1Row();
-    return;
   }
 
-  rows.forEach(function (item) {
-    const tr = document.createElement("tr");
-    tr.className = "jewel1-row";
-    tr.dataset.rowId = item.ID || "";
-    tr.innerHTML = `
-      <td><input type="text" class="j1-cast-no" value="${item.Cast_No || ""}"></td>
-      <td><select class="select_contact j1-vendor"><option value="">Select Contact</option></select></td>
-      <td><select class="select_metal_type j1-metal-type"><option value="">Select Metal Type</option></select></td>
-      <td><select class="select_color j1-metal-color"><option value="">Select Color</option></select></td>
-      <td><select class="select_purity j1-metal-purity"><option value="">Select Purity</option></select></td>
-      <td><select class="select_unit j1-unit"><option value="">Select Unit</option></select></td>
-      <td><input type="number" class="j1-weight" value="${item.Weight || ""}"></td>
-      <td><input type="number" class="j1-qty" value="${item.Quantity || ""}"></td>
-      <td><input type="number" class="j1-market" value="${item.Metal_Market || ""}"></td>
-      <td><input type="text" class="j1-price" value="${item.Price || ""}"></td>
-      <td><input type="text" class="j1-gold-cost" value="${item.Gold_Cost || ""}"></td>
-      <td><textarea class="j1-remarks">${item.Remarks || ""}</textarea></td>
-    `;
-    tbody.appendChild(tr);
-
-    if (typeof loadContactLookup === "function") loadContactLookup(tr.querySelector(".j1-vendor"));
-    if (typeof loadMetalTypeLookup === "function") loadMetalTypeLookup(tr.querySelector(".j1-metal-type"));
-    if (typeof loadColorLookup === "function") loadColorLookup(tr.querySelector(".j1-metal-color"));
-    if (typeof loadPurityLookup === "function") loadPurityLookup(tr.querySelector(".j1-metal-purity"));
-    if (typeof loadUnitLookup === "function") loadUnitLookup(tr.querySelector(".j1-unit"));
-
-    setTimeout(function () {
-      const vendorId = item.Vendor?.ID || item.Vendor || "";
-      const metalTypeId = item.Metal_Type?.ID || item.Metal_Type || "";
-      const metalColorId = item.Metal_Colour?.ID || item.Metal_Colour || "";
-      const metalPurityId = item.Metal_Purity?.ID || item.Metal_Purity || "";
-      const unitId = item.Unit?.ID || item.Unit || "";
-
-      if (vendorId) tr.querySelector(".j1-vendor").value = vendorId;
-      if (metalTypeId) tr.querySelector(".j1-metal-type").value = metalTypeId;
-      if (metalColorId) tr.querySelector(".j1-metal-color").value = metalColorId;
-      if (metalPurityId) tr.querySelector(".j1-metal-purity").value = metalPurityId;
-      if (unitId) tr.querySelector(".j1-unit").value = unitId;
-    }, 500);
-  });
-}
-
-function loadJewelleryDiamondSubform(recordID, data) {
-  const tbody = document.getElementById("jewel2Body");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  const rows = data.Diamond_Details || [];
-  if (rows.length === 0) {
-    if (typeof addJewellery2Row === "function") addJewellery2Row();
-    return;
+  /* ================= SURFACE LOOKUP ================= */
+  function loadSurfaceLookup() {
+    ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "All_Surface" })
+      .then(function (response) {
+        const unitSelect = document.getElementById("surface_lookup");
+        if (!unitSelect) return;
+        unitSelect.innerHTML = `<option value="">None</option>`;
+        if (!response.data || response.data.length === 0) return;
+        response.data.forEach(function (record) {
+          const option = document.createElement("option");
+          option.value = record.ID;
+          option.text = record.Description1;
+          unitSelect.appendChild(option);
+        });
+      })
+      .catch(function (error) {
+        console.error("Surface lookup error:", error);
+      });
   }
 
-  rows.forEach(function (item) {
-    const tr = document.createElement("tr");
-    tr.className = "jewel2-row";
-    tr.dataset.rowId = item.ID || "";
-    tr.innerHTML = `
-      <td><input type="text" class="j2-lot" value="${item.Diamond_Lot_No || ""}"></td>
-      <td><select class="select_shape j2-shape"><option value="">Select Shape</option></select></td>
-      <td><input type="text" class="j2-quality" value="${item.Quality || ""}"></td>
-      <td><input type="number" class="j2-stones" value="${item.No_of_Stones || ""}"></td>
-      <td><input type="number" class="j2-total-ct" value="${item.Total_Ct_Wt || ""}"></td>
-      <td><input type="text" class="j2-price" value="${item.Price || ""}"></td>
-      <td><input type="text" class="j2-cost" value="${item.Diamond_Cost || ""}"></td>
-      <td><textarea class="j2-remarks">${item.Remarks || ""}</textarea></td>
-    `;
-    tbody.appendChild(tr);
+  /* ================= TREATMENT LOOKUP ================= */
+  function loadTreatmentLookup() {
+    ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Treatment" })
+      .then(function (response) {
+        const select = document.getElementById("treatment_lookup");
+        if (!select) return;
+        select.innerHTML = `<option value="">None</option>`;
+        if (!response.data || response.data.length === 0) return;
+        response.data.forEach(function (record) {
+          const option = document.createElement("option");
+          option.value = record.ID;
+          option.text = record.Description1;
+          select.appendChild(option);
+        });
+      })
+      .catch(function (error) {
+        console.error("Treatment lookup error:", error);
+      });
+  }
 
-    if (typeof loadShapeLookup === "function") {
-      // Use the cached renderShapeOptions if available
-      const shapeSelect = tr.querySelector(".j2-shape");
-      if (typeof renderShapeOptions === "function") {
-        renderShapeOptions(shapeSelect);
-      }
+  /* ================= SHAPE LOOKUP ================= */
+  function loadShapeLookup() {
+    ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Shape" })
+      .then(function (response) {
+        const select = document.getElementById("shape_lookup");
+        if (!select) return;
+        select.innerHTML = `<option value="">None</option>`;
+        if (!response.data || response.data.length === 0) return;
+        response.data.forEach(function (record) {
+          const option = document.createElement("option");
+          option.value = record.ID;
+          option.text = record.Description1;
+          select.appendChild(option);
+        });
+      })
+      .catch(function (error) {
+        console.error("Shape lookup error:", error);
+      });
+  }
+
+  /* ================= DIA SHAPE LOOKUP ================= */
+  function loaddiaShapeLookup() {
+    ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Shape" })
+      .then(function (response) {
+        const select = document.getElementById("dia_shape");
+        if (!select) return;
+        select.innerHTML = `<option value="">None</option>`;
+        if (!response.data || response.data.length === 0) return;
+        response.data.forEach(function (record) {
+          const option = document.createElement("option");
+          option.value = record.ID;
+          option.text = record.Description1;
+          select.appendChild(option);
+        });
+      })
+      .catch(function (error) {
+        console.error("Dia Shape lookup error:", error);
+      });
+  }
+
+  /* ================= DIAMOND COLOR LOOKUP ================= */
+  function loadDiaColorLookup() {
+    ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Color" })
+      .then(function (response) {
+        const select = document.getElementById("dia_color");
+        if (!select) return;
+        select.innerHTML = `<option value="">None</option>`;
+        if (!response.data || response.data.length === 0) return;
+        response.data.forEach(function (record) {
+          const option = document.createElement("option");
+          option.value = record.ID;
+          option.text = record.Description1;
+          select.appendChild(option);
+        });
+      })
+      .catch(function (error) {
+        console.error("Colour lookup error:", error);
+      });
+  }
+
+  /* ================= DIAMOND CLARITY LOOKUP ================= */
+  function loadDiaClarityLookup() {
+    ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Clarity" })
+      .then(function (response) {
+        const select = document.getElementById("dia_clarity");
+        if (!select) return;
+        select.innerHTML = `<option value="">None</option>`;
+        if (!response.data || response.data.length === 0) return;
+        response.data.forEach(function (record) {
+          const option = document.createElement("option");
+          option.value = record.ID;
+          option.text = record.Description1;
+          select.appendChild(option);
+        });
+      })
+      .catch(function (error) {
+        console.error("Clarity lookup error:", error);
+      });
+  }
+
+  /* ================= DIAMOND CUT LOOKUP ================= */
+  function loadDiaCutLookup() {
+    ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Cut" })
+      .then(function (response) {
+        const select = document.getElementById("dia_cut");
+        if (!select) return;
+        select.innerHTML = `<option value="">None</option>`;
+        if (!response.data || response.data.length === 0) return;
+        response.data.forEach(function (record) {
+          const option = document.createElement("option");
+          option.value = record.ID;
+          option.text = record.Description1;
+          select.appendChild(option);
+        });
+      })
+      .catch(function (error) {
+        console.error("Cut lookup error:", error);
+      });
+  }
+
+  /* ================= DIAMOND POLISH LOOKUP ================= */
+  function loadDiaPolishLookup() {
+    ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Polish" })
+      .then(function (response) {
+        const select = document.getElementById("dia_polish");
+        if (!select) return;
+        select.innerHTML = `<option value="">None</option>`;
+        if (!response.data || response.data.length === 0) return;
+        response.data.forEach(function (record) {
+          const option = document.createElement("option");
+          option.value = record.ID;
+          option.text = record.Description1;
+          select.appendChild(option);
+        });
+      })
+      .catch(function (error) {
+        console.error("Polish lookup error:", error);
+      });
+  }
+
+  /* ================= DIAMOND SYMMETRY LOOKUP ================= */
+  function loadDiaSymmetryLookup() {
+    ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Symmetry" })
+      .then(function (response) {
+        const select = document.getElementById("dia_symmetry");
+        if (!select) return;
+        select.innerHTML = `<option value="">None</option>`;
+        if (!response.data || response.data.length === 0) return;
+        response.data.forEach(function (record) {
+          const option = document.createElement("option");
+          option.value = record.ID;
+          option.text = record.Description1;
+          select.appendChild(option);
+        });
+      })
+      .catch(function (error) {
+        console.error("Symmetry lookup error:", error);
+      });
+  }
+
+  /* ================= DIAMOND CULET LOOKUP ================= */
+  function loadDiaCuletLookup(selectedValue = null) {
+    if (culetLookupData) {
+      renderCuletOptions(selectedValue);
+      return;
     }
-
-    setTimeout(function () {
-      const shapeId = item.Shape?.ID || item.Shape || "";
-      if (shapeId) tr.querySelector(".j2-shape").value = shapeId;
-    }, 500);
-  });
-}
-
-function loadJewelleryColorStoneSubform(recordID, data) {
-  const tbody = document.getElementById("jewel3Body");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  const rows = data.Color_Stone1 || [];
-  if (rows.length === 0) {
-    if (typeof addJewellery3Row === "function") addJewellery3Row();
-    return;
+    ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Cutlet" })
+      .then(function (response) {
+        culetLookupData = response.data || [];
+        renderCuletOptions(selectedValue);
+      })
+      .catch(function (error) {
+        console.error("Culet lookup error:", error);
+      });
   }
 
-  rows.forEach(function (item) {
-    const tr = document.createElement("tr");
-    tr.className = "jewel3-row";
-    tr.dataset.rowId = item.ID || "";
-    tr.innerHTML = `
-      <td><input type="text" class="j3-lot" value="${item.Lot_No || ""}"></td>
-      <td><select class="j3-stone-type"><option value="">Select</option></select></td>
-      <td><select class="select_shape"><option value="">Select Shape</option></select></td>
-      <td><input type="text" class="j3-quality" value="${item.Quality || ""}"></td>
-      <td><input type="text" class="j3-range" value="${item.Range || ""}"></td>
-      <td><input type="number" class="j3-no-stones" value="${item.No_Stones || ""}"></td>
-      <td><input type="number" class="j3-wt-stone" value="${item.Wt_Stone || ""}"></td>
-      <td><input type="number" class="j3-ctwt" value="${item.CT_WT || ""}"></td>
-      <td><select class="select_unit j3-unit"><option value="">Select Unit</option></select></td>
-      <td><select class="Select_Cut j3-cut"><option value="">Select Cut</option></select></td>
-      <td><select class="Select_Stone_Color j3-color"><option value="">Select Stone Color</option></select></td>
-      <td><select class="Select_Clarity_j3-clarity"><option value="">Select Clarity</option></select></td>
-      <td><select class="j3-supplier"><option value="">Select Supplier</option></select></td>
-      <td><select class="j3-setter"><option value="">Select Setter</option></select></td>
-      <td><input type="text" class="j3-price" value="${item.Price || ""}"></td>
-      <td><input type="text" class="j3-cost" value="${item.Stone_Cost || ""}"></td>
-      <td><input type="checkbox" class="j3-cs" ${item.CS ? "checked" : ""}></td>
-      <td><input type="checkbox" class="j3-duty" ${item.Duty ? "checked" : ""}></td>
-      <td><textarea class="j3-remarks">${item.Remarks || ""}</textarea></td>
-    `;
-    tbody.appendChild(tr);
+  function renderCuletOptions(selectedValue = null) {
+    const select = document.getElementById("dia_culet");
+    if (!select) return;
+    select.innerHTML = `<option value="">None</option>`;
+    culetLookupData.forEach(function (record) {
+      const option = document.createElement("option");
+      option.value = record.ID;
+      option.text = record.Description1;
+      select.appendChild(option);
+    });
+    if (selectedValue) select.value = selectedValue;
+  }
 
-    if (typeof loadUnitLookup === "function") loadUnitLookup(tr.querySelector(".j3-unit"));
-    if (typeof loadCutLookup === "function") loadCutLookup(tr.querySelector(".j3-cut"));
-    if (typeof loadColorLookup === "function") loadColorLookup(tr.querySelector(".j3-color"));
-    if (typeof loadClarityLookup === "function") loadClarityLookup(tr.querySelector(".Select_Clarity_j3-clarity"));
-    if (typeof loadContactLookup === "function") {
-      loadContactLookup(tr.querySelector(".j3-supplier"));
-      loadContactLookup(tr.querySelector(".j3-setter"));
+  /* ================= DIAMOND FLUORESCENCE LOOKUP ================= */
+  function loadDiaFluorescenceLookup(selectedValue = null) {
+    if (fluorescenceLookupData) {
+      renderFluorescenceOptions(selectedValue);
+      return;
     }
-    if (typeof renderShapeOptions === "function") renderShapeOptions(tr.querySelector(".select_shape"));
-
-    setTimeout(function () {
-      const shapeId = item.Shape?.ID || item.Shape || "";
-      const unitId = item.Unit?.ID || item.Unit || "";
-      const cutId = item.Cut?.ID || item.Cut || "";
-      const colorId = item.Stone_Color?.ID || item.Stone_Color || "";
-      const clarityId = item.Clarity?.ID || item.Clarity || "";
-      const supplierId = item.Supplier?.ID || item.Supplier || "";
-      const setterId = item.Setter?.ID || item.Setter || "";
-
-      if (shapeId) tr.querySelector(".select_shape").value = shapeId;
-      if (unitId) tr.querySelector(".j3-unit").value = unitId;
-      if (cutId) tr.querySelector(".j3-cut").value = cutId;
-      if (colorId) tr.querySelector(".j3-color").value = colorId;
-      if (clarityId) tr.querySelector(".Select_Clarity_j3-clarity").value = clarityId;
-      if (supplierId) tr.querySelector(".j3-supplier").value = supplierId;
-      if (setterId) tr.querySelector(".j3-setter").value = setterId;
-    }, 500);
-  });
-}
-
-function loadJewelleryLabourSubform(recordID, data) {
-  const tbody = document.getElementById("jewel4Body");
-  if (!tbody) return;
-  tbody.innerHTML = "";
-
-  const rows = data.Labour_Details || [];
-  if (rows.length === 0) {
-    if (typeof addJewellery4Row === "function") addJewellery4Row();
-    return;
+    ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Fluroscence" })
+      .then(function (response) {
+        fluorescenceLookupData = response.data || [];
+        renderFluorescenceOptions(selectedValue);
+      })
+      .catch(function (error) {
+        console.error("Fluorescence lookup error:", error);
+      });
   }
 
-  rows.forEach(function (item) {
-    const tr = document.createElement("tr");
-    tr.className = "jewel4-row";
-    tr.dataset.rowId = item.ID || "";
-    tr.innerHTML = `
-      <td><input type="text" class="j4-labor-no" value="${item.Labour_No || ""}"></td>
-      <td><textarea class="j4-description">${item.Description || ""}</textarea></td>
-      <td><input type="text" class="j4-price" value="${item.Price || ""}"></td>
-      <td><input type="number" class="j4-qty" value="${item.Quantity || ""}"></td>
-      <td><input type="checkbox" class="j4-duty" ${item.Duty ? "checked" : ""}></td>
-      <td><input type="text" class="j4-amount" value="${item.Amount || ""}"></td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
+  function renderFluorescenceOptions(selectedValue = null) {
+    const select = document.getElementById("dia_fluorescence");
+    if (!select) return;
+    select.innerHTML = `<option value="">None</option>`;
+    fluorescenceLookupData.forEach(function (record) {
+      const option = document.createElement("option");
+      option.value = record.ID;
+      option.text = record.Description1;
+      select.appendChild(option);
+    });
+    if (selectedValue) select.value = selectedValue;
+  }
 
-/* ─── Date string from Zoho (dd-Mon-yyyy or ISO) → yyyy-mm-dd for <input type="date"> ─── */
-function formatToYYYYMMDD(dateStr) {
-  if (!dateStr) return "";
-  if (dateStr.includes("T")) return dateStr.split("T")[0];
-  if (dateStr.includes("-")) {
-    const parts = dateStr.split("-");
-    if (parts.length === 3) {
-      const [day, monthStr, year] = parts;
-      const months = {
-        Jan: "01", Feb: "02", Mar: "03", Apr: "04",
-        May: "05", Jun: "06", Jul: "07", Aug: "08",
-        Sep: "09", Oct: "10", Nov: "11", Dec: "12",
-      };
-      const month = months[monthStr];
-      if (month) return `${year}-${month}-${day.padStart(2, "0")}`;
+  /* ================= DIAMOND FLUORESCENCE COLOR LOOKUP ================= */
+  function loadDiaFluorescenceColorLookup(selectedValue = null) {
+    if (fluorescenceColorLookupData) {
+      renderFluorescenceColorOptions(selectedValue);
+      return;
     }
+    ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Fluroscence_color" })
+      .then(function (response) {
+        fluorescenceColorLookupData = response.data || [];
+        renderFluorescenceColorOptions(selectedValue);
+      })
+      .catch(function (error) {
+        console.error("Fluorescence Color lookup error:", error);
+      });
   }
-  return "";
-}
 
-/* =================================================================================
-   LOAD CERTIFICATE SUBFORM ROWS
-================================================================================= */
-function loadCertificateSubform(recordID) {
-  const certTbody = document.getElementById("certificateBody");
-  certTbody.innerHTML = "";
-  document.getElementById("certificateuploadsec").style.display = "block";
+  function renderFluorescenceColorOptions(selectedValue = null) {
+    const select = document.getElementById("dia_colour_fluorescence");
+    if (!select) return;
+    select.innerHTML = `<option value="">None</option>`;
+    fluorescenceColorLookupData.forEach(function (record) {
+      const option = document.createElement("option");
+      option.value = record.ID;
+      option.text = record.Description1;
+      select.appendChild(option);
+    });
+    if (selectedValue) select.value = selectedValue;
+  }
 
-  ZOHO.CREATOR.DATA.getRecords({
-    app_name: "feiny-app",
-    report_name: "All_Certificate_Details",
-    criteria: "Lot_Master_ID == " + recordID,
-  })
-    .then(function (response) {
-      console.log("CertificateLoad -- ", response);
-      const certData = response.data || [];
+  /* ================= SPECIES LOOKUP ================= */
+  function loadSpeciesLookup() {
+    ZOHO.CREATOR.DATA.getRecords({
+      app_name: "feiny-app",
+      report_name: "All_Stone_Species",
+    })
+      .then(function (response) {
+        const select = document.getElementById("species_lookup");
+        if (!select) return;
 
-      if (certData.length === 0) {
-        console.log("No certificate rows found — adding blank row");
-        addCertificateRow();
+        select.innerHTML = `<option value="">None</option>`;
+
+        if (!response.data || response.data.length === 0) return;
+
+        response.data.forEach(function (record) {
+          speciesMap[record.ID] = record;
+
+          const option = document.createElement("option");
+          option.value = record.ID;
+          option.text = record.Species;
+          select.appendChild(option);
+        });
+
+        setupSpeciesAutoFill();
+      })
+      .catch(function (error) {
+        console.error("Species lookup error:", error);
+      });
+  }
+
+  /* ================= AUTO FILL SUB SPECIES ================= */
+  function setupSpeciesAutoFill() {
+    const speciesSelect = document.getElementById("species_lookup");
+    const subSpeciesField = document.getElementById("sub_species");
+
+    if (!speciesSelect || !subSpeciesField) return;
+
+    speciesSelect.addEventListener("change", function () {
+      const selectedId = this.value;
+
+      if (!selectedId) {
+        subSpeciesField.value = "";
         return;
       }
 
-      certData
-        .slice()
-        .reverse()
-        .forEach(function (item) {
-          const formattedDate = formatToYYYYMMDD(item.Date_field);
-          const tr = document.createElement("tr");
-          tr.classList.add("cert-row");
-          tr.dataset.certRecordId = item.ID || "";
+      const selectedRecord = speciesMap[selectedId];
 
-          tr.innerHTML = `
-            <td><input class="cert-id" value="${item.ID1 || ""}"></td>
-            <td class="cert-file-cell">
-              <input type="file" class="cert-file" accept=".pdf,.jpg,.jpeg,.png,.gif">
-              <div class="existing-file-display" style="margin-top:5px;"></div>
-            </td>
-            <td><input type="date" class="cert-date" value="${formattedDate}"></td>
-            <td><textarea class="cert-notes">${item.Notes || ""}</textarea></td>
-            <td><select class="cert-lab"></select></td>
-            <td><select class="cert-lab-desc"></select></td>
-            <td><select class="cert-lab-sup"></select></td>
-            <td>
-              <input type="text" class="cert-rowUnique-id" value="${item.ID || ""}" style="display:none;">
-            </td>
-            <td>
-              <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
-            </td>
-          `;
+      if (selectedRecord && selectedRecord.Sub_species) {
+        subSpeciesField.value = selectedRecord.Sub_species;
+      } else {
+        subSpeciesField.value = "";
+      }
+    });
+  }
 
-          certTbody.appendChild(tr);
+ /* ================= RAPPORT PRICE ================= */
+function fetchRapportPrice() {
+  // Lookup fields — .value gives the linked record ID
+  const shapeId   = document.getElementById("dia_shape")?.value;
+  const colorId   = document.getElementById("dia_color")?.value;
+  const clarityId = document.getElementById("dia_clarity")?.value;
+  const weight    = parseFloat(document.getElementById("dia_weight")?.value);
 
-          const existingFileDisplay = tr.querySelector(".existing-file-display");
+  console.log("IDs:", { shapeId, colorId, clarityId, weight });
 
-          if (item.Certificate_Single) {
-            const fullUrl = "https://creator.zoho.com" + item.Certificate_Single;
+  const priceEl = document.getElementById("rapport_price");
 
-            function getFileNameAndExtension(url) {
-              try {
-                const decodedUrl = decodeURIComponent(url);
-                const match = decodedUrl.match(/[?&]filepath=([^&]+)/);
-                let fileName = match && match[1] ? match[1] : decodedUrl.split("/").pop();
-                fileName = fileName || "Download File";
-                fileName = fileName.replace(/^\d+_/, "");
-                const parts = fileName.split(".");
-                const extension = parts.length > 1 ? parts.pop().toLowerCase() : "";
-                return { fileName, extension };
-              } catch (e) {
-                return { fileName: "Download File", extension: "" };
-              }
-            }
+  if (!shapeId || !colorId || !clarityId || isNaN(weight) || weight <= 0) {
+    if (priceEl) priceEl.value = "";
+    return;
+  }
 
-            const { fileName, extension } = getFileNameAndExtension(fullUrl);
+  // Both forms share the same lookup tables so IDs match directly.
+  // Use FieldName.ID = numericId for each lookup field.
+  const criteria =
+    "Shapes.ID = " + shapeId +
+    " && Colors.ID = " + colorId +
+    " && Claritys.ID = " + clarityId;
 
-            if (["jpg", "jpeg", "png", "gif"].includes(extension)) {
-              existingFileDisplay.innerHTML = `
-                <div style="cursor:pointer;padding:10px;background:#f0f0f0;border-radius:4px;" onclick="openFilePreview('${fullUrl}','${fileName}')">
-                  <img src="${fullUrl}" alt="${fileName}" style="max-width:80px;max-height:80px;display:block;margin-bottom:5px;border-radius:3px;">
-                  <small style="color:#666;">Click to preview</small>
-                </div>`;
-            } else if (extension === "pdf") {
-              existingFileDisplay.innerHTML = `
-                <div style="cursor:pointer;padding:8px;border:1px solid #ddd;border-radius:4px;display:inline-block;background:#fff;text-align:center;" onclick="openFilePreview('${fullUrl}','${fileName}')">
-                  <div style="color:#d32f2f;font-size:24px;text-align:center;margin-bottom:5px;">📄</div>
-                  <small style="color:#0066cc;font-weight:bold;">Preview PDF</small><br>
-                  <small style="color:#888;font-size:10px;">${fileName}</small>
-                </div>`;
-            } else {
-              existingFileDisplay.innerHTML = `
-                <div style="cursor:pointer;padding:8px;border:1px solid #ddd;border-radius:4px;display:inline-block;background:#fff;" onclick="openFilePreview('${fullUrl}','${fileName}')">
-                  <small style="color:#333;">📎 ${fileName}</small><br>
-                  <small style="color:#0066cc;">Click to view</small>
-                </div>`;
-            }
-          } else {
-            existingFileDisplay.innerHTML = "<small>No file uploaded</small>";
-          }
+  console.log("CRITERIA:", criteria);
 
-          populateRowSelects(tr);
+  ZOHO.CREATOR.DATA.getRecords({
+    app_name: "feiny-app",
+    report_name: "All_Rapaport_Masters",
+    criteria: criteria,
+    max_records: 200,
+  })
+    .then(function (response) {
+      console.log("FULL RESPONSE:", response);
 
-          setTimeout(function () {
-            tr.querySelector(".cert-lab").value = item.Lab?.ID || "";
-            tr.querySelector(".cert-lab-desc").value = item.Lab_Descriptor?.ID || "";
-            tr.querySelector(".cert-lab-sup").value = item.Laboratory_Supplement?.ID || "";
-          }, 300);
-        });
+      if (response.code !== 3000 || !response.data || response.data.length === 0) {
+        console.warn("No Rapaport records returned — check IDs match Rapaport Master lookup IDs");
+        if (priceEl) priceEl.value = "";
+        return;
+      }
+
+      console.log("SAMPLE RECORD:", response.data[0]);
+
+      // Filter by weight — Weight_high_size1 must be >= the entered weight
+      const filtered = response.data.filter(function (rec) {
+        const highWeight = parseFloat(rec.Weight_high_size1);
+        return !isNaN(highWeight) && highWeight >= weight;
+      });
+
+      console.log("WEIGHT FILTERED:", filtered);
+
+      if (filtered.length === 0) {
+        console.warn("No Rapaport record covers this weight");
+        if (priceEl) priceEl.value = "";
+        return;
+      }
+
+      // Smallest upper bound that still covers the entered weight
+      const sorted = [...filtered].sort(
+        (a, b) => parseFloat(a.Weight_high_size1) - parseFloat(b.Weight_high_size1)
+      );
+
+      const price = sorted[0].Rapaport_Price || "";
+      console.log("FINAL PRICE:", price);
+      if (priceEl) priceEl.value = price;
     })
     .catch(function (error) {
-      console.error("Error fetching certificate subform:", error);
-      addCertificateRow();
+      console.error("Rapaport fetch error:", error);
+      if (priceEl) priceEl.value = "";
     });
 }
 
-/* ================= FILE PREVIEW ================= */
-function openFilePreview(url, fileName) {
-  const modal = document.getElementById("filePreviewModal");
-  const content = document.getElementById("previewContent");
-  if (!modal || !content) return;
+/* ================= RAPPORT PRICE TRIGGERS ================= */
+function initRapportPriceTriggers() {
+  const shapeEl   = document.getElementById("dia_shape");
+  const colorEl   = document.getElementById("dia_color");
+  const clarityEl = document.getElementById("dia_clarity");
+  const weightEl  = document.getElementById("dia_weight");
 
-  const ext = (fileName.split(".").pop() || "").toLowerCase();
-  if (["jpg", "jpeg", "png", "gif"].includes(ext)) {
-    content.innerHTML = `<img src="${url}" alt="${fileName}" style="max-width:100%;max-height:80vh;">`;
-  } else if (ext === "pdf") {
-    content.innerHTML = `<iframe src="${url}" style="width:80vw;height:80vh;border:none;"></iframe>`;
-  } else {
-    content.innerHTML = `<a href="${url}" target="_blank" style="font-size:18px;">📎 Open ${fileName}</a>`;
+  [shapeEl, colorEl, clarityEl].forEach(function (el) {
+    if (el) el.addEventListener("change", fetchRapportPrice);
+  });
+
+  if (weightEl) weightEl.addEventListener("input", fetchRapportPrice);
+
+  fetchRapportPrice();
+}
+  /* ================= SPECIES CHANGE → HTS / CODE ================= */
+  const speciesLookupEl = document.getElementById("species_lookup");
+  if (speciesLookupEl) {
+    speciesLookupEl.addEventListener("change", function () {
+      const recordId = this.value;
+      if (!recordId) {
+        document.getElementById("hts_field").value = "";
+        document.getElementById("code_field").value = "";
+        return;
+      }
+      ZOHO.CREATOR.DATA.getRecordById({
+        app_name: "feiny-app",
+        report_name: "All_Stone_Species",
+        id: recordId,
+      })
+        .then(function (response) {
+          if (response.code !== 3000 || !response.data) return;
+          document.getElementById("hts_field").value = response.data.HTS || "";
+          document.getElementById("code_field").value = response.data.Default_Treatment_Code || "";
+        })
+        .catch(function (error) {
+          console.error("Species record error:", error);
+        });
+    });
   }
 
-  modal.style.display = "flex";
-}
+  /* ================= HELPER FUNCTION - GET NUMBER ================= */
+  function getNumber(id) {
+    let val = document.getElementById(id)?.value;
+    if (!val) return null;
+    val = val.trim().replace(",", ".");
+    const num = Number(val);
+    return isNaN(num) ? null : num;
+  }
 
-function closeFilePreview() {
-  const modal = document.getElementById("filePreviewModal");
-  const content = document.getElementById("previewContent");
-  if (modal) modal.style.display = "none";
-  if (content) content.innerHTML = "";
-}
+  /* =================================================================================
+    SAVE RECORD — CREATE + UPDATE
+  ================================================================================= */
+  function saveRecord() {
+    const Category1 = document.getElementById("itemType")?.value || "";
+    const In_SKU = document.getElementById("In_SKU")?.value || "";
+
+    // Determine correct cost value based on category
+    let costVal = getNumber("cost_amount"); // Color Stone default
+    if (Category1 === "Diamond") costVal = getNumber("dia_cost_amount");
+    else if (Category1 === "Jewellery") costVal = getNumber("cost_amount_summary");
+
+    if (!Category1 || !In_SKU) {
+      alert("Please select Item Type and enter SKU");
+      return;
+    }
+
+    const saveBtn = document.getElementById("addRecord");
+    const originalText = saveBtn ? saveBtn.textContent : "Save";
+    if (saveBtn) {
+      saveBtn.textContent = "Saving...";
+      saveBtn.disabled = true;
+    }
+
+    // ── Build base record object ──
+    const recordData = cleanRecordData({
+      Select: Category1,
+      Category1: Category1,
+      In_SKU: In_SKU,
+      Stock_On_Hand: getNumber("Stock_On_Hand"),
+      Status: document.getElementById("Status")?.value || "",
+      Treatment: document.getElementById("treatment_lookup")?.value || "",
+      Species: document.getElementById("species_lookup")?.value || "",
+      Surface: document.getElementById("surface_lookup")?.value || "",
+      Shape: document.getElementById("shape_lookup")?.value || "",
+      Origin: document.getElementById("origin_country")?.value || "",
+      Country_of_Cut: document.getElementById("country_cut")?.value || "",
+      HTS: document.getElementById("hts_field")?.value || "",
+      Code: document.getElementById("code_field")?.value || "",
+      Rapport_Price: getNumber("rapport_price"),
+      Name1: document.getElementById("cs_short_description")?.value || "",
+      Long_Description: document.getElementById("cs_long_description")?.value || "",
+      length_field: getNumber("min_length"),
+      Width: getNumber("min_width"),
+      Height: getNumber("min_height"),
+      Length_field1: getNumber("max_length"),
+      Width1: getNumber("max_width"),
+      Height1: getNumber("max_height"),
+      weight: getNumber("weight"),
+      AGL: document.getElementById("cert_agl")?.checked || false,
+      GIA: document.getElementById("cert_gia")?.checked || false,
+      Gub: document.getElementById("cert_gubelin")?.checked || false,
+      SSEF: document.getElementById("cert_ssef")?.checked || false,
+      Other: document.getElementById("cert_other")?.checked || false,
+      Description2: document.getElementById("certificate_details")?.value || "",
+      Price4: getNumber("Price4"),
+      Minimum_Price: getNumber("MinimumPrice"),
+      Unit: document.getElementById("unit_lookup")?.value || "",
+      Shape3: document.getElementById("dia_shape")?.value || "",
+      Color: document.getElementById("dia_color")?.value || "",
+      Clarity: document.getElementById("dia_clarity")?.value || "",
+      Cut: document.getElementById("dia_cut")?.value || "",
+      Polish: document.getElementById("dia_polish")?.value || "",
+      Culet: document.getElementById("dia_culet")?.value || "",
+      Symmetry: document.getElementById("dia_symmetry")?.value || "",
+      Fluorescence1: document.getElementById("dia_fluorescence")?.value || "",
+      Fluorescence_Color: document.getElementById("dia_colour_fluorescence")?.value || "",
+      Length_mm: getNumber("dia_length"),
+      Width_mm: getNumber("dia_width"),
+      Depth1: getNumber("dia_depth"),
+      Table: getNumber("dia_table"),
+      Depth2: getNumber("dia_depth_percent"),
+      Weight_Ct: getNumber("dia_weight"),
+      Price_Per_carat: getNumber("price_per_carat"),
+      Total_Price: getNumber("total_price"),
+      Rapport_Price1: getNumber("rapport_price"),
+      Quantity: getNumber("quantity"),
+      Short_Description1: document.getElementById("diashort_description")?.value || "",
+      Long_Description2: document.getElementById("dialong_description")?.value || "",
+      Cost_Amount: costVal,
+      Sub_species: document.getElementById("sub_species")?.value || "",
+      Style: document.getElementById("style")?.value || "",
+      Jewellery_Type: document.getElementById("jewellery_type")?.value || "",
+      Platinum: document.getElementById("platinum")?.value || "",
+      Gold: document.getElementById("gold")?.value || "",
+      Production: document.getElementById("production")?.value || "",
+      Instructions: document.getElementById("instructions")?.value || "",
+      Country_Of_Origin1: document.getElementById("countries_origin")?.value || "",
+      Size: document.getElementById("size")?.value || "",
+      Weight_grams: getNumber("weight_grams"),
+      Circa: document.getElementById("circa")?.value || "",
+      Order: document.getElementById("order")?.value || "",
+      HTS1: document.getElementById("hts")?.value || "",
+      Notes: document.getElementById("note")?.value || "",
+      Brand: document.getElementById("brand")?.value || "",
+      Jewel_Short_Description: document.getElementById("description")?.value || "",
+      Jewel_Long_Description: document.getElementById("instruction")?.value || "",
+      Diamond_price: getNumber("diamond_price"),
+      Semi_Mount_Price: getNumber("semi_mount_price"),
+      Other_Cost: getNumber("other_cost"),
+      Total_Cost: getNumber("total_cost"),
+      Duty2: getNumber("duty_percentage"),
+      Amount: getNumber("duty_amount"),
+      Final_Cost: getNumber("final_cost"),
+      Selling_price_per_piece: getNumber("selling_price_piece"),
+  Partnership_Details: cleanSubformRows(getPartnerRowsData()),
+  Metal_Details: cleanSubformRows(getMetalDetailsRowsData()),
+  Diamond_Details: cleanSubformRows(getDiamondDetailsRowsData()),
+  Color_Stone1: cleanSubformRows(getColorStoneDetailsRowsData()),
+  Labour_Details: cleanSubformRows(getLabourDetailsRowsData()),
+    });
+  console.log("Saving config:", recordData);
+
+    if (!recId) {
+      /* ===============================
+          ➕ CREATE - Record Creation - API CALL
+      =============================== */
+      const config = {
+        app_name: "feiny-app",
+        form_name: "Lot_Master",
+        payload: {
+          data: recordData,
+        },
+      };
+
+      ZOHO.CREATOR.DATA.addRecords(config)
+        .then(function (response) {
+          console.log("✅ Created:", response);
+
+          if (response.code === 3000 || response.code === "3000") {
+            alert("✅ Record Saved Successfully");
+
+            let recordId = null;
+            if (
+              response.data &&
+              Array.isArray(response.data) &&
+              response.data.length > 0
+            )
+              recordId = response.data[0].ID;
+            else if (response.data && response.data.ID)
+              recordId = response.data.ID;
+            else if (response.details && response.details.id)
+              recordId = response.details.id;
+            else if (response.id) recordId = response.id;
+
+            if (!recordId)
+              throw new Error(
+                "Record created but ID not found: " + JSON.stringify(response),
+              );
+
+            // Handle file uploads after create
+            let uploadPromises = [];
+            const certPromises = createCertificateRecords(In_SKU, recordId);
+            if (certPromises && certPromises.length > 0)
+              uploadPromises = uploadPromises.concat(certPromises);
+            if (recordId && diaImageFile)
+              uploadPromises.push(uploadDiaImage(recordId, diaImageFile));
+            if (recordId && stoneImageFile)
+              uploadPromises.push(uploadStoneImage(recordId, stoneImageFile));
+
+            return Promise.all(uploadPromises);
+          } else {
+            throw new Error(
+              "Failed to create record: " +
+                (response.message || JSON.stringify(response)),
+            );
+          }
+        })
+        .then(function (uploadResults) {
+          console.log("Upload results:", uploadResults);
+          const successCount =
+            uploadResults?.filter((u) => u.type === "certificate" && u.success)
+              .length || 0;
+          let message = "Record created successfully!";
+          if (successCount > 0)
+            message += ` ${successCount} certificate(s) created.`;
+          alert(message);
+          certificateFiles.clear();
+          certificateFilesToUpload = [];
+
+          // ✅ CLEAR PAGE AFTER SUCCESSFUL SAVE
+          clearPageAfterSave();
+
+          // Navigate to the report list
+          ZOHO.CREATOR.UTIL.navigateTo({
+            url: "#Report:All_Lot_Master",
+            target: "same",
+          });
+        })
+        .catch(function (error) {
+          console.error("❌ Save Error:", error);
+          alert("❌ Error: " + error.message);
+        })
+        .finally(function () {
+          if (saveBtn) {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+          }
+        });
+    } else {
+      /* ===============================
+          🔄 Record Updatation - API CALL
+      =============================== */
+      console.log("recId:", recId);
+  console.log("Update Data:", recordData);
+      ZOHO.CREATOR.DATA.updateRecordById({
+    app_name: "feiny-app",
+    report_name: "All_Lot_Master",
+    id: recId,
+    payload: {
+      data: recordData,
+    },
+  })
+        .then(function (res) {
+          console.log("✅ Updated:", res);
+
+          if (res.code === 3000 || res.code === "3000") {
+            alert("✅ Updated Successfully");
+
+            // Handle file uploads after update
+            let uploadPromises = [];
+
+            // const certPromises = uploadCertificateFile(recId,"");
+            const certPromises = createCertificateRecords(In_SKU, recId);
+            if (certPromises && certPromises.length > 0)
+              uploadPromises = uploadPromises.concat(certPromises);
+            if (recId && diaImageFile)
+              uploadPromises.push(uploadDiaImage(recId, diaImageFile));
+            if (recId && stoneImageFile)
+              uploadPromises.push(uploadStoneImage(recId, stoneImageFile));
+
+            return Promise.all(uploadPromises);
+          } else {
+            throw new Error(
+              "Failed to update record: " + (res.message || JSON.stringify(res)),
+            );
+          }
+        })
+        .then(function (uploadResults) {
+          console.log("Upload results:", uploadResults);
+          const successCount =
+            uploadResults?.filter((u) => u.type === "certificate" && u.success)
+              .length || 0;
+          let message = "Record updated successfully!";
+          if (successCount > 0)
+            message += ` ${successCount} certificate(s) created.`;
+          alert(message);
+          certificateFiles.clear();
+          certificateFilesToUpload = [];
+
+          // ✅ CLEAR PAGE AFTER SUCCESSFUL UPDATE
+          clearPageAfterSave();
+
+          ZOHO.CREATOR.UTIL.navigateTo({
+            url: "#Report:All_Lot_Master",
+            target: "same",
+          });
+        })
+        .catch(function (error) {
+          console.error("❌ Save Error:", error);
+          alert("❌ Error: " + error.message);
+        })
+        .finally(function () {
+          if (saveBtn) {
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+          }
+        });
+    }
+  }
+  /* ================= DIAMOND IMAGE UPLOAD ================= */
+  function uploadDiaImage(recordId, file) {
+    return new Promise(function (resolve, reject) {
+      ZOHO.CREATOR.FILE.uploadFile({
+        app_name: "feiny-app",
+        report_name: "All_Lot_Master",
+        id: recordId,
+        field_name: "item_Image",
+        file: file,
+      })
+        .then(function (response) {
+          if (response.code === 3000 || response.code === "3000") {
+            setImagePreview(file);
+            ZOHO.CREATOR.DATA.invokeCustomApi({
+              api_name: "imageupload",
+              workspace_name: "ankit_feiny",
+              http_method: "POST",
+              content_type: "application/json",
+              payload: { IDd: recordId, fileFormat: file.name },
+              public_key: "2hXJDxEmMyekhJ7yFtrJV5n14",
+            })
+              .then((r) => console.log("Custom API SUCCESS:", r))
+              .catch((e) => console.error("Custom API ERROR:", e));
+            resolve({ type: "image", success: true });
+          } else {
+            reject(new Error(response.message || "Upload failed"));
+          }
+        })
+        .catch(reject);
+    });
+  }
+
+  function setImagePreview(file) {
+    diaImageFile = file;
+    const preview = document.getElementById("imagePreview");
+    if (preview && file) {
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = "block";
+    }
+  }
+
+  const preview = document.getElementById("imagePreview");
+  if (preview) {
+    preview.style.cursor = "pointer";
+    preview.onclick = function () {
+      if (preview.src) window.open(preview.src, "_blank");
+    };
+  }
+
+  /* ================= STONE IMAGE UPLOAD ================= */
+  function uploadStoneImage(recordId, file) {
+    return new Promise(function (resolve, reject) {
+      ZOHO.CREATOR.FILE.uploadFile({
+        app_name: "feiny-app",
+        report_name: "All_Lot_Master",
+        id: recordId,
+        field_name: "item_Image",
+        file: file,
+      })
+        .then(function (response) {
+          if (response.code === 3000 || response.code === "3000") {
+            return ZOHO.CREATOR.DATA.invokeCustomApi({
+              api_name: "imageupload",
+              workspace_name: "ankit_feiny",
+              http_method: "POST",
+              content_type: "application/json",
+              payload: { IDd: recordId, fileFormat: file.name },
+              public_key: "2hXJDxEmMyekhJ7yFtrJV5n14",
+            });
+          } else {
+            throw new Error(response.message || "Stone image upload failed");
+          }
+        })
+        .then((r) => {
+          console.log("Stone custom API SUCCESS:", r);
+          resolve({ type: "stoneImage", success: true });
+        })
+        .catch(reject);
+    });
+  }
+
+  /* ── Upload Certificate File ── */
+  function uploadCertificateFile(recordId, file) {
+    console.log("uploadCertificateFile", recordId, file);
+    return new Promise(function (resolve, reject) {
+      ZOHO.CREATOR.FILE.uploadFile({
+        app_name: "feiny-app",
+        report_name: "All_Certificate_Details",
+        id: recordId,
+        field_name: "Certificate_Single",
+        file: file,
+      })
+        .then(function (response) {
+          if (response.code === 3000 || response.code === "3000") {
+            ZOHO.CREATOR.DATA.invokeCustomApi({
+              api_name: "asfd",
+              workspace_name: "ankit_feiny",
+              http_method: "POST",
+              content_type: "application/json",
+              payload: { IDd: recordId, fileFormat: response.data.filename },
+              public_key: "yUeF2jG7QJWCHXUaEuCQ91XvA",
+            })
+              .then((r) => {
+                console.log("Cert custom API SUCCESS:", r);
+                resolve(response);
+              })
+              .catch((e) => {
+                console.error("Cert custom API ERROR:", e);
+                reject(e);
+              });
+          } else {
+            reject(new Error(response.message || "Certificate file upload failed"));
+          }
+        })
+        .catch(reject);
+    });
+  }
+
+  /* ================= CREATE CERTIFICATE RECORDS ================= */
+  function createCertificateRecords(skuValue, lotRecordID) {
+    const promises = [];
+    const rows = document.querySelectorAll("#certificateBody tr");
+    const categoryValue = document.getElementById("itemType")?.value || "";
+    const speciesId = document.getElementById("species_lookup")?.value || "";
+    const speciesValue = speciesMap[speciesId]?.Species || "";
+
+    if (rows.length === 0) return promises;
+
+    rows.forEach(function (row, index) {
+      const idInput = row.querySelector(".cert-id");
+      const fileInput = row.querySelector(".cert-file");
+      const dateInput = row.querySelector(".cert-date");
+      const notesInput = row.querySelector(".cert-notes");
+      const labSelect = row.querySelector(".cert-lab");
+      const labDescSelect = row.querySelector(".cert-lab-desc");
+      const labSupSelect = row.querySelector(".cert-lab-sup");
+      const rowUniqueID = row.querySelector(".cert-rowUnique-id");
+
+      const idValue = idInput?.value || "";
+      const fileExists = fileInput?.files && fileInput.files.length > 0;
+
+      let dateValue = "";
+      if (dateInput && dateInput.value) {
+        const dateObj = new Date(dateInput.value);
+        const day = String(dateObj.getDate()).padStart(2, "0");
+        const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        const month = monthNames[dateObj.getMonth()];
+        const year = dateObj.getFullYear();
+        dateValue = `${day}-${month}-${year}`;
+      }
+
+      const notesValue = notesInput?.value || "";
+      const labValue = labSelect?.value || "";
+      const labDescValue = labDescSelect?.value || "";
+      const labSupValue = labSupSelect?.value || "";
+
+      const hasData = idValue || fileExists || dateValue || notesValue || labValue || labDescValue || labSupValue;
+      if (!hasData) return;
+
+      const certData = {
+        ID1: idValue,
+        Date_field: dateValue,
+        Notes: notesValue,
+        Lab: labValue,
+        Lab_Descriptor: labDescValue,
+        Laboratory_Supplement: labSupValue,
+        SKU: skuValue,
+        Categories: categoryValue,
+        Species: speciesValue,
+        Lot_Master_ID: lotRecordID,
+      };
+
+      // ── Update existing certificate row ──
+      if (rowUniqueID && rowUniqueID.value) {
+        const updatePromise = ZOHO.CREATOR.DATA.updateRecordById({
+          app_name: "feiny-app",
+          report_name: "All_Certificate_Details",
+          id: String(rowUniqueID.value),
+          payload: { data: certData },
+        })
+          .then(function (res) {
+            console.log("Cert Row Update Response", res);
+            if (rowUniqueID && fileExists) {
+              return uploadCertificateFile(rowUniqueID.value, fileInput.files[0]);
+            }
+          })
+          .catch(function (error) {
+            console.error("❌ Cert UpdateRes Error:", error);
+            alert("❌ Cert Update Error: " + getErrorMessage(error));
+          });
+
+        promises.push(updatePromise);
+      } else {
+        // ── Create new certificate row ──
+        const promise = new Promise((resolve) => {
+          ZOHO.CREATOR.DATA.addRecords({
+            app_name: "feiny-app",
+            form_name: "Certificate_Uploads",
+            payload: { data: certData },
+          })
+            .then(function (response) {
+              let certRecordId = null;
+              if (response.code === 3000 || response.code === "3000") {
+                if (response.data && Array.isArray(response.data) && response.data.length > 0)
+                  certRecordId = response.data[0].ID;
+                else if (response.data && response.data.ID)
+                  certRecordId = response.data.ID;
+                else if (response.details && response.details.id)
+                  certRecordId = response.details.id;
+                else if (response.id)
+                  certRecordId = response.id;
+              }
+              if (certRecordId && fileExists) {
+                return uploadCertificateFile(certRecordId, fileInput.files[0])
+                  .then(() =>
+                    resolve({
+                      type: "certificate",
+                      success: true,
+                      index,
+                      sku: skuValue,
+                      recordId: certRecordId,
+                    })
+                  )
+                  .catch((err) =>
+                    resolve({
+                      type: "certificate",
+                      success: true,
+                      fileUploadFailed: true,
+                      index,
+                      error: getErrorMessage(err),
+                    })
+                  );
+              } else {
+                resolve({
+                  type: "certificate",
+                  success: true,
+                  index,
+                  sku: skuValue,
+                  recordId: certRecordId,
+                  noFile: true,
+                });
+              }
+            })
+            .catch(function (error) {
+              resolve({
+                type: "certificate",
+                success: false,
+                error: getErrorMessage(error),
+                index,
+                sku: skuValue,
+              });
+            });
+        });
+
+        promises.push(promise);
+      }
+    });
+
+    return promises;
+  }
+
+  /* ================= GET PARTNERSHIP SUBFORM DATA ================= */
+  function getPartnerRowsData() {
+    const category = document.getElementById("itemType")?.value;
+    const partnerRows = [];
+    const isJewellery = category === "Jewellery";
+    const selector = isJewellery ? "#jewelleryPartnershipBody tr" : "#partnerBody tr";
+
+    document.querySelectorAll(selector).forEach(function (row) {
+      let partnerValue, shares, percent, commission, itemized, desc;
+
+      if (isJewellery) {
+        partnerValue = row.querySelector(".jp_partner_select_contact")?.value || "";
+        shares = row.querySelector(".jp_shares")?.value || "";
+        percent = row.querySelector(".jp_partnership_percentage")?.value || "";
+        commission = row.querySelector(".jp_commission_percentage")?.value || "";
+        itemized = row.querySelector(".jp_commission_itemization")?.checked || false;
+        desc = row.querySelector(".jp_description")?.value || "";
+      } else {
+        partnerValue = row.querySelector(".partnerdatalookup")?.value || "";
+        shares = row.querySelector(".partner-share")?.value || "";
+        percent = row.querySelector(".partner-percent")?.value || "";
+        commission = row.querySelector(".commission-percent")?.value || "";
+        itemized = row.querySelector(".commission-itemized")?.checked || false;
+        desc = row.querySelector(".partner-desc")?.value || "";
+      }
+
+      if (partnerValue) {
+        const rowData = {
+          Partner_Name: partnerValue,
+          Partnership_shares: shares,
+          Partnership: percent,
+          Commission: commission,
+          Description: desc,
+          Commission_Itemized_on_Invoice: itemized,
+        };
+        if (row.dataset.rowId) rowData.ID = row.dataset.rowId;
+        partnerRows.push(rowData);
+      }
+    });
+
+    return partnerRows;
+  }
+
+  /* ================= GET METAL DETAILS SUBFORM DATA (JEWELLERY 1) ================= */
+  function getMetalDetailsRowsData() {
+    const metalRows = [];
+    document.querySelectorAll("#jewel1Body .jewel1-row").forEach(function (row) {
+      const castNo = row.querySelector(".j1-cast-no")?.value || "";
+      const vendor = row.querySelector(".j1-vendor")?.value || row.querySelector(".select_contact_j1_vendor")?.value || "";
+      const metalType = row.querySelector(".j1-metal-type")?.value || "";
+      const metalColor = row.querySelector(".j1-metal-color")?.value || "";
+      const metalPurity = row.querySelector(".j1-metal-purity")?.value || "";
+      const unit = row.querySelector(".j1-unit")?.value || "";
+      const weight = row.querySelector(".j1-weight")?.value || "";
+      const qty = row.querySelector(".j1-qty")?.value || "";
+      const market = row.querySelector(".j1-market")?.value || "";
+      const price = row.querySelector(".j1-price")?.value || "";
+      const goldCost = row.querySelector(".j1-gold-cost")?.value || "";
+      const remarks = row.querySelector(".j1-remarks")?.value || "";
+
+      if (castNo || vendor || metalType || metalColor || metalPurity || unit || weight || qty || price || remarks) {
+        const rowData = {
+          Cast_No: castNo,
+          Vendor: vendor,
+          Metal_Type: metalType,
+          Metal_Colour: metalColor,
+          Metal_Purity: metalPurity,
+          Unit: unit,
+          Weight: weight,
+          Quantity: qty,
+          Metal_Market: market,
+          Price: price,
+          Gold_Cost: goldCost,
+          Remarks: remarks,
+        };
+        if (row.dataset.rowId) rowData.ID = row.dataset.rowId;
+        metalRows.push(rowData);
+      }
+    });
+    return metalRows;
+  }
+
+  /* ================= GET DIAMOND DETAILS SUBFORM DATA (JEWELLERY 2) ================= */
+  function getDiamondDetailsRowsData() {
+    const diamondRows = [];
+    document.querySelectorAll("#jewel2Body .jewel2-row").forEach(function (row) {
+      const lot = row.querySelector(".j2-lot")?.value || "";
+      const shape = row.querySelector(".select_shape")?.value || "";
+      const quality = row.querySelector(".j2-quality")?.value || "";
+      const stones = row.querySelector(".j2-stones")?.value || "";
+      const totalCt = row.querySelector(".j2-total-ct")?.value || "";
+      const price = row.querySelector(".j2-price")?.value || "";
+      const cost = row.querySelector(".j2-cost")?.value || "";
+      const remarks = row.querySelector(".j2-remarks")?.value || "";
+
+      if (lot || shape || quality || stones || totalCt || price || cost || remarks) {
+        const rowData = {
+          Diamond_Lot_No: lot,
+          Shape: shape,
+          Quality: quality,
+          No_of_Stones: stones,
+          Total_Ct_Wt: totalCt,
+          Price: price,
+          Diamond_Cost: cost,
+          Remarks: remarks,
+        };
+        if (row.dataset.rowId) rowData.ID = row.dataset.rowId;
+        diamondRows.push(rowData);
+      }
+    });
+    return diamondRows;
+  }
+
+  /* ================= GET COLOR STONE DETAILS SUBFORM DATA (JEWELLERY 3) ================= */
+  function getColorStoneDetailsRowsData() {
+    const colorStoneRows = [];
+    document.querySelectorAll("#jewel3Body tr").forEach(function (row) {
+      const lot = row.querySelector(".j3-lot")?.value || "";
+      const stoneType = row.querySelector(".j3-stone-type")?.value || "";
+      const shape = row.querySelector(".select_shape")?.value || "";
+      const quality = row.querySelector(".j3-quality")?.value || "";
+      const range = row.querySelector(".j3-range")?.value || "";
+      const noStones = row.querySelector(".j3-no-stones")?.value || "";
+      const wtStone = row.querySelector(".j3-wt-stone")?.value || "";
+      const ctwt = row.querySelector(".j3-ctwt")?.value || "";
+      const unit = row.querySelector(".j3-unit")?.value || row.querySelector(".select_unit")?.value || "";
+      const cut = row.querySelector(".j3-cut")?.value || row.querySelector(".Select_Cut")?.value || "";
+      const color = row.querySelector(".j3-color")?.value || row.querySelector(".Select_Stone_Color")?.value || "";
+      const clarity = row.querySelector(".j3-clarity")?.value || row.querySelector(".Select_Clarity_j3-clarity")?.value || "";
+      const supplier = row.querySelector(".j3-supplier")?.value || "";
+      const setter = row.querySelector(".j3-setter")?.value || "";
+      const price = row.querySelector(".j3-price")?.value || "";
+      const cost = row.querySelector(".j3-cost")?.value || "";
+      const cs = row.querySelector(".j3-cs")?.checked || false;
+      const duty = row.querySelector(".j3-duty")?.checked || false;
+      const remarks = row.querySelector(".j3-remarks")?.value || "";
+
+      if (lot || stoneType || shape || quality || price || cost || remarks) {
+        const rowData = {
+          Lot_No: lot,
+          Stone_Type: stoneType,
+          Shape: shape,
+          Quality: quality,
+          Range: range,
+          No_Stones: noStones,
+          Wt_Stone: wtStone,
+          CT_WT: ctwt,
+          Unit: unit,
+          Cut: cut,
+          Stone_Color: color,
+          Clarity: clarity,
+          Supplier: supplier,
+          Setter: setter,
+          Price: price,
+          Stone_Cost: cost,
+          CS: cs,
+          Duty: duty,
+          Remarks: remarks,
+        };
+        if (row.dataset.rowId) rowData.ID = row.dataset.rowId;
+        colorStoneRows.push(rowData);
+      }
+    });
+    return colorStoneRows;
+  }
+
+  /* ================= GET LABOUR DETAILS SUBFORM DATA (JEWELLERY 4) ================= */
+  function getLabourDetailsRowsData() {
+    const labourRows = [];
+    document.querySelectorAll("#jewel4Body tr").forEach(function (row) {
+      const laborNo = row.querySelector(".j4-labor-no")?.value || "";
+      const description = row.querySelector(".j4-description")?.value || "";
+      const price = row.querySelector(".j4-price")?.value || "";
+      const qty = row.querySelector(".j4-qty")?.value || "";
+      const duty = row.querySelector(".j4-duty")?.checked || false;
+      const amount = row.querySelector(".j4-amount")?.value || "";
+
+      if (laborNo || description || price || qty || amount) {
+        const rowData = {
+          Labor: laborNo,
+          Description: description,
+          Price: price,
+          Qty: qty,
+          Duty: duty,
+          Amount: amount,
+        };
+        if (row.dataset.rowId) rowData.ID = row.dataset.rowId;
+        labourRows.push(rowData);
+      }
+    });
+    return labourRows;
+  }
+
+  /* ================= CLEAR FULL PAGE AFTER SAVE ================= */
+  function clearPageAfterSave() {
+    document.querySelectorAll("input, textarea, select").forEach(function (el) {
+      if (el.type === "button" || el.type === "submit" || el.type === "hidden") return;
+      if (el.type === "checkbox" || el.type === "radio") {
+        el.checked = false;
+      } else if (el.type === "file") {
+        el.value = "";
+      } else {
+        el.value = "";
+      }
+    });
+
+    document.querySelectorAll("select").forEach(function (sel) {
+      sel.selectedIndex = 0;
+    });
+
+    diaImageFile = null;
+    stoneImageFile = null;
+
+    const diaPrev = document.getElementById("imagePreview");
+    if (diaPrev) { diaPrev.src = ""; diaPrev.style.display = "none"; }
+
+    const stonePrev = document.getElementById("stoneImagePreview");
+    if (stonePrev) { stonePrev.src = ""; stonePrev.style.display = "none"; }
+
+    const clearImg = document.getElementById("clearImage");
+    if (clearImg) clearImg.style.display = "none";
+
+    const clearStone = document.getElementById("clearStoneImage");
+    if (clearStone) clearStone.style.display = "none";
+
+    if (document.getElementById("diamand_imageText"))
+      document.getElementById("diamand_imageText").style.display = "block";
+    if (document.getElementById("imageText"))
+      document.getElementById("imageText").style.display = "block";
+
+    const certBody = document.getElementById("certificateBody");
+    if (certBody) {
+      certBody.innerHTML = "";
+      addCertificateRow();
+    }
+
+    certificateFiles.clear();
+    certificateFilesToUpload = [];
+
+    const partnerBody = document.getElementById("partnerBody");
+    if (partnerBody) {
+      partnerBody.innerHTML = "";
+      if (typeof addPartnerRow === "function") addPartnerRow();
+    }
+
+    ["jewel1Body", "jewel2Body", "jewel3Body", "jewel4Body", "jewelleryPartnershipBody"].forEach(function (id) {
+      const body = document.getElementById(id);
+      if (body) body.innerHTML = "";
+    });
+
+    [
+      "total_price", "rapport_price", "Rapport_Price",
+      "cs_short_description", "cs_long_description",
+      "diashort_description", "dialong_description",
+      "hts_field", "code_field",
+    ].forEach(function (id) {
+      const f = document.getElementById(id);
+      if (f) f.value = "";
+    });
+
+    [
+      "colorStoneSection", "diamondSection", "pricingSection",
+      "Dimensionssection", "neededcertificatesec", "certificateuploadsec",
+      "partnershipsec", "Jewellery_1_Metal_Details", "Jewellery_2_Diamond_Details",
+      "Jewellery_3_Color_Stone", "Jewellery_4_Labour", "Jewellery_Cost_Summary",
+      "Jewellery_Partnership",
+    ].forEach(function (id) {
+      const sec = document.getElementById(id);
+      if (sec) sec.style.display = "none";
+    });
+
+    recId = null;
+    lot_edit = false;
+    window.scrollTo(0, 0);
+    console.log("Form Cleared Successfully");
+  }
+
+  /* =================================================================================
+    LOAD EXISTING RECORD (EDIT MODE)
+  ================================================================================= */
+  function loadExistingRecord(recordID) {
+    ZOHO.CREATOR.DATA.getRecordById({
+      app_name: "feiny-app",
+      report_name: "All_Lot_Master",
+      id: recordID,
+    })
+      .then(function (res) {
+        const data = res.data;
+        console.log("Existing record data:", data);
+
+        if (data.item_Image) {
+          const fullUrl = "https://creator.zoho.com" + data.item_Image;
+          const frame = document.getElementById("stoneImagePreview");
+          if (frame) {
+            frame.src = fullUrl;
+            frame.style.display = "block";
+            document.getElementById("imageText").style.display = "none";
+            document.getElementById("clearStoneImage").style.display = "block";
+          }
+          const diaFrame = document.getElementById("imagePreview");
+          if (diaFrame) {
+            diaFrame.src = fullUrl;
+            diaFrame.style.display = "block";
+            document.getElementById("diamand_imageText").style.display = "none";
+            document.getElementById("clearImage").style.display = "block";
+          }
+        }
+
+        document.getElementById("In_SKU").value = data.In_SKU || "";
+        document.getElementById("itemType").value = data.Category1 || "";
+        document.getElementById("Stock_On_Hand").value = data.Stock_On_Hand || "1";
+        document.getElementById("Status").value = data.Status || "";
+
+        document.getElementById("surface_lookup").value = data.Surface?.ID || "";
+        document.getElementById("treatment_lookup").value = data.Treatment?.ID || "";
+        document.getElementById("shape_lookup").value = data.Shape?.ID || "";
+        document.getElementById("origin_country").value = data.Origin || "";
+        document.getElementById("country_cut").value = data.Country_of_Cut || "";
+        document.getElementById("hts_field").value = data.HTS || "";
+        document.getElementById("code_field").value = data.Code || "";
+        document.getElementById("cs_short_description").value = data.Name1 || "";
+        document.getElementById("cs_long_description").value = data.Long_Description || "";
+
+        const speciesId = data.Species?.ID || "";
+        loadSpeciesLookup(speciesId);
+
+        const culetId = data.Culet?.ID || "";
+        loadDiaCuletLookup(culetId);
+
+        const fluorescenceId = data.Fluorescence1?.ID || "";
+        loadDiaFluorescenceLookup(fluorescenceId);
+
+        const fluorescenceColorId = data.Fluorescence_Color?.ID || "";
+        loadDiaFluorescenceColorLookup(fluorescenceColorId);
+
+        document.getElementById("min_length").value = data.length_field || "";
+        document.getElementById("min_width").value = data.Width || "";
+        document.getElementById("min_height").value = data.Height || "";
+        document.getElementById("max_length").value = data.Length_field1 || "";
+        document.getElementById("max_width").value = data.Width1 || "";
+        document.getElementById("max_height").value = data.Height1 || "";
+        document.getElementById("weight").value = data.weight || "";
+
+        document.getElementById("cert_other").checked = data.Other || false;
+        document.getElementById("cert_gubelin").checked = data.Gub || false;
+        document.getElementById("cert_agl").checked = data.AGL || false;
+        document.getElementById("cert_gia").checked = data.GIA || false;
+        document.getElementById("cert_ssef").checked = data.SSEF || false;
+        document.getElementById("certificate_details").value = data.Description2 || "";
+
+        document.getElementById("Price4").value = data.Price4 || "";
+        document.getElementById("MinimumPrice").value = data.Minimum_Price || "";
+        document.getElementById("unit_lookup").value = data.Unit?.ID || "";
+        document.getElementById("cost_amount").value = data.Cost_Amount || "";
+        document.getElementById("sub_species").value = data.Sub_species || "";
+
+        document.getElementById("dia_shape").value = data.Shape3?.ID || "";
+        document.getElementById("dia_color").value = data.Color?.ID || "";
+        document.getElementById("dia_clarity").value = data.Clarity?.ID || "";
+        document.getElementById("dia_cut").value = data.Cut?.ID || "";
+        document.getElementById("dia_polish").value = data.Polish?.ID || "";
+        document.getElementById("dia_symmetry").value = data.Symmetry?.ID || "";
+        document.getElementById("dia_length").value = data.Length_mm || "";
+        document.getElementById("dia_width").value = data.Width_mm || "";
+        document.getElementById("dia_depth").value = data.Depth1 || "";
+        document.getElementById("dia_table").value = data.Table || "";
+        document.getElementById("dia_depth_percent").value = data.Depth2 || "";
+        document.getElementById("quantity").value = data.Quantity || "";
+        document.getElementById("dia_weight").value = data.Weight_Ct || "";
+        document.getElementById("price_per_carat").value = data.Price_Per_carat || "";
+        document.getElementById("total_price").value = data.Total_Price || "";
+        document.getElementById("rapport_price").value = data.Rapport_Price1 || "";
+        document.getElementById("diashort_description").value = data.Short_Description1 || "";
+        document.getElementById("dialong_description").value = data.Long_Description2 || "";
+
+        document.getElementById("style").value = data.Style || "";
+        document.getElementById("jewellery_type").value = data.Jewellery_Type?.ID || data.Jewellery_Type || "";
+        document.getElementById("platinum").value = data.Platinum || "";
+        document.getElementById("gold").value = data.Gold || "";
+        document.getElementById("production").value = data.Production || "";
+        if (document.getElementById("instructions"))
+          document.getElementById("instructions").value = data.Instructions || "";
+        if (document.getElementById("countries_origin"))
+          document.getElementById("countries_origin").value = data.Country_Of_Origin1 || "";
+        document.getElementById("size").value = data.Size || "";
+        document.getElementById("weight_grams").value = data.Weight_grams || "";
+        document.getElementById("circa").value = data.Circa || "";
+        document.getElementById("order").value = data.Order || "";
+        document.getElementById("hts").value = data.HTS1 || "";
+        document.getElementById("note").value = data.Notes || "";
+        document.getElementById("brand").value = data.Brand?.ID || data.Brand || "";
+        if (document.getElementById("description"))
+          document.getElementById("description").value = data.Jewel_Short_Description || "";
+        if (document.getElementById("instruction"))
+          document.getElementById("instruction").value = data.Jewel_Long_Description || "";
+
+        if (document.getElementById("diamond_price"))
+          document.getElementById("diamond_price").value = data.Diamond_Price || "";
+        if (document.getElementById("semi_mount_price"))
+          document.getElementById("semi_mount_price").value = data.Semi_Mount_Price || "";
+        if (document.getElementById("other_cost"))
+          document.getElementById("other_cost").value = data.Other_Cost || "";
+        if (document.getElementById("total_cost"))
+          document.getElementById("total_cost").value = data.Total_Cost || "";
+        if (document.getElementById("duty_percentage"))
+          document.getElementById("duty_percentage").value = data.Duty_Percentage || "";
+        if (document.getElementById("duty_amount"))
+          document.getElementById("duty_amount").value = data.Duty_Amount || "";
+        if (document.getElementById("final_cost"))
+          document.getElementById("final_cost").value = data.Final_Cost || "";
+        if (document.getElementById("selling_price_piece"))
+          document.getElementById("selling_price_piece").value = data.Selling_Price_Piece || "";
+        if (document.getElementById("cost_amount_summary"))
+          document.getElementById("cost_amount_summary").value = data.Cost_Amount || "";
+
+        /* ─── Certificate Subform ─── */
+        loadCertificateSubform(recordID);
+
+        /* ─── Jewellery Subforms ─── */
+        if (data.Category1 === "Jewellery") {
+          loadJewelleryMetalSubform(recordID, data);
+          loadJewelleryDiamondSubform(recordID, data);
+          loadJewelleryColorStoneSubform(recordID, data);
+          loadJewelleryLabourSubform(recordID, data);
+        }
+
+        /* ─── Partnership Details Subform ─── */
+        const partnerData = data.Partnership_Details || [];
+        const isJewel = data.Category1 === "Jewellery";
+        const tbody = document.getElementById(isJewel ? "jewelleryPartnershipBody" : "partnerBody");
+        if (tbody) tbody.innerHTML = "";
+
+        if (partnerData.length > 0) {
+          partnerData.forEach(function (item) {
+            const tr = document.createElement("tr");
+            tr.dataset.rowId = item.ID || "";
+
+            if (isJewel) {
+              tr.className = "jewellery-partnership-row";
+              tr.innerHTML = `
+                <td><select class="jp_partner_select_contact"><option value="">Select Contact</option></select></td>
+                <td><input type="text" class="jp_shares" value="${item.Partnership_shares || ""}"></td>
+                <td><input type="text" class="jp_partnership_percentage" value="${item.Partnership || ""}"></td>
+                <td><input type="text" class="jp_commission_percentage" value="${item.Commission || ""}"></td>
+                <td class="checkbox-cell"><input type="checkbox" class="jp_commission_itemization" ${item.Commission_Itemized_on_Invoice === "true" || item.Commission_Itemized_on_Invoice === true ? "checked" : ""}></td>
+                <td><textarea class="jp_description">${item.Description || ""}</textarea></td>
+                <td><button type="button" class="btn-remove" onclick="removeRow(this)">❌</button></td>`;
+            } else {
+              tr.className = "partner-row";
+              tr.innerHTML = `
+                <td><select class="partnerdatalookup"><option value="">Select Partner</option></select></td>
+                <td><input type="text" class="partner-share" value="${item.Partnership_shares || ""}"></td>
+                <td><input type="text" class="partner-percent" value="${item.Partnership || ""}"></td>
+                <td><input type="text" class="commission-percent" value="${item.Commission || ""}"></td>
+                <td style="text-align:center"><input type="checkbox" class="commission-itemized" ${item.Commission_Itemized_on_Invoice === "true" || item.Commission_Itemized_on_Invoice === true ? "checked" : ""}></td>
+                <td><textarea class="partner-desc">${item.Description || ""}</textarea></td>
+                <td><button type="button" class="btn-remove" onclick="removeRow(this)">❌</button></td>`;
+            }
+
+            if (tbody) tbody.appendChild(tr);
+            const selectEl = tr.querySelector("select");
+
+            setTimeout(function () {
+              if (typeof populatePartnerDropdowns === "function") populatePartnerDropdowns(selectEl);
+              if (item.Partner_Name?.ID) {
+                selectEl.value = item.Partner_Name.ID;
+              }
+            }, 300);
+          });
+        } else {
+          console.log("⚠️ No partnership data found");
+          if (typeof addPartnerRow === "function") addPartnerRow();
+        }
+
+        applyVisibility();
+      })
+      .catch(function (err) {
+        console.error("loadExistingRecord error:", err);
+      });
+  }
+
+  /* =================================================================================
+    LOAD JEWELLERY SUBFORMS
+  ================================================================================= */
+
+  function loadJewelleryMetalSubform(recordID, data) {
+    const tbody = document.getElementById("jewel1Body");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    const rows = data.Metal_Details || [];
+    if (rows.length === 0) {
+      if (typeof addJewellery1Row === "function") addJewellery1Row();
+      return;
+    }
+
+    rows.forEach(function (item) {
+      const tr = document.createElement("tr");
+      tr.className = "jewel1-row";
+      tr.dataset.rowId = item.ID || "";
+      tr.innerHTML = `
+        <td><input type="text" class="j1-cast-no" value="${item.Cast || ""}"></td>
+        <td><select class="select_contact j1-vendor"><option value="">Select Contact</option></select></td>
+        <td><select class="select_metal_type j1-metal-type"><option value="">Select Metal Type</option></select></td>
+        <td><select class="select_color j1-metal-color"><option value="">Select Color</option></select></td>
+        <td><select class="select_purity j1-metal-purity"><option value="">Select Purity</option></select></td>
+        <td><select class="select_unit j1-unit"><option value="">Select Unit</option></select></td>
+        <td><input type="number" class="j1-weight" value="${item.Wt || ""}"></td>
+        <td><input type="number" class="j1-qty" value="${item.Qty || ""}"></td>
+        <td><input type="number" class="j1-market" value="${item.Metal_Market || ""}"></td>
+        <td><input type="text" class="j1-price" value="${item.Price || ""}"></td>
+        <td><input type="text" class="j1-gold-cost" value="${item.Gold_Cost || ""}"></td>
+        <td><textarea class="j1-remarks">${item.Remarks || ""}</textarea></td>
+      `;
+      tbody.appendChild(tr);
+
+      if (typeof loadContactLookup === "function") loadContactLookup(tr.querySelector(".j1-vendor"));
+      if (typeof loadMetalTypeLookup === "function") loadMetalTypeLookup(tr.querySelector(".j1-metal-type"));
+      if (typeof loadColorLookup === "function") loadColorLookup(tr.querySelector(".j1-metal-color"));
+      if (typeof loadPurityLookup === "function") loadPurityLookup(tr.querySelector(".j1-metal-purity"));
+      if (typeof loadUnitLookup === "function") loadUnitLookup(tr.querySelector(".j1-unit"));
+
+      setTimeout(function () {
+        const vendorId = item.Vendor1?.ID || item.Vendor1 || "";
+        const metalTypeId = item.Metal_Type1?.ID || item.Metal_Type1 || "";
+        const metalColorId = item.Metal_Color?.ID || item.Metal_Color || "";
+        const metalPurityId = item.Metal_Purity?.ID || item.Metal_Purity || "";
+        const unitId = item.Unit1?.ID || item.Unit1 || "";
+
+        if (vendorId) tr.querySelector(".j1-vendor").value = vendorId;
+        if (metalTypeId) tr.querySelector(".j1-metal-type").value = metalTypeId;
+        if (metalColorId) tr.querySelector(".j1-metal-color").value = metalColorId;
+        if (metalPurityId) tr.querySelector(".j1-metal-purity").value = metalPurityId;
+        if (unitId) tr.querySelector(".j1-unit").value = unitId;
+      }, 500);
+    });
+  }
+
+  function loadJewelleryDiamondSubform(recordID, data) {
+    const tbody = document.getElementById("jewel2Body");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    const rows = data.Diamond_Details || [];
+    if (rows.length === 0) {
+      if (typeof addJewellery2Row === "function") addJewellery2Row();
+      return;
+    }
+
+    rows.forEach(function (item) {
+      const tr = document.createElement("tr");
+      tr.className = "jewel2-row";
+      tr.dataset.rowId = item.ID || "";
+      tr.innerHTML = `
+        <td><input type="text" class="j2-lot" value="${item.Diamond_Lot || ""}"></td>
+        <td><select class="select_shape j2-shape"><option value="">Select Shape</option></select></td>
+        <td><input type="text" class="j2-quality" value="${item.Diamond_Quality || ""}"></td>
+        <td><input type="number" class="j2-stones" value="${item.No_of_Stones || ""}"></td>
+        <td><input type="number" class="j2-total-ct" value="${item.Total_Ct_Wt || ""}"></td>
+        <td><input type="text" class="j2-price" value="${item.Price || ""}"></td>
+        <td><input type="text" class="j2-cost" value="${item.Diamond_cost || ""}"></td>
+        <td><textarea class="j2-remarks">${item.Remarks || ""}</textarea></td>
+      `;
+      tbody.appendChild(tr);
+
+      if (typeof renderShapeOptions === "function") {
+        renderShapeOptions(tr.querySelector(".j2-shape"));
+      }
+
+      setTimeout(function () {
+        const shapeId = item.Shape1?.ID || item.Shape1 || "";
+        if (shapeId) tr.querySelector(".j2-shape").value = shapeId;
+      }, 500);
+    });
+  }
+
+  function loadJewelleryColorStoneSubform(recordID, data) {
+    const tbody = document.getElementById("jewel3Body");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    const rows = data.Color_Stone1 || [];
+    if (rows.length === 0) {
+      if (typeof addJewellery3Row === "function") addJewellery3Row();
+      return;
+    }
+
+    rows.forEach(function (item) {
+      const tr = document.createElement("tr");
+      tr.className = "jewel3-row";
+      tr.dataset.rowId = item.ID || "";
+      tr.innerHTML = `
+        <td><input type="text" class="j3-lot" value="${item.Lot_No || ""}"></td>
+        <td><select class="j3-stone-type"><option value="">Select</option></select></td>
+        <td><select class="select_shape"><option value="">Select Shape</option></select></td>
+        <td><input type="text" class="j3-quality" value="${item.Quality || ""}"></td>
+        <td><input type="text" class="j3-range" value="${item.Range || ""}"></td>
+        <td><input type="number" class="j3-no-stones" value="${item.No_Stones || ""}"></td>
+        <td><input type="number" class="j3-wt-stone" value="${item.Wt_Stone || ""}"></td>
+        <td><input type="number" class="j3-ctwt" value="${item.CT_WT || ""}"></td>
+        <td><select class="select_unit j3-unit"><option value="">Select Unit</option></select></td>
+        <td><select class="Select_Cut j3-cut"><option value="">Select Cut</option></select></td>
+        <td><select class="Select_Stone_Color j3-color"><option value="">Select Stone Color</option></select></td>
+        <td><select class="Select_Clarity_j3-clarity"><option value="">Select Clarity</option></select></td>
+        <td><select class="j3-supplier"><option value="">Select Supplier</option></select></td>
+        <td><select class="j3-setter"><option value="">Select Setter</option></select></td>
+        <td><input type="text" class="j3-price" value="${item.Price || ""}"></td>
+        <td><input type="text" class="j3-cost" value="${item.Stone_Cost || ""}"></td>
+        <td><input type="checkbox" class="j3-cs" ${item.CS ? "checked" : ""}></td>
+        <td><input type="checkbox" class="j3-duty" ${item.Duty ? "checked" : ""}></td>
+        <td><textarea class="j3-remarks">${item.Remarks || ""}</textarea></td>
+      `;
+      tbody.appendChild(tr);
+
+      if (typeof loadUnitLookup === "function") loadUnitLookup(tr.querySelector(".j3-unit"));
+      if (typeof loadCutLookup === "function") loadCutLookup(tr.querySelector(".j3-cut"));
+      if (typeof loadColorLookup === "function") loadColorLookup(tr.querySelector(".j3-color"));
+      if (typeof loadClarityLookup === "function") loadClarityLookup(tr.querySelector(".Select_Clarity_j3-clarity"));
+      if (typeof loadContactLookup === "function") {
+        loadContactLookup(tr.querySelector(".j3-supplier"));
+        loadContactLookup(tr.querySelector(".j3-setter"));
+      }
+      if (typeof renderShapeOptions === "function") renderShapeOptions(tr.querySelector(".select_shape"));
+
+      setTimeout(function () {
+        const shapeId = item.Shape?.ID || item.Shape || "";
+        const unitId = item.Unit?.ID || item.Unit || "";
+        const cutId = item.Cut?.ID || item.Cut || "";
+        const colorId = item.Stone_Color?.ID || item.Stone_Color || "";
+        const clarityId = item.Clarity?.ID || item.Clarity || "";
+        const supplierId = item.Supplier?.ID || item.Supplier || "";
+        const setterId = item.Setter?.ID || item.Setter || "";
+
+        if (shapeId) tr.querySelector(".select_shape").value = shapeId;
+        if (unitId) tr.querySelector(".j3-unit").value = unitId;
+        if (cutId) tr.querySelector(".j3-cut").value = cutId;
+        if (colorId) tr.querySelector(".j3-color").value = colorId;
+        if (clarityId) tr.querySelector(".Select_Clarity_j3-clarity").value = clarityId;
+        if (supplierId) tr.querySelector(".j3-supplier").value = supplierId;
+        if (setterId) tr.querySelector(".j3-setter").value = setterId;
+      }, 500);
+    });
+  }
+
+  function loadJewelleryLabourSubform(recordID, data) {
+    const tbody = document.getElementById("jewel4Body");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    const rows = data.Labour_Details || [];
+    if (rows.length === 0) {
+      if (typeof addJewellery4Row === "function") addJewellery4Row();
+      return;
+    }
+
+    rows.forEach(function (item) {
+      const tr = document.createElement("tr");
+      tr.className = "jewel4-row";
+      tr.dataset.rowId = item.ID || "";
+      tr.innerHTML = `
+        <td><input type="text" class="j4-labor-no" value="${item.Labour_No || ""}"></td>
+        <td><textarea class="j4-description">${item.Description || ""}</textarea></td>
+        <td><input type="text" class="j4-price" value="${item.Price || ""}"></td>
+        <td><input type="number" class="j4-qty" value="${item.Quantity || ""}"></td>
+        <td><input type="checkbox" class="j4-duty" ${item.Duty ? "checked" : ""}></td>
+        <td><input type="text" class="j4-amount" value="${item.Amount || ""}"></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* ─── Date string from Zoho → yyyy-mm-dd for <input type="date"> ─── */
+  function formatToYYYYMMDD(dateStr) {
+    if (!dateStr) return "";
+    if (dateStr.includes("T")) return dateStr.split("T")[0];
+    if (dateStr.includes("-")) {
+      const parts = dateStr.split("-");
+      if (parts.length === 3) {
+        const [day, monthStr, year] = parts;
+        const months = {
+          Jan: "01", Feb: "02", Mar: "03", Apr: "04",
+          May: "05", Jun: "06", Jul: "07", Aug: "08",
+          Sep: "09", Oct: "10", Nov: "11", Dec: "12",
+        };
+        const month = months[monthStr];
+        if (month) return `${year}-${month}-${day.padStart(2, "0")}`;
+      }
+    }
+    return "";
+  }
+
+  /* =================================================================================
+    LOAD CERTIFICATE SUBFORM ROWS
+  ================================================================================= */
+  function loadCertificateSubform(recordID) {
+    const certTbody = document.getElementById("certificateBody");
+    certTbody.innerHTML = "";
+    document.getElementById("certificateuploadsec").style.display = "block";
+
+    ZOHO.CREATOR.DATA.getRecords({
+      app_name: "feiny-app",
+      report_name: "All_Certificate_Details",
+      criteria: "Lot_Master_ID == " + recordID,
+    })
+      .then(function (response) {
+        console.log("CertificateLoad -- ", response);
+        const certData = response.data || [];
+
+        if (certData.length === 0) {
+          console.log("No certificate rows found — adding blank row");
+          addCertificateRow();
+          return;
+        }
+
+        certData
+          .slice()
+          .reverse()
+          .forEach(function (item) {
+            const formattedDate = formatToYYYYMMDD(item.Date_field);
+            const tr = document.createElement("tr");
+            tr.classList.add("cert-row");
+            tr.dataset.certRecordId = item.ID || "";
+
+            tr.innerHTML = `
+              <td><input class="cert-id" value="${item.ID1 || ""}"></td>
+              <td class="cert-file-cell">
+                <input type="file" class="cert-file" accept=".pdf,.jpg,.jpeg,.png,.gif">
+                <div class="existing-file-display" style="margin-top:5px;"></div>
+              </td>
+              <td><input type="date" class="cert-date" value="${formattedDate}"></td>
+              <td><textarea class="cert-notes">${item.Notes || ""}</textarea></td>
+              <td><select class="cert-lab"></select></td>
+              <td><select class="cert-lab-desc"></select></td>
+              <td><select class="cert-lab-sup"></select></td>
+              <td>
+                <input type="text" class="cert-rowUnique-id" value="${item.ID || ""}" style="display:none;">
+              </td>
+              <td>
+                <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
+              </td>
+            `;
+
+            certTbody.appendChild(tr);
+
+            const existingFileDisplay = tr.querySelector(".existing-file-display");
+
+            if (item.Certificate_Single) {
+              const fullUrl = "https://creator.zoho.com" + item.Certificate_Single;
+
+              function getFileNameAndExtension(url) {
+                try {
+                  const decodedUrl = decodeURIComponent(url);
+                  const match = decodedUrl.match(/[?&]filepath=([^&]+)/);
+                  let fileName = match && match[1] ? match[1] : decodedUrl.split("/").pop();
+                  fileName = fileName || "Download File";
+                  fileName = fileName.replace(/^\d+_/, "");
+                  const parts = fileName.split(".");
+                  const extension = parts.length > 1 ? parts.pop().toLowerCase() : "";
+                  return { fileName, extension };
+                } catch (e) {
+                  return { fileName: "Download File", extension: "" };
+                }
+              }
+
+              const { fileName, extension } = getFileNameAndExtension(fullUrl);
+
+              if (["jpg", "jpeg", "png", "gif"].includes(extension)) {
+                existingFileDisplay.innerHTML = `
+                  <div style="cursor:pointer;padding:10px;background:#f0f0f0;border-radius:4px;" onclick="openFilePreview('${fullUrl}','${fileName}')">
+                    <img src="${fullUrl}" alt="${fileName}" style="max-width:80px;max-height:80px;display:block;margin-bottom:5px;border-radius:3px;">
+                    <small style="color:#666;">Click to preview</small>
+                  </div>`;
+              } else if (extension === "pdf") {
+                existingFileDisplay.innerHTML = `
+                  <div style="cursor:pointer;padding:8px;border:1px solid #ddd;border-radius:4px;display:inline-block;background:#fff;text-align:center;" onclick="openFilePreview('${fullUrl}','${fileName}')">
+                    <div style="color:#d32f2f;font-size:24px;text-align:center;margin-bottom:5px;">📄</div>
+                    <small style="color:#0066cc;font-weight:bold;">Preview PDF</small><br>
+                    <small style="color:#888;font-size:10px;">${fileName}</small>
+                  </div>`;
+              } else {
+                existingFileDisplay.innerHTML = `
+                  <div style="cursor:pointer;padding:8px;border:1px solid #ddd;border-radius:4px;display:inline-block;background:#fff;" onclick="openFilePreview('${fullUrl}','${fileName}')">
+                    <small style="color:#333;">📎 ${fileName}</small><br>
+                    <small style="color:#0066cc;">Click to view</small>
+                  </div>`;
+              }
+            } else {
+              existingFileDisplay.innerHTML = "<small>No file uploaded</small>";
+            }
+
+            populateRowSelects(tr);
+
+            setTimeout(function () {
+              tr.querySelector(".cert-lab").value = item.Lab?.ID || "";
+              tr.querySelector(".cert-lab-desc").value = item.Lab_Descriptor?.ID || "";
+              tr.querySelector(".cert-lab-sup").value = item.Laboratory_Supplement?.ID || "";
+            }, 300);
+          });
+      })
+      .catch(function (error) {
+        console.error("Error fetching certificate subform:", error);
+        addCertificateRow();
+      });
+  }
+
+  /* ================= FILE PREVIEW ================= */
+  function openFilePreview(url, fileName) {
+    const modal = document.getElementById("filePreviewModal");
+    const content = document.getElementById("previewContent");
+    if (!modal || !content) return;
+
+    const ext = (fileName.split(".").pop() || "").toLowerCase();
+    if (["jpg", "jpeg", "png", "gif"].includes(ext)) {
+      content.innerHTML = `<img src="${url}" alt="${fileName}" style="max-width:100%;max-height:80vh;">`;
+    } else if (ext === "pdf") {
+      content.innerHTML = `<iframe src="${url}" style="width:80vw;height:80vh;border:none;"></iframe>`;
+    } else {
+      content.innerHTML = `<a href="${url}" target="_blank" style="font-size:18px;">📎 Open ${fileName}</a>`;
+    }
+
+    modal.style.display = "flex";
+  }
+
+  function closeFilePreview() {
+    const modal = document.getElementById("filePreviewModal");
+    const content = document.getElementById("previewContent");
+    if (modal) modal.style.display = "none";
+    if (content) content.innerHTML = "";
+  }

@@ -141,20 +141,22 @@ function addJewelleryPartnershipRow() {
   const tbody = document.getElementById("jewelleryPartnershipBody");
 
   const newRow = document.createElement("tr");
-  newRow.className = "partner-row";
+  newRow.className = "jewellery-partnership-row";
   newRow.innerHTML = `
-              <td>
-                  <select id="select_contact">
-                        <option value="">Select Contact</option>
-                      </select>
-                  </td>
-                  <td><input /></td>
-                  <td><input /></td>
-                  <td><input /></td>
-                  <td><input type="checkbox" /></td>
-                  <td><textarea></textarea></td>
-                
+    <td>
+        <select class="jp_partner_select_contact">
+          <option value="">Select Contact</option>
+        </select>
+    </td>
+    <td><input type="text" class="jp_shares" /></td>
+    <td><input type="text" class="jp_partnership_percentage" /></td>
+    <td><input type="text" class="jp_commission_percentage" /></td>
+    <td class="checkbox-cell"><input type="checkbox" class="jp_commission_itemization" /></td>
+    <td><textarea class="jp_description"></textarea></td>
+    <td><button type="button" class="btn-remove" onclick="removeRow(this)">❌</button></td>
         `;
   tbody.appendChild(newRow);
-  loadContactLookup(newRow.querySelector(".select_contact"));
+  if (typeof populatePartnerDropdowns === 'function') {
+    populatePartnerDropdowns(newRow.querySelector(".jp_partner_select_contact"));
+  }
 }

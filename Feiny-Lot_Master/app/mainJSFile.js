@@ -988,93 +988,130 @@
     });
   }
 
- /* ================= RAPPORT PRICE ================= */
-function fetchRapportPrice() {
-  // Lookup fields — .value gives the linked record ID
-  const shapeId   = document.getElementById("dia_shape")?.value;
-  const colorId   = document.getElementById("dia_color")?.value;
-  const clarityId = document.getElementById("dia_clarity")?.value;
-  const weight    = parseFloat(document.getElementById("dia_weight")?.value);
+  /* ================= RAPAPORT PRICE ================= */
+  function fetchRapportPrice() {
 
-  console.log("IDs:", { shapeId, colorId, clarityId, weight });
+    const shapeId   = document.getElementById("dia_shape")?.value;
+    const colorId   = document.getElementById("dia_color")?.value;
+    const clarityId = document.getElementById("dia_clarity")?.value;
+    const weight    = parseFloat(document.getElementById("dia_weight")?.value);
 
-  const priceEl = document.getElementById("rapport_price");
+    console.log("IDs:", {
+      shapeId,
+      colorId,
+      clarityId,
+      weight
+    });
 
-  if (!shapeId || !colorId || !clarityId || isNaN(weight) || weight <= 0) {
-    if (priceEl) priceEl.value = "";
-    return;
-  }
+    const priceEl = document.getElementById("rapport_price");
 
-  // Both forms share the same lookup tables so IDs match directly.
-  // Use FieldName.ID = numericId for each lookup field.
-  const criteria =
-    "Shapes.ID = " + shapeId +
-    " && Colors.ID = " + colorId +
-    " && Claritys.ID = " + clarityId;
+    if (!shapeId || !colorId || !clarityId || isNaN(weight) || weight <= 0) {
+      if (priceEl) priceEl.value = "";
+      return;
+    }
 
-  console.log("CRITERIA:", criteria);
+    // Correct criteria for lookup text IDs
+    const criteria =
+      'Shapes.ID = "' + shapeId + '"' +
+      ' && Colors.ID = "' + colorId + '"' +
+      ' && Claritys.ID = "' + clarityId + '"';
 
-  ZOHO.CREATOR.DATA.getRecords({
-    app_name: "feiny-app",
-    report_name: "All_Rapaport_Masters",
-    criteria: criteria,
-    max_records: 200,
-  })
-    .then(function (response) {
+    console.log("CRITERIA:", criteria);
+
+    ZOHO.CREATOR.DATA.getRecords({
+      app_name: "feiny-app",
+      report_name: "All_Rapaport_Masters",
+      criteria: criteria,
+      max_records: 200
+    })
+    .then(function(response) {
+
       console.log("FULL RESPONSE:", response);
 
-      if (response.code !== 3000 || !response.data || response.data.length === 0) {
-        console.warn("No Rapaport records returned — check IDs match Rapaport Master lookup IDs");
+      if (
+        response.code !== 3000 ||
+        !response.data ||
+        response.data.length === 0
+      ) {
+        console.warn("No Rapaport records found");
         if (priceEl) priceEl.value = "";
         return;
       }
 
-      console.log("SAMPLE RECORD:", response.data[0]);
+      console.log("ALL RECORDS:", response.data);
 
-      // Filter by weight — Weight_high_size1 must be >= the entered weight
-      const filtered = response.data.filter(function (rec) {
+      // Match correct weight range
+      const matchedRecord = response.data.find(function(rec) {
+
+        const lowWeight  = parseFloat(rec.Weight_low_size);
         const highWeight = parseFloat(rec.Weight_high_size1);
-        return !isNaN(highWeight) && highWeight >= weight;
+
+        console.log(
+          "Checking:",
+          lowWeight,
+          highWeight,
+          "Input:",
+          weight
+        );
+
+        return (
+          !isNaN(lowWeight) &&
+          !isNaN(highWeight) &&
+          weight >= lowWeight &&
+          weight <= highWeight
+        );
       });
 
-      console.log("WEIGHT FILTERED:", filtered);
+      console.log("MATCHED RECORD:", matchedRecord);
 
-      if (filtered.length === 0) {
-        console.warn("No Rapaport record covers this weight");
+      if (!matchedRecord) {
+        console.warn("No matching weight range");
         if (priceEl) priceEl.value = "";
         return;
       }
 
-      // Smallest upper bound that still covers the entered weight
-      const sorted = [...filtered].sort(
-        (a, b) => parseFloat(a.Weight_high_size1) - parseFloat(b.Weight_high_size1)
-      );
+      const price = matchedRecord.Rapaport_Price || "";
 
-      const price = sorted[0].Rapaport_Price || "";
       console.log("FINAL PRICE:", price);
-      if (priceEl) priceEl.value = price;
+
+      if (priceEl) {
+        priceEl.value = price;
+      }
+
     })
-    .catch(function (error) {
+    .catch(function(error) {
+
       console.error("Rapaport fetch error:", error);
-      if (priceEl) priceEl.value = "";
+
+      if (priceEl) {
+        priceEl.value = "";
+      }
     });
-}
+  }
 
-/* ================= RAPPORT PRICE TRIGGERS ================= */
-function initRapportPriceTriggers() {
-  const shapeEl   = document.getElementById("dia_shape");
-  const colorEl   = document.getElementById("dia_color");
-  const clarityEl = document.getElementById("dia_clarity");
-  const weightEl  = document.getElementById("dia_weight");
 
-  [shapeEl, colorEl, clarityEl].forEach(function (el) {
-    if (el) el.addEventListener("change", fetchRapportPrice);
-  });
+  /* ================= RAPAPORT PRICE TRIGGERS ================= */
+  function initRapportPriceTriggers() {
 
-  if (weightEl) weightEl.addEventListener("input", fetchRapportPrice);
+    const shapeEl   = document.getElementById("dia_shape");
+    const colorEl   = document.getElementById("dia_color");
+    const clarityEl = document.getElementById("dia_clarity");
+    const weightEl  = document.getElementById("dia_weight");
 
-  fetchRapportPrice();
-}
+    [shapeEl, colorEl, clarityEl].forEach(function(el) {
+      if (el) {
+        el.addEventListener("change", fetchRapportPrice);
+      }
+    });
+
+    if (weightEl) {
+      weightEl.addEventListener("input", fetchRapportPrice);
+      weightEl.addEventListener("change", fetchRapportPrice);
+    }
+
+    fetchRapportPrice();
+  }
+
   /* ================= SPECIES CHANGE → HTS / CODE ================= */
   const speciesLookupEl = document.getElementById("species_lookup");
   if (speciesLookupEl) {
@@ -1215,11 +1252,16 @@ function initRapportPriceTriggers() {
       Amount: getNumber("duty_amount"),
       Final_Cost: getNumber("final_cost"),
       Selling_price_per_piece: getNumber("selling_price_piece"),
-  Partnership_Details: cleanSubformRows(getPartnerRowsData()),
-  Metal_Details: cleanSubformRows(getMetalDetailsRowsData()),
-  Diamond_Details: cleanSubformRows(getDiamondDetailsRowsData()),
-  Color_Stone1: cleanSubformRows(getColorStoneDetailsRowsData()),
-  Labour_Details: cleanSubformRows(getLabourDetailsRowsData()),
+      Partnership_Details: cleanSubformRows(getPartnerRowsData()),
+  // Metal_Details: cleanSubformRows(getMetalDetailsRowsData()),
+
+  // Diamond_Details: cleanSubformRows(getDiamondDetailsRowsData()),
+
+  // // Jewellery 3 - Color Stone Details
+  // Color_Stone1: cleanSubformRows(getColorStoneDetailsRowsData()),
+
+  // // Jewellery 4 - Labour Details
+  // Labour_Details: cleanSubformRows(getLabourDetailsRowsData()),
     });
   console.log("Saving config:", recordData);
 
@@ -2142,14 +2184,14 @@ function initRapportPriceTriggers() {
       tr.className = "jewel1-row";
       tr.dataset.rowId = item.ID || "";
       tr.innerHTML = `
-        <td><input type="text" class="j1-cast-no" value="${item.Cast || ""}"></td>
+        <td><input type="text" class="j1-cast-no" value="${item.Cast_No || ""}"></td>
         <td><select class="select_contact j1-vendor"><option value="">Select Contact</option></select></td>
         <td><select class="select_metal_type j1-metal-type"><option value="">Select Metal Type</option></select></td>
         <td><select class="select_color j1-metal-color"><option value="">Select Color</option></select></td>
         <td><select class="select_purity j1-metal-purity"><option value="">Select Purity</option></select></td>
         <td><select class="select_unit j1-unit"><option value="">Select Unit</option></select></td>
-        <td><input type="number" class="j1-weight" value="${item.Wt || ""}"></td>
-        <td><input type="number" class="j1-qty" value="${item.Qty || ""}"></td>
+        <td><input type="number" class="j1-weight" value="${item.Weight || ""}"></td>
+        <td><input type="number" class="j1-qty" value="${item.Quantity || ""}"></td>
         <td><input type="number" class="j1-market" value="${item.Metal_Market || ""}"></td>
         <td><input type="text" class="j1-price" value="${item.Price || ""}"></td>
         <td><input type="text" class="j1-gold-cost" value="${item.Gold_Cost || ""}"></td>
@@ -2164,11 +2206,11 @@ function initRapportPriceTriggers() {
       if (typeof loadUnitLookup === "function") loadUnitLookup(tr.querySelector(".j1-unit"));
 
       setTimeout(function () {
-        const vendorId = item.Vendor1?.ID || item.Vendor1 || "";
-        const metalTypeId = item.Metal_Type1?.ID || item.Metal_Type1 || "";
-        const metalColorId = item.Metal_Color?.ID || item.Metal_Color || "";
+        const vendorId = item.Vendor?.ID || item.Vendor || "";
+        const metalTypeId = item.Metal_Type?.ID || item.Metal_Type || "";
+        const metalColorId = item.Metal_Colour?.ID || item.Metal_Colour || "";
         const metalPurityId = item.Metal_Purity?.ID || item.Metal_Purity || "";
-        const unitId = item.Unit1?.ID || item.Unit1 || "";
+        const unitId = item.Unit?.ID || item.Unit || "";
 
         if (vendorId) tr.querySelector(".j1-vendor").value = vendorId;
         if (metalTypeId) tr.querySelector(".j1-metal-type").value = metalTypeId;
@@ -2195,13 +2237,13 @@ function initRapportPriceTriggers() {
       tr.className = "jewel2-row";
       tr.dataset.rowId = item.ID || "";
       tr.innerHTML = `
-        <td><input type="text" class="j2-lot" value="${item.Diamond_Lot || ""}"></td>
+        <td><input type="text" class="j2-lot" value="${item.Diamond_Lot_No || ""}"></td>
         <td><select class="select_shape j2-shape"><option value="">Select Shape</option></select></td>
-        <td><input type="text" class="j2-quality" value="${item.Diamond_Quality || ""}"></td>
+        <td><input type="text" class="j2-quality" value="${item.Quality || ""}"></td>
         <td><input type="number" class="j2-stones" value="${item.No_of_Stones || ""}"></td>
         <td><input type="number" class="j2-total-ct" value="${item.Total_Ct_Wt || ""}"></td>
         <td><input type="text" class="j2-price" value="${item.Price || ""}"></td>
-        <td><input type="text" class="j2-cost" value="${item.Diamond_cost || ""}"></td>
+        <td><input type="text" class="j2-cost" value="${item.Diamond_Cost || ""}"></td>
         <td><textarea class="j2-remarks">${item.Remarks || ""}</textarea></td>
       `;
       tbody.appendChild(tr);
@@ -2211,7 +2253,7 @@ function initRapportPriceTriggers() {
       }
 
       setTimeout(function () {
-        const shapeId = item.Shape1?.ID || item.Shape1 || "";
+        const shapeId = item.Shape?.ID || item.Shape || "";
         if (shapeId) tr.querySelector(".j2-shape").value = shapeId;
       }, 500);
     });

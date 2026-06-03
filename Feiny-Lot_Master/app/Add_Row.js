@@ -1,5 +1,6 @@
 // Add Row Function for Jewellery 1 Table - Jewellery 1 – Metal Details
 function addJewellery1Row() {
+  // // console.log("Adding Jewellery 1 row...");
   const tbody = document.getElementById("jewel1Body");
 
   const newRow = document.createElement("tr");
@@ -38,6 +39,7 @@ function addJewellery1Row() {
     <td><input type="text" class="j1-gold-cost" /></td>
     <td><textarea class="j1-remarks"></textarea></td>
   `;
+        `;
   tbody.appendChild(newRow);
 
   if (typeof loadContactLookup === "function") loadContactLookup(newRow.querySelector(".j1-vendor"));
@@ -45,10 +47,17 @@ function addJewellery1Row() {
   if (typeof loadColorLookup === "function") loadColorLookup(newRow.querySelector(".j1-metal-color"));
   if (typeof loadPurityLookup === "function") loadPurityLookup(newRow.querySelector(".j1-metal-purity"));
   if (typeof loadUnitLookup === "function") loadUnitLookup(newRow.querySelector(".j1-unit"));
+  loadContactLookup(newRow.querySelector(".select_contact"));
+  loadMetalTypeLookup(newRow.querySelector(".select_metal_type"));
+  loadColorLookup(newRow.querySelector(".select_color"));
+  loadPurityLookup(newRow.querySelector(".select_purity"));
+  loadUnitLookup(newRow.querySelector(".select_unit"));
 }
 
 // Add Row Function for Jewellery 2 – Diamond Details
+
 function addJewellery2Row() {
+  // console.log("Adding Jewellery 2 row...");
   const tbody = document.getElementById("jewel2Body");
 
   const newRow = document.createElement("tr");
@@ -67,6 +76,7 @@ function addJewellery2Row() {
     <td><input type="text" class="j2-cost" /></td>
     <td><textarea class="j2-remarks"></textarea></td>
   `;
+        `;
   tbody.appendChild(newRow);
 
   // Use cached render if available, otherwise load
@@ -75,10 +85,13 @@ function addJewellery2Row() {
   } else if (typeof loadShapeLookup === "function") {
     loadShapeLookup(newRow.querySelector(".j2-shape"));
   }
+  loadShapeLookup(newRow.querySelector(".select_shape"));
 }
 
 // Add Row Function for Jewellery 3 – Color Stone
+// Add Row Function for Jewellery 2 – Diamond Details
 function addJewellery3Row() {
+  // console.log("Adding Jewellery 3 row...");
   const tbody = document.getElementById("jewel3Body");
 
   const newRow = document.createElement("tr");
@@ -136,6 +149,34 @@ function addJewellery3Row() {
     <td><input type="checkbox" class="j3-duty" /></td>
     <td><textarea class="j3-remarks"></textarea></td>
   `;
+                  <td><input class="j3-lot" /></td>
+                  <td><select class="j3-stone-type"></select></td>
+                  <td>
+                  <select class="select_shape">
+                    <option value="">Select Shape</option>
+                  </select>
+                </td>
+                  <td><input class="j3-quality" /></td>
+                  <td><input class="j3-range" /></td>
+                  <td><input class="j3-no-stones" /></td>
+                  <td><input class="j3-wt-stone" /></td>
+                  <td><input class="j3-ctwt" /></td>
+                  <td><select class="select_unit j3-unit">
+                        <option value="">Select Unit</option>
+                      </select></td>
+                  <td><select class="Select_Cut j3-cut"></select></td>
+                  <td><select class="Select_Stone_Color j3-color"></select></td>
+                  <td><select class="Select_Clarity_j3-clarity j3-clarity"></select></td>
+                  <td><select class="j3-supplier"></select></td>
+                  <td><select class="j3-setter"></select></td>
+                  <td><input class="j3-price" /></td>
+                  <td><input class="j3-cost" /></td>
+                  <td><input type="checkbox" class="j3-cs" /></td>
+                  <td><input type="checkbox" class="j3-duty" /></td>
+                  <td><textarea class="j3-remarks"></textarea></td>
+                  <td><button type="button" class="btn-remove" onclick="removeRow(this)">❌</button></td>
+                
+        `;
   tbody.appendChild(newRow);
 
   if (typeof loadUnitLookup === "function") loadUnitLookup(newRow.querySelector(".j3-unit"));
@@ -151,10 +192,14 @@ function addJewellery3Row() {
   } else if (typeof loadShapeLookup === "function") {
     loadShapeLookup(newRow.querySelector(".select_shape"));
   }
+  loadUnitLookup(newRow.querySelector(".select_unit"));
+  loadShapeLookup(newRow.querySelector(".select_shape"));
 }
 
 // Add Row Function for Jewellery 4 – Labour
+// Add Row Function for Jewellery 2 – Diamond Details
 function addJewellery4Row() {
+  // console.log("Adding Jewellery 4 row...");
   const tbody = document.getElementById("jewel4Body");
 
   const newRow = document.createElement("tr");
@@ -167,11 +212,21 @@ function addJewellery4Row() {
     <td><input type="checkbox" class="j4-duty" /></td>
     <td><input type="text" class="j4-amount" /></td>
   `;
+                  <td><input class="j4-labor-no" /></td>
+                  <td><textarea class="j4-description"></textarea></td>
+                  <td><input class="j4-price" /></td>
+                  <td><input class="j4-qty" /></td>
+                  <td><input type="checkbox" class="j4-duty" /></td>
+                  <td><input class="j4-amount" /></td>
+                  <td><button type="button" class="btn-remove" onclick="removeRow(this)">❌</button></td>
+                
+        `;
   tbody.appendChild(newRow);
 }
 
 // Add Row Function for Jewellery Partnership Details
 function addJewelleryPartnershipRow() {
+  // console.log("Adding Jewellery 5 row...");
   const tbody = document.getElementById("jewelleryPartnershipBody");
 
   const newRow = document.createElement("tr");
@@ -181,6 +236,9 @@ function addJewelleryPartnershipRow() {
       <select class="jp_partner_select_contact">
         <option value="">Select Contact</option>
       </select>
+        <select class="jp_partner_select_contact">
+          <option value="">Select Contact</option>
+        </select>
     </td>
     <td><input type="text" class="jp_shares" /></td>
     <td><input type="text" class="jp_partnership_percentage" /></td>
@@ -189,9 +247,11 @@ function addJewelleryPartnershipRow() {
     <td><textarea class="jp_description"></textarea></td>
     <td><button type="button" class="btn-remove" onclick="removeRow(this)">❌</button></td>
   `;
+        `;
   tbody.appendChild(newRow);
 
   if (typeof populatePartnerDropdowns === "function") {
+  if (typeof populatePartnerDropdowns === 'function') {
     populatePartnerDropdowns(newRow.querySelector(".jp_partner_select_contact"));
   }
 }

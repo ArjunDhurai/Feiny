@@ -52,16 +52,70 @@
     return cleaned;
   }
 
+  function getLookupId(value) {
+    if (!value) return "";
+    if (typeof value === "object") {
+      return value.ID || value.id || value.value || "";
+    }
+    return String(value);
+  }
+
+  function getLookupDisplayValue(value) {
+    if (!value) return "";
+    if (typeof value === "object") {
+      return (
+        value.zc_display_value ||
+        value.display_value ||
+        value.Name ||
+        value.Customer_Name ||
+        value.Legal_Name ||
+        value.Full_Name ||
+        value.Display_Name ||
+        value.ID ||
+        ""
+      );
+    }
+    return String(value);
+  }
+
+  function ensureSelectOption(select, value, text) {
+    if (!select || !value) return;
+
+    const valueText = String(value);
+    const exists = Array.from(select.options).some(function (option) {
+      return option.value === valueText;
+    });
+
+    if (!exists) {
+      const option = document.createElement("option");
+      option.value = valueText;
+      option.text = text || valueText;
+      select.appendChild(option);
+    }
+
+    select.value = valueText;
+  }
+
   /* ─── Clean subform rows: remove nulls inside each row, skip fully empty rows ─── */
   function cleanSubformRows(rows) {
     if (!Array.isArray(rows)) return [];
     return rows
       .map(function (row) {
         const cleaned = {};
+        const hasExistingId =
+          row.ID !== null && row.ID !== undefined && String(row.ID).trim() !== "";
+
         Object.keys(row).forEach(function (key) {
           const val = row[key];
           if (val === null || val === undefined) return;
-          if (typeof val === "string" && val.trim() === "" && key !== "ID") return;
+          if (
+            typeof val === "string" &&
+            val.trim() === "" &&
+            key !== "ID" &&
+            !hasExistingId
+          ) {
+            return;
+          }
           cleaned[key] = val;
         });
         return cleaned;
@@ -83,6 +137,7 @@
         loadExistingRecord(recId);
       }
     });
+
 
     /* ================= SECTION VISIBILITY ================= */
 
@@ -988,130 +1043,93 @@
     });
   }
 
-  /* ================= RAPAPORT PRICE ================= */
-  function fetchRapportPrice() {
+   /* ================= RAPPORT PRICE ================= */
+function fetchRapportPrice() {
+  // Lookup fields — .value gives the linked record ID
+  const shapeId   = document.getElementById("dia_shape")?.value;
+  const colorId   = document.getElementById("dia_color")?.value;
+  const clarityId = document.getElementById("dia_clarity")?.value;
+  const weight    = parseFloat(document.getElementById("dia_weight")?.value);
 
-    const shapeId   = document.getElementById("dia_shape")?.value;
-    const colorId   = document.getElementById("dia_color")?.value;
-    const clarityId = document.getElementById("dia_clarity")?.value;
-    const weight    = parseFloat(document.getElementById("dia_weight")?.value);
+  console.log("IDs:", { shapeId, colorId, clarityId, weight });
 
-    console.log("IDs:", {
-      shapeId,
-      colorId,
-      clarityId,
-      weight
-    });
+  const priceEl = document.getElementById("rapport_price");
 
-    const priceEl = document.getElementById("rapport_price");
+  if (!shapeId || !colorId || !clarityId || isNaN(weight) || weight <= 0) {
+    if (priceEl) priceEl.value = "";
+    return;
+  }
 
-    if (!shapeId || !colorId || !clarityId || isNaN(weight) || weight <= 0) {
-      if (priceEl) priceEl.value = "";
-      return;
-    }
+  // Both forms share the same lookup tables so IDs match directly.
+  // Use FieldName.ID = numericId for each lookup field.
+  const criteria =
+    "Shapes.ID = " + shapeId +
+    " && Colors.ID = " + colorId +
+    " && Claritys.ID = " + clarityId;
 
-    // Correct criteria for lookup text IDs
-    const criteria =
-      'Shapes.ID = "' + shapeId + '"' +
-      ' && Colors.ID = "' + colorId + '"' +
-      ' && Claritys.ID = "' + clarityId + '"';
+  console.log("CRITERIA:", criteria);
 
-    console.log("CRITERIA:", criteria);
-
-    ZOHO.CREATOR.DATA.getRecords({
-      app_name: "feiny-app",
-      report_name: "All_Rapaport_Masters",
-      criteria: criteria,
-      max_records: 200
-    })
-    .then(function(response) {
-
+  ZOHO.CREATOR.DATA.getRecords({
+    app_name: "feiny-app",
+    report_name: "All_Rapaport_Masters",
+    criteria: criteria,
+    max_records: 200,
+  })
+    .then(function (response) {
       console.log("FULL RESPONSE:", response);
 
-      if (
-        response.code !== 3000 ||
-        !response.data ||
-        response.data.length === 0
-      ) {
-        console.warn("No Rapaport records found");
+      if (response.code !== 3000 || !response.data || response.data.length === 0) {
+        console.warn("No Rapaport records returned — check IDs match Rapaport Master lookup IDs");
         if (priceEl) priceEl.value = "";
         return;
       }
 
-      console.log("ALL RECORDS:", response.data);
+      console.log("SAMPLE RECORD:", response.data[0]);
 
-      // Match correct weight range
-      const matchedRecord = response.data.find(function(rec) {
-
-        const lowWeight  = parseFloat(rec.Weight_low_size);
+      // Filter by weight — Weight_high_size1 must be >= the entered weight
+      const filtered = response.data.filter(function (rec) {
         const highWeight = parseFloat(rec.Weight_high_size1);
-
-        console.log(
-          "Checking:",
-          lowWeight,
-          highWeight,
-          "Input:",
-          weight
-        );
-
-        return (
-          !isNaN(lowWeight) &&
-          !isNaN(highWeight) &&
-          weight >= lowWeight &&
-          weight <= highWeight
-        );
+        return !isNaN(highWeight) && highWeight >= weight;
       });
 
-      console.log("MATCHED RECORD:", matchedRecord);
+      console.log("WEIGHT FILTERED:", filtered);
 
-      if (!matchedRecord) {
-        console.warn("No matching weight range");
+      if (filtered.length === 0) {
+        console.warn("No Rapaport record covers this weight");
         if (priceEl) priceEl.value = "";
         return;
       }
 
-      const price = matchedRecord.Rapaport_Price || "";
+      // Smallest upper bound that still covers the entered weight
+      const sorted = [...filtered].sort(
+        (a, b) => parseFloat(a.Weight_high_size1) - parseFloat(b.Weight_high_size1)
+      );
 
+      const price = sorted[0].Rapaport_Price || "";
       console.log("FINAL PRICE:", price);
-
-      if (priceEl) {
-        priceEl.value = price;
-      }
-
+      if (priceEl) priceEl.value = price;
     })
-    .catch(function(error) {
-
+    .catch(function (error) {
       console.error("Rapaport fetch error:", error);
-
-      if (priceEl) {
-        priceEl.value = "";
-      }
+      if (priceEl) priceEl.value = "";
     });
-  }
+}
 
+/* ================= RAPPORT PRICE TRIGGERS ================= */
+function initRapportPriceTriggers() {
+  const shapeEl   = document.getElementById("dia_shape");
+  const colorEl   = document.getElementById("dia_color");
+  const clarityEl = document.getElementById("dia_clarity");
+  const weightEl  = document.getElementById("dia_weight");
 
-  /* ================= RAPAPORT PRICE TRIGGERS ================= */
-  function initRapportPriceTriggers() {
+  [shapeEl, colorEl, clarityEl].forEach(function (el) {
+    if (el) el.addEventListener("change", fetchRapportPrice);
+  });
 
-    const shapeEl   = document.getElementById("dia_shape");
-    const colorEl   = document.getElementById("dia_color");
-    const clarityEl = document.getElementById("dia_clarity");
-    const weightEl  = document.getElementById("dia_weight");
+  if (weightEl) weightEl.addEventListener("input", fetchRapportPrice);
 
-    [shapeEl, colorEl, clarityEl].forEach(function(el) {
-      if (el) {
-        el.addEventListener("change", fetchRapportPrice);
-      }
-    });
-
-    if (weightEl) {
-      weightEl.addEventListener("input", fetchRapportPrice);
-      weightEl.addEventListener("change", fetchRapportPrice);
-    }
-
-    fetchRapportPrice();
-  }
-
+  fetchRapportPrice();
+}
   /* ================= SPECIES CHANGE → HTS / CODE ================= */
   const speciesLookupEl = document.getElementById("species_lookup");
   if (speciesLookupEl) {
@@ -1151,29 +1169,30 @@
     SAVE RECORD — CREATE + UPDATE
   ================================================================================= */
   function saveRecord() {
-    const Category1 = document.getElementById("itemType")?.value || "";
-    const In_SKU = document.getElementById("In_SKU")?.value || "";
+  const Category1 = document.getElementById("itemType")?.value || "";
+  const In_SKU = document.getElementById("In_SKU")?.value || "";
 
-    // Determine correct cost value based on category
-    let costVal = getNumber("cost_amount"); // Color Stone default
-    if (Category1 === "Diamond") costVal = getNumber("dia_cost_amount");
-    else if (Category1 === "Jewellery") costVal = getNumber("cost_amount_summary");
+  // Determine correct cost value based on category
+  let costVal = getNumber("cost_amount"); // Color Stone default
+  if (Category1 === "Diamond") costVal = getNumber("dia_cost_amount");
+  else if (Category1 === "Jewellery") costVal = getNumber("cost_amount_summary");
 
-    if (!Category1 || !In_SKU) {
-      alert("Please select Item Type and enter SKU");
-      return;
-    }
+  if (!Category1 || !In_SKU) {
+    alert("Please select Item Type and enter SKU");
+    return;
+  }
 
-    const saveBtn = document.getElementById("addRecord");
-    const originalText = saveBtn ? saveBtn.textContent : "Save";
-    if (saveBtn) {
-      saveBtn.textContent = "Saving...";
-      saveBtn.disabled = true;
-    }
+  const saveBtn = document.getElementById("addRecord");
+  const originalText = saveBtn ? saveBtn.textContent : "Save";
+  if (saveBtn) {
+    saveBtn.textContent = "Saving...";
+    saveBtn.disabled = true;
+  }
 
-    // ── Build base record object ──
-    const recordData = cleanRecordData({
+  // ── Build base record object ──
+  const recordData = cleanRecordData({
       Select: Category1,
+      // Category1: Category1,
       Category1: Category1,
       In_SKU: In_SKU,
       Stock_On_Hand: getNumber("Stock_On_Hand"),
@@ -1253,175 +1272,162 @@
       Final_Cost: getNumber("final_cost"),
       Selling_price_per_piece: getNumber("selling_price_piece"),
       Partnership_Details: cleanSubformRows(getPartnerRowsData()),
-  // Metal_Details: cleanSubformRows(getMetalDetailsRowsData()),
+      
+  Metal_Details: cleanSubformRows(getMetalDetailsRowsData()),
 
-  // Diamond_Details: cleanSubformRows(getDiamondDetailsRowsData()),
+  Diamond_Details: cleanSubformRows(getDiamondDetailsRowsData()),
 
-  // // Jewellery 3 - Color Stone Details
-  // Color_Stone1: cleanSubformRows(getColorStoneDetailsRowsData()),
+  // Jewellery 3 - Color Stone Details
+  Color_Stone1: cleanSubformRows(getColorStoneDetailsRowsData()),
 
-  // // Jewellery 4 - Labour Details
-  // Labour_Details: cleanSubformRows(getLabourDetailsRowsData()),
+  // Jewellery 4 - Labour Details
+  Labour_Details: cleanSubformRows(getLabourDetailsRowsData()),
     });
+    console.log("Partnership Data", getPartnerRowsData());
   console.log("Saving config:", recordData);
 
-    if (!recId) {
-      /* ===============================
-          ➕ CREATE - Record Creation - API CALL
-      =============================== */
-      const config = {
-        app_name: "feiny-app",
-        form_name: "Lot_Master",
-        payload: {
-          data: recordData,
-        },
-      };
+  if (!recId) {
+    /* ===============================
+        ➕ CREATE - Record Creation - API CALL
+    =============================== */
+    const config = {
+      app_name: "feiny-app",
+      form_name: "Lot_Master",
+      payload: {
+        data: recordData,
+      },
+    };
 
-      ZOHO.CREATOR.DATA.addRecords(config)
-        .then(function (response) {
-          console.log("✅ Created:", response);
+    ZOHO.CREATOR.DATA.addRecords(config)
+      .then(function (response) {
+        console.log("✅ Created:", response);
 
-          if (response.code === 3000 || response.code === "3000") {
-            alert("✅ Record Saved Successfully");
+        if (response.code === 3000 || response.code === "3000") {
+          alert("✅ Record Saved Successfully");
 
-            let recordId = null;
-            if (
-              response.data &&
-              Array.isArray(response.data) &&
-              response.data.length > 0
-            )
-              recordId = response.data[0].ID;
-            else if (response.data && response.data.ID)
-              recordId = response.data.ID;
-            else if (response.details && response.details.id)
-              recordId = response.details.id;
-            else if (response.id) recordId = response.id;
+          let recordId = null;
+          if (response.data && Array.isArray(response.data) && response.data.length > 0)
+            recordId = response.data[0].ID;
+          else if (response.data && response.data.ID)
+            recordId = response.data.ID;
+          else if (response.details && response.details.id)
+            recordId = response.details.id;
+          else if (response.id) recordId = response.id;
 
-            if (!recordId)
-              throw new Error(
-                "Record created but ID not found: " + JSON.stringify(response),
-              );
+          if (!recordId)
+            throw new Error("Record created but ID not found: " + JSON.stringify(response));
 
-            // Handle file uploads after create
-            let uploadPromises = [];
-            const certPromises = createCertificateRecords(In_SKU, recordId);
-            if (certPromises && certPromises.length > 0)
-              uploadPromises = uploadPromises.concat(certPromises);
-            if (recordId && diaImageFile)
-              uploadPromises.push(uploadDiaImage(recordId, diaImageFile));
-            if (recordId && stoneImageFile)
-              uploadPromises.push(uploadStoneImage(recordId, stoneImageFile));
+          // Handle file uploads after create
+          let uploadPromises = [];
+          const certPromises = createCertificateRecords(In_SKU, recordId);
+          if (certPromises && certPromises.length > 0)
+            uploadPromises = uploadPromises.concat(certPromises);
+          if (recordId && diaImageFile)
+            uploadPromises.push(uploadDiaImage(recordId, diaImageFile));
+          if (recordId && stoneImageFile)
+            uploadPromises.push(uploadStoneImage(recordId, stoneImageFile));
 
-            return Promise.all(uploadPromises);
-          } else {
-            throw new Error(
-              "Failed to create record: " +
-                (response.message || JSON.stringify(response)),
-            );
-          }
-        })
-        .then(function (uploadResults) {
-          console.log("Upload results:", uploadResults);
-          const successCount =
-            uploadResults?.filter((u) => u.type === "certificate" && u.success)
-              .length || 0;
-          let message = "Record created successfully!";
-          if (successCount > 0)
-            message += ` ${successCount} certificate(s) created.`;
-          alert(message);
-          certificateFiles.clear();
-          certificateFilesToUpload = [];
+          return Promise.all(uploadPromises);
+        } else {
+          throw new Error("Failed to create record: " + (response.message || JSON.stringify(response)));
+        }
+      })
+      .then(function (uploadResults) {
+        console.log("Upload results:", uploadResults);
+        const successCount = uploadResults?.filter((u) => u.type === "certificate" && u.success).length || 0;
+        let message = "Record created successfully!";
+        if (successCount > 0) message += ` ${successCount} certificate(s) created.`;
+        alert(message);
+        certificateFiles.clear();
+        certificateFilesToUpload = [];
 
-          // ✅ CLEAR PAGE AFTER SUCCESSFUL SAVE
-          clearPageAfterSave();
+        // ✅ CLEAR PAGE AFTER SUCCESSFUL SAVE
+        clearPageAfterSave();
 
-          // Navigate to the report list
-          ZOHO.CREATOR.UTIL.navigateTo({
-            url: "#Report:All_Lot_Master",
-            target: "same",
-          });
-        })
-        .catch(function (error) {
-          console.error("❌ Save Error:", error);
-          alert("❌ Error: " + error.message);
-        })
-        .finally(function () {
-          if (saveBtn) {
-            saveBtn.textContent = originalText;
-            saveBtn.disabled = false;
-          }
+        // Navigate to the report list
+        ZOHO.CREATOR.UTIL.navigateTo({
+          url: "#Report:All_Lot_Master",
+          target: "same",
         });
-    } else {
-      /* ===============================
-          🔄 Record Updatation - API CALL
-      =============================== */
-      console.log("recId:", recId);
-  console.log("Update Data:", recordData);
-      ZOHO.CREATOR.DATA.updateRecordById({
-    app_name: "feiny-app",
-    report_name: "All_Lot_Master",
-    id: recId,
-    payload: {
-      data: recordData,
-    },
-  })
-        .then(function (res) {
-          console.log("✅ Updated:", res);
+      })
+      .catch(function (error) {
+        console.error("❌ Save Error:", error);
+        alert("❌ Error: " + error.message);
+        alert("❌ Error: " + getErrorMessage(error));
+      })
+      .finally(function () {
+        if (saveBtn) {
+          saveBtn.textContent = originalText;
+          saveBtn.disabled = false;
+        }
+      });
+  } else {
+    /* ===============================
+        🔄 Record Updatation - API CALL
+    =============================== */
+    console.log("recId:", recId);
+    console.log("Update Data:", recordData);
 
-          if (res.code === 3000 || res.code === "3000") {
-            alert("✅ Updated Successfully");
+    ZOHO.CREATOR.DATA.updateRecordById({
+      app_name: "feiny-app",
+      report_name: "All_Lot_Master", // ✅ must be report_name, not form_name
+      id: recId,
+      id: String(recId),
+      payload: {
+        data: recordData,
+      },
+    })
+      .then(function (res) {
+        console.log("✅ Updated:", res);
 
-            // Handle file uploads after update
-            let uploadPromises = [];
+        if (res.code === 3000 || res.code === "3000") {
+          alert("✅ Updated Successfully");
 
-            // const certPromises = uploadCertificateFile(recId,"");
-            const certPromises = createCertificateRecords(In_SKU, recId);
-            if (certPromises && certPromises.length > 0)
-              uploadPromises = uploadPromises.concat(certPromises);
-            if (recId && diaImageFile)
-              uploadPromises.push(uploadDiaImage(recId, diaImageFile));
-            if (recId && stoneImageFile)
-              uploadPromises.push(uploadStoneImage(recId, stoneImageFile));
+          // Handle file uploads after update
+          let uploadPromises = [];
+          const certPromises = createCertificateRecords(In_SKU, recId);
+          if (certPromises && certPromises.length > 0)
+            uploadPromises = uploadPromises.concat(certPromises);
+          if (recId && diaImageFile)
+            uploadPromises.push(uploadDiaImage(recId, diaImageFile));
+          if (recId && stoneImageFile)
+            uploadPromises.push(uploadStoneImage(recId, stoneImageFile));
 
-            return Promise.all(uploadPromises);
-          } else {
-            throw new Error(
-              "Failed to update record: " + (res.message || JSON.stringify(res)),
-            );
-          }
-        })
-        .then(function (uploadResults) {
-          console.log("Upload results:", uploadResults);
-          const successCount =
-            uploadResults?.filter((u) => u.type === "certificate" && u.success)
-              .length || 0;
-          let message = "Record updated successfully!";
-          if (successCount > 0)
-            message += ` ${successCount} certificate(s) created.`;
-          alert(message);
-          certificateFiles.clear();
-          certificateFilesToUpload = [];
+          return Promise.all(uploadPromises);
+        } else {
+          throw new Error("Failed to update record: " + (res.message || JSON.stringify(res)));
+        }
+      })
+      .then(function (uploadResults) {
+        console.log("Upload results:", uploadResults);
+        const successCount = uploadResults?.filter((u) => u.type === "certificate" && u.success).length || 0;
+        let message = "Record updated successfully!";
+        if (successCount > 0) message += ` ${successCount} certificate(s) created.`;
+        alert(message);
+        certificateFiles.clear();
+        certificateFilesToUpload = [];
 
-          // ✅ CLEAR PAGE AFTER SUCCESSFUL UPDATE
-          clearPageAfterSave();
+        // ✅ CLEAR PAGE AFTER SUCCESSFUL UPDATE
+        clearPageAfterSave();
 
-          ZOHO.CREATOR.UTIL.navigateTo({
-            url: "#Report:All_Lot_Master",
-            target: "same",
-          });
-        })
-        .catch(function (error) {
-          console.error("❌ Save Error:", error);
-          alert("❌ Error: " + error.message);
-        })
-        .finally(function () {
-          if (saveBtn) {
-            saveBtn.textContent = originalText;
-            saveBtn.disabled = false;
-          }
+        ZOHO.CREATOR.UTIL.navigateTo({
+          url: "#Report:All_Lot_Master",
+          target: "same",
         });
-    }
+      })
+      .catch(function (error) {
+        console.error("❌ Save Error:", error);
+        alert("❌ Error: " + error.message);
+        alert("❌ Error: " + getErrorMessage(error));
+      })
+      .finally(function () {
+        if (saveBtn) {
+          saveBtn.textContent = originalText;
+          saveBtn.disabled = false;
+        }
+      });
   }
+}
   /* ================= DIAMOND IMAGE UPLOAD ================= */
   function uploadDiaImage(recordId, file) {
     return new Promise(function (resolve, reject) {
@@ -1685,47 +1691,80 @@
 
   /* ================= GET PARTNERSHIP SUBFORM DATA ================= */
   function getPartnerRowsData() {
-    const category = document.getElementById("itemType")?.value;
-    const partnerRows = [];
-    const isJewellery = category === "Jewellery";
-    const selector = isJewellery ? "#jewelleryPartnershipBody tr" : "#partnerBody tr";
-
-    document.querySelectorAll(selector).forEach(function (row) {
-      let partnerValue, shares, percent, commission, itemized, desc;
-
-      if (isJewellery) {
-        partnerValue = row.querySelector(".jp_partner_select_contact")?.value || "";
-        shares = row.querySelector(".jp_shares")?.value || "";
-        percent = row.querySelector(".jp_partnership_percentage")?.value || "";
-        commission = row.querySelector(".jp_commission_percentage")?.value || "";
-        itemized = row.querySelector(".jp_commission_itemization")?.checked || false;
-        desc = row.querySelector(".jp_description")?.value || "";
-      } else {
-        partnerValue = row.querySelector(".partnerdatalookup")?.value || "";
-        shares = row.querySelector(".partner-share")?.value || "";
-        percent = row.querySelector(".partner-percent")?.value || "";
-        commission = row.querySelector(".commission-percent")?.value || "";
-        itemized = row.querySelector(".commission-itemized")?.checked || false;
-        desc = row.querySelector(".partner-desc")?.value || "";
+  const category = document.getElementById("itemType")?.value;
+  const partnerRows = [];
+  const isJewellery = category === "Jewellery";
+ 
+  const selector = isJewellery
+    ? "#jewelleryPartnershipBody tr"
+    : "#partnerBody tr";
+ 
+  document.querySelectorAll(selector).forEach(function (row) {
+ 
+    let partnerValue = "";
+    let shares = "";
+    let percent = "";
+    let commission = "";
+    let Commission_Itemized_on_Invoice = false;
+    let Description = "";
+ 
+    if (isJewellery) {
+      const partnerSelect = row.querySelector(".jp_partner_select_contact");
+      partnerValue = partnerSelect?.value || row.dataset.partnerId || "";
+      shares = row.querySelector(".jp_shares")?.value || "";
+      percent = row.querySelector(".jp_partnership_percentage")?.value || "";
+      commission = row.querySelector(".jp_commission_percentage")?.value || "";
+      Commission_Itemized_on_Invoice = row.querySelector(".jp_commission_itemization")?.checked || false;
+      Description = row.querySelector(".jp_description")?.value || "";
+    } else {
+      const partnerSelect = row.querySelector(".partnerdatalookup");
+      partnerValue = partnerSelect?.value || row.dataset.partnerId || "";
+      shares = row.querySelector(".partner-share")?.value || "";
+      percent = row.querySelector(".partner-percent")?.value || "";
+      commission = row.querySelector(".commission-percent")?.value || "";
+      Commission_Itemized_on_Invoice = row.querySelector(".commission-itemized")?.checked || false;
+      Description = row.querySelector(".partner-desc")?.value || "";
+    }
+ 
+    if (
+      partnerValue ||
+      shares ||
+      percent ||
+      commission ||
+      Description ||
+      Commission_Itemized_on_Invoice
+    ) {
+      const rowData = {
+        Partner_Name: partnerValue,
+        Partnership_shares: shares,
+        Partnership: percent,
+        Commission: commission,
+        Description: Description,
+        Commission_Itemized_on_Invoice: Commission_Itemized_on_Invoice,
+      };
+ 
+      // ── FIX: read rowId from BOTH dataset.rowId AND data-row-id attribute
+      // In edit mode, loadExistingRecord sets tr.dataset.rowId = item.ID
+      // dataset.rowId maps to the attribute data-row-id, so both should
+      // work. We coerce to string and only add ID when it is a non-empty value.
+      const rowId =
+        (row.dataset && row.dataset.rowId && String(row.dataset.rowId).trim() !== "")
+          ? String(row.dataset.rowId).trim()
+          : (row.getAttribute("data-row-id") && String(row.getAttribute("data-row-id")).trim() !== "")
+            ? String(row.getAttribute("data-row-id")).trim()
+            : null;
+ 
+      if (rowId) {
+        rowData.ID = rowId;
       }
-
-      if (partnerValue) {
-        const rowData = {
-          Partner_Name: partnerValue,
-          Partnership_shares: shares,
-          Partnership: percent,
-          Commission: commission,
-          Description: desc,
-          Commission_Itemized_on_Invoice: itemized,
-        };
-        if (row.dataset.rowId) rowData.ID = row.dataset.rowId;
-        partnerRows.push(rowData);
-      }
-    });
-
-    return partnerRows;
-  }
-
+ 
+      partnerRows.push(rowData);
+    }
+  });
+ 
+  console.log("Partnership Update Payload:", partnerRows);
+  return partnerRows;
+}
   /* ================= GET METAL DETAILS SUBFORM DATA (JEWELLERY 1) ================= */
   function getMetalDetailsRowsData() {
     const metalRows = [];
@@ -1863,9 +1902,11 @@
       if (laborNo || description || price || qty || amount) {
         const rowData = {
           Labor: laborNo,
+          Labour_No: laborNo,
           Description: description,
           Price: price,
           Qty: qty,
+          Quantity: qty,
           Duty: duty,
           Amount: amount,
         };
@@ -2119,6 +2160,9 @@
           partnerData.forEach(function (item) {
             const tr = document.createElement("tr");
             tr.dataset.rowId = item.ID || "";
+            const partnerId = getLookupId(item.Partner_Name);
+            const partnerDisplay = getLookupDisplayValue(item.Partner_Name);
+            tr.dataset.partnerId = partnerId;
 
             if (isJewel) {
               tr.className = "jewellery-partnership-row";
@@ -2147,9 +2191,7 @@
 
             setTimeout(function () {
               if (typeof populatePartnerDropdowns === "function") populatePartnerDropdowns(selectEl);
-              if (item.Partner_Name?.ID) {
-                selectEl.value = item.Partner_Name.ID;
-              }
+              ensureSelectOption(selectEl, partnerId, partnerDisplay);
             }, 300);
           });
         } else {

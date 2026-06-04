@@ -1,4 +1,4 @@
-  // Date: 2024-06-20 time: 12:00 PM  ddddyy
+// Date: 2024-06-20 time: 12:00 PM  ddddyy
   let certificateLookupCache = {
     labs: [],
     descriptors: [],
@@ -1407,13 +1407,70 @@ function initRapportPriceTriggers() {
         certificateFiles.clear();
         certificateFilesToUpload = [];
 
-        // ✅ CLEAR PAGE AFTER SUCCESSFUL UPDATE
-        clearPageAfterSave();
+ /* ================= CLEAR PAGE AFTER SAVE ================= */
+function clearPageAfterSave() {
+  // Reset all input fields
+  document.querySelectorAll("input").forEach((el) => {
+    if (el.type === "checkbox" || el.type === "radio") {
+      el.checked = false;
+    } else if (el.type !== "button" && el.type !== "submit") {
+      el.value = "";
+    }
+  });
 
-        ZOHO.CREATOR.UTIL.navigateTo({
-          url: "#Report:All_Lot_Master",
-          target: "same",
-        });
+  // Reset textarea
+  document.querySelectorAll("textarea").forEach((el) => {
+    el.value = "";
+  });
+
+  // Reset dropdowns
+  document.querySelectorAll("select").forEach((el) => {
+    el.selectedIndex = 0;
+  });
+
+  // Clear subforms
+  const partnerBody = document.getElementById("partnerBody");
+  if (partnerBody) partnerBody.innerHTML = "";
+
+  const jewelleryPartnershipBody = document.getElementById("jewelleryPartnershipBody");
+  if (jewelleryPartnershipBody) jewelleryPartnershipBody.innerHTML = "";
+
+  const certificateBody = document.getElementById("certificateBody");
+  if (certificateBody) certificateBody.innerHTML = "";
+
+  // Clear image preview
+  const preview = document.getElementById("imagePreview");
+  if (preview) {
+    preview.src = "";
+    preview.style.display = "none";
+  }
+
+  const stonePreview = document.getElementById("stoneImagePreview");
+  if (stonePreview) {
+    stonePreview.src = "";
+    stonePreview.style.display = "none";
+  }
+
+  // Reset variables
+  diaImageFile = null;
+  stoneImageFile = null;
+  certificateFiles.clear();
+  certificateFilesToUpload = [];
+
+  console.log("✅ Form Cleared Successfully");
+}
+
+        // ✅ CLEAR PAGE AFTER SUCCESSFUL UPDATE
+       clearPageAfterSave();
+
+// Reset edit mode
+recId = null;
+lot_edit = false;
+
+// Stay on same page and clear form
+setTimeout(() => {
+  window.location.reload();
+}, 500);
       })
       .catch(function (error) {
         console.error("❌ Save Error:", error);
@@ -1689,82 +1746,116 @@ function initRapportPriceTriggers() {
     return promises;
   }
 
-  /* ================= GET PARTNERSHIP SUBFORM DATA ================= */
   function getPartnerRowsData() {
-  const category = document.getElementById("itemType")?.value;
-  const partnerRows = [];
-  const isJewellery = category === "Jewellery";
- 
-  const selector = isJewellery
-    ? "#jewelleryPartnershipBody tr"
-    : "#partnerBody tr";
- 
-  document.querySelectorAll(selector).forEach(function (row) {
- 
-    let partnerValue = "";
-    let shares = "";
-    let percent = "";
-    let commission = "";
-    let Commission_Itemized_on_Invoice = false;
-    let Description = "";
- 
-    if (isJewellery) {
-      const partnerSelect = row.querySelector(".jp_partner_select_contact");
-      partnerValue = partnerSelect?.value || row.dataset.partnerId || "";
-      shares = row.querySelector(".jp_shares")?.value || "";
-      percent = row.querySelector(".jp_partnership_percentage")?.value || "";
-      commission = row.querySelector(".jp_commission_percentage")?.value || "";
-      Commission_Itemized_on_Invoice = row.querySelector(".jp_commission_itemization")?.checked || false;
-      Description = row.querySelector(".jp_description")?.value || "";
-    } else {
-      const partnerSelect = row.querySelector(".partnerdatalookup");
-      partnerValue = partnerSelect?.value || row.dataset.partnerId || "";
-      shares = row.querySelector(".partner-share")?.value || "";
-      percent = row.querySelector(".partner-percent")?.value || "";
-      commission = row.querySelector(".commission-percent")?.value || "";
-      Commission_Itemized_on_Invoice = row.querySelector(".commission-itemized")?.checked || false;
-      Description = row.querySelector(".partner-desc")?.value || "";
-    }
- 
-    if (
-      partnerValue ||
-      shares ||
-      percent ||
-      commission ||
-      Description ||
-      Commission_Itemized_on_Invoice
-    ) {
-      const rowData = {
-        Partner_Name: partnerValue,
-        Partnership_shares: shares,
-        Partnership: percent,
-        Commission: commission,
-        Description: Description,
-        Commission_Itemized_on_Invoice: Commission_Itemized_on_Invoice,
-      };
- 
-      // ── FIX: read rowId from BOTH dataset.rowId AND data-row-id attribute
-      // In edit mode, loadExistingRecord sets tr.dataset.rowId = item.ID
-      // dataset.rowId maps to the attribute data-row-id, so both should
-      // work. We coerce to string and only add ID when it is a non-empty value.
+    const category = document.getElementById("itemType")?.value;
+    const partnerRows = [];
+    const isJewellery = category === "Jewellery";
+
+    const selector = isJewellery
+      ? "#jewelleryPartnershipBody tr"
+      : "#partnerBody tr";
+
+    document.querySelectorAll(selector).forEach(function (row) {
+
+      let partnerValue = "";
+      let shares = "";
+      let percent = "";
+      let commission = "";
+      let Commission_Itemized_on_Invoice = false;
+      let Description = "";
+
+      if (isJewellery) {
+        const partnerSelect = row.querySelector(".jp_partner_select_contact");
+
+        // ── FIX BUG 1: read live select value first, then fall back to the
+        //    dataset attribute that was stamped on the TR by loadExistingRecord.
+        //    Use both dataset property AND getAttribute to be safe.
+        const datasetPartnerId =
+          (row.dataset && row.dataset.partnerId && String(row.dataset.partnerId).trim() !== "")
+            ? String(row.dataset.partnerId).trim()
+            : (row.getAttribute("data-partner-id") && String(row.getAttribute("data-partner-id")).trim() !== "")
+              ? String(row.getAttribute("data-partner-id")).trim()
+              : "";
+
+        partnerValue = (partnerSelect && partnerSelect.value && partnerSelect.value.trim() !== "")
+          ? partnerSelect.value.trim()
+          : datasetPartnerId;
+
+        shares = row.querySelector(".jp_shares")?.value || "";
+        percent = row.querySelector(".jp_partnership_percentage")?.value || "";
+        commission = row.querySelector(".jp_commission_percentage")?.value || "";
+        Commission_Itemized_on_Invoice = row.querySelector(".jp_commission_itemization")?.checked || false;
+        Description = row.querySelector(".jp_description")?.value || "";
+      } else {
+        const partnerSelect = row.querySelector(".partnerdatalookup");
+
+        // ── FIX BUG 1 (same pattern for non-Jewellery rows)
+        const datasetPartnerId =
+          (row.dataset && row.dataset.partnerId && String(row.dataset.partnerId).trim() !== "")
+            ? String(row.dataset.partnerId).trim()
+            : (row.getAttribute("data-partner-id") && String(row.getAttribute("data-partner-id")).trim() !== "")
+              ? String(row.getAttribute("data-partner-id")).trim()
+              : "";
+
+        partnerValue = (partnerSelect && partnerSelect.value && partnerSelect.value.trim() !== "")
+          ? partnerSelect.value.trim()
+          : datasetPartnerId;
+
+        shares = row.querySelector(".partner-share")?.value || "";
+        percent = row.querySelector(".partner-percent")?.value || "";
+        commission = row.querySelector(".commission-percent")?.value || "";
+        Commission_Itemized_on_Invoice = row.querySelector(".commission-itemized")?.checked || false;
+        Description = row.querySelector(".partner-desc")?.value || "";
+      }
+
+      // ── Skip completely empty rows (no data at all) ──
+      if (
+        !partnerValue &&
+        !shares &&
+        !percent &&
+        !commission &&
+        !Description &&
+        !Commission_Itemized_on_Invoice
+      ) {
+        return;
+      }
+
+      // ── Read the existing subform row ID (for update vs insert) ──
       const rowId =
         (row.dataset && row.dataset.rowId && String(row.dataset.rowId).trim() !== "")
           ? String(row.dataset.rowId).trim()
           : (row.getAttribute("data-row-id") && String(row.getAttribute("data-row-id")).trim() !== "")
             ? String(row.getAttribute("data-row-id")).trim()
             : null;
- 
+
+      // ── Build the row payload ──
+      const rowData = {
+        Partnership_shares: shares,
+        Partnership: percent,
+        Commission: commission,
+        Description: Description,
+        Commission_Itemized_on_Invoice: Commission_Itemized_on_Invoice,
+      };
+
+      // ── FIX BUG 2: only include Partner_Name when we actually have a value.
+      //    If the lookup select had not loaded yet and we have no fallback ID,
+      //    omitting the field is safer than sending "" which would clear the
+      //    existing linked record on Zoho's side. ──
+      if (partnerValue) {
+        rowData.Partner_Name = partnerValue;
+      }
+
       if (rowId) {
         rowData.ID = rowId;
       }
- 
+
       partnerRows.push(rowData);
-    }
-  });
- 
-  console.log("Partnership Update Payload:", partnerRows);
-  return partnerRows;
-}
+    });
+
+    console.log("Partnership Update Payload:", partnerRows);
+    return partnerRows;
+  }
+
   /* ================= GET METAL DETAILS SUBFORM DATA (JEWELLERY 1) ================= */
   function getMetalDetailsRowsData() {
     const metalRows = [];
@@ -2150,61 +2241,56 @@ function initRapportPriceTriggers() {
           loadJewelleryLabourSubform(recordID, data);
         }
 
-        /* ─── Partnership Details Subform ─── */
-        const partnerData = data.Partnership_Details || [];
-        const isJewel = data.Category1 === "Jewellery";
-        const tbody = document.getElementById(isJewel ? "jewelleryPartnershipBody" : "partnerBody");
-        if (tbody) tbody.innerHTML = "";
+        /* ─── PARTNERSHIP DETAILS SUBFORM ─── */
+      var partnerData = data.Partnership_Details;
+      var partnerTbody = document.getElementById("partnerBody");
+      partnerTbody.innerHTML = "";
 
-        if (partnerData.length > 0) {
-          partnerData.forEach(function (item) {
-            const tr = document.createElement("tr");
-            tr.dataset.rowId = item.ID || "";
-            const partnerId = getLookupId(item.Partner_Name);
-            const partnerDisplay = getLookupDisplayValue(item.Partner_Name);
-            tr.dataset.partnerId = partnerId;
+      if (partnerData && partnerData.length > 0) {
+        partnerData.forEach(function (item) {
+          var tr = document.createElement("tr");
+          tr.classList.add("partner-row");
 
-            if (isJewel) {
-              tr.className = "jewellery-partnership-row";
-              tr.innerHTML = `
-                <td><select class="jp_partner_select_contact"><option value="">Select Contact</option></select></td>
-                <td><input type="text" class="jp_shares" value="${item.Partnership_shares || ""}"></td>
-                <td><input type="text" class="jp_partnership_percentage" value="${item.Partnership || ""}"></td>
-                <td><input type="text" class="jp_commission_percentage" value="${item.Commission || ""}"></td>
-                <td class="checkbox-cell"><input type="checkbox" class="jp_commission_itemization" ${item.Commission_Itemized_on_Invoice === "true" || item.Commission_Itemized_on_Invoice === true ? "checked" : ""}></td>
-                <td><textarea class="jp_description">${item.Description || ""}</textarea></td>
-                <td><button type="button" class="btn-remove" onclick="removeRow(this)">❌</button></td>`;
-            } else {
-              tr.className = "partner-row";
-              tr.innerHTML = `
-                <td><select class="partnerdatalookup"><option value="">Select Partner</option></select></td>
-                <td><input type="text" class="partner-share" value="${item.Partnership_shares || ""}"></td>
-                <td><input type="text" class="partner-percent" value="${item.Partnership || ""}"></td>
-                <td><input type="text" class="commission-percent" value="${item.Commission || ""}"></td>
-                <td style="text-align:center"><input type="checkbox" class="commission-itemized" ${item.Commission_Itemized_on_Invoice === "true" || item.Commission_Itemized_on_Invoice === true ? "checked" : ""}></td>
-                <td><textarea class="partner-desc">${item.Description || ""}</textarea></td>
-                <td><button type="button" class="btn-remove" onclick="removeRow(this)">❌</button></td>`;
-            }
+          tr.innerHTML = `
+    <td>
+      <select class="partnerdatalookup">
+        <option value="">Select Partner</option>
+      </select>
+    </td>
+    <td><input type="text" class="partner-share" value="${
+      item.Partnership_shares || ""
+    }"></td>
+    <td><input type="text" class="partner-percent" value="${
+      item.Partnership || ""
+    }"></td>
+    <td><input type="text" class="commission-percent" value="${
+      item.Commission || ""
+    }"></td>
+    <td style="text-align:center">
+      <input type="checkbox" class="commission-itemized" ${
+        item.Commission_Itemized_on_Invoice === "true" ? "checked" : ""
+      }>
+    </td>
+    <td><textarea class="partner-desc">${item.Description || ""}</textarea></td>
+  `;
 
-            if (tbody) tbody.appendChild(tr);
-            const selectEl = tr.querySelector("select");
+          partnerTbody.appendChild(tr);
+          populatePartnerDropdowns();
 
-            setTimeout(function () {
-              if (typeof populatePartnerDropdowns === "function") populatePartnerDropdowns(selectEl);
-              ensureSelectOption(selectEl, partnerId, partnerDisplay);
-            }, 300);
-          });
-        } else {
-          console.log("⚠️ No partnership data found");
-          if (typeof addPartnerRow === "function") addPartnerRow();
-        }
-
-        applyVisibility();
-      })
-      .catch(function (err) {
-        console.error("loadExistingRecord error:", err);
-      });
-  }
+          setTimeout(function () {
+            const selectEl = tr.querySelector(".partnerdatalookup");
+            selectEl.value = item.Partner_Name?.ID || "";
+          }, 300);
+        });
+      } else {
+        console.log("⚠️ No partnership data found");
+        addPartnerRow();
+      }
+    })
+    .catch(function (err) {
+      console.error("loadExistingRecord error:", err);
+    });
+}
 
   /* =================================================================================
     LOAD JEWELLERY SUBFORMS
@@ -2535,19 +2621,17 @@ function initRapportPriceTriggers() {
     const modal = document.getElementById("filePreviewModal");
     const content = document.getElementById("previewContent");
     if (!modal || !content) return;
-
     const ext = (fileName.split(".").pop() || "").toLowerCase();
-    if (["jpg", "jpeg", "png", "gif"].includes(ext)) {
+    if (["jpg","jpeg","png","gif"].includes(ext)) {
       content.innerHTML = `<img src="${url}" alt="${fileName}" style="max-width:100%;max-height:80vh;">`;
     } else if (ext === "pdf") {
       content.innerHTML = `<iframe src="${url}" style="width:80vw;height:80vh;border:none;"></iframe>`;
     } else {
       content.innerHTML = `<a href="${url}" target="_blank" style="font-size:18px;">📎 Open ${fileName}</a>`;
     }
-
     modal.style.display = "flex";
   }
-
+ 
   function closeFilePreview() {
     const modal = document.getElementById("filePreviewModal");
     const content = document.getElementById("previewContent");

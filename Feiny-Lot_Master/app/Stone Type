@@ -1,0 +1,57 @@
+/* ================= Stone LOOKUP ================= */
+let stoneLookupData = null;
+
+function loadStoneLookup(targetElement = null) {
+  if (stoneLookupData) {
+    renderStoneOptions(targetElement);
+    return;
+  }
+
+  ZOHO.CREATOR.DATA.getRecords({
+    app_name: "feiny-app",
+    report_name: "All_Stone_Species",
+  })
+    .then(function (response) {
+      if (response.data && response.data.length > 0) {
+        stoneLookupData = response.data;
+        renderStoneOptions(targetElement);
+      }
+    })
+    .catch(function (error) {
+      console.error("Stone lookup error:", error);
+    });
+}
+
+function renderStoneOptions(targetElement = null) {
+
+  const selects = targetElement
+    ? [targetElement]
+    : document.querySelectorAll(
+        "#j3-stone-type, .j3-stone-type, #selectstone, .selectstone, #stonelookup, .j1-stone, .j3-stone"
+      );
+
+  selects.forEach(function (select) {
+    if (!select) return;
+
+    const selectedValue = select.value;
+    select.innerHTML =
+      `<option value="">Select</option>`;
+
+    stoneLookupData.forEach(function (record) {
+      const option =
+        document.createElement("option");
+
+      option.value = record.ID;
+      option.text = record.Species;
+
+      if (
+        selectedValue &&
+        selectedValue == record.ID
+      ) {
+        option.selected = true;
+      }
+
+      select.appendChild(option);
+    });
+  });
+}

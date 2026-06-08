@@ -581,15 +581,53 @@
               </select>
             </div>
 
-            <div class="jm-field">
-              <label for="main_image">Image</label>
-              <input id="main_image" type="file" />
-            </div>
+            <!-- Main Image -->
+<div class="jm-field">
+  <label for="main_image">Main Image</label>
 
-            <div class="jm-field">
-              <label for="side_image">Side Image</label>
-              <input id="side_image" type="file" />
-            </div>
+  <div class="image-upload-box">
+    <input id="main_image" type="file" accept="image/*" />
+
+    <img
+      id="mainImagePreview"
+      src=""
+      alt="Main Preview"
+      style="display: none; width: 120px; margin-top: 10px"
+    />
+
+    <button
+      type="button"
+      id="clearMainImage"
+      style="display: none"
+    >
+      Clear
+    </button>
+  </div>
+</div>
+
+<!-- Side Image -->
+<div class="jm-field">
+  <label for="side_image">Side Image</label>
+
+  <div class="image-upload-box">
+    <input id="side_image" type="file" accept="image/*" />
+
+    <img
+      id="sideImagePreview"
+      src=""
+      alt="Side Preview"
+      style="display: none; width: 120px; margin-top: 10px"
+    />
+
+    <button
+      type="button"
+      id="clearSideImage"
+      style="display: none"
+    >
+      Clear
+    </button>
+  </div>
+</div>
 
             <div class="jm-field">
               <label for="category">Category</label>
@@ -600,7 +638,7 @@
 
             <div class="jm-field">
               <label for="platinum">Platinum</label>
-              <input id="platinum" type="text" />
+              <input id="platinum" type="number" step="0.01" />
             </div>
 
             <!-- <div class="jm-field">
@@ -620,7 +658,7 @@
 
             <div class="jm-field">
               <label for="gold">Gold</label>
-              <input id="gold" type="text" />
+              <input id="gold" type="number" step="0.01" />
             </div>
 
             <div class="jm-field">
@@ -754,11 +792,11 @@
                 </td>
 
                 <td>
-                  <input type="text" class="j1-price" />
+                  <input type="number" class="j1-price" step="0.01" />
                 </td>
 
                 <td>
-                  <input type="text" class="j1-gold-cost" />
+                  <input type="number" class="j1-gold-cost" step="0.01" />
                 </td>
 
                 <td>
@@ -812,9 +850,9 @@
 
                 <td><input type="number" class="j2-total-ct" /></td>
 
-                <td><input type="text" class="j2-price" /></td>
+                <td><input type="number" class="j2-price" step="0.01" /></td>
 
-                <td><input type="text" class="j2-cost" /></td>
+                <td><input type="number" class="j2-cost" step="0.01" /></td>
 
                 <td><textarea class="j2-remarks"></textarea></td>
               </tr>
@@ -850,8 +888,6 @@
                 <th>Cut</th>
                 <th>Stone Color</th>
                 <th>Clarity</th>
-                <th>Supplier</th>
-                <th>Setter</th>
                 <th>Price</th>
                 <th>Stone Cost</th>
                 <th>C.S</th>
@@ -908,20 +944,10 @@
                     <option value="">Select Clarity</option>
                   </select>
                 </td>
-                <td>
-                  <select class="j3-supplier">
-                    <option value="">Select Supplier</option>
-                  </select>
-                </td>
-                <td>
-                  <select class="j3-setter">
-                    <option value="">Select Setter</option>
-                  </select>
-                </td>
 
-                <td><input type="text" class="j3-price" /></td>
+                <td><input type="number" class="j3-price" step="0.01" /></td>
 
-                <td><input type="text" class="j3-cost" /></td>
+                <td><input type="number" class="j3-cost" step="0.01" /></td>
 
                 <td><input type="checkbox" class="j3-cs" /></td>
 
@@ -1017,13 +1043,13 @@
 
                 <td><textarea class="j4-description"></textarea></td>
 
-                <td><input type="text" class="j4-price" /></td>
+                <td><input type="number" class="j4-price" step="0.01" /></td>
 
-                <td><input type="number" class="j4-qty" /></td>
+                <td><input type="number" class="j4-qty" step="0.01" /></td>
 
                 <td><input type="checkbox" class="j4-duty" /></td>
 
-                <td><input type="text" class="j4-amount" /></td>
+                <td><input type="number" class="j4-amount" step="0.01" /></td>
               </tr>
             </tbody>
           </table>
@@ -1061,17 +1087,17 @@
 
                 <!-- Shares -->
                 <td>
-                  <input type="text" class="jp_shares" />
+                  <input type="number" class="jp_shares" step="0.01" />
                 </td>
 
                 <!-- Partnership % -->
                 <td>
-                  <input type="text" class="jp_partnership_percentage" />
+                  <input type="number" class="jp_partnership_percentage" step="0.01" />
                 </td>
 
                 <!-- Commission % -->
                 <td>
-                  <input type="text" class="jp_commission_percentage" />
+                  <input type="number" class="jp_commission_percentage" step="0.01" />
                 </td>
 
                 <!-- Commission Itemization -->

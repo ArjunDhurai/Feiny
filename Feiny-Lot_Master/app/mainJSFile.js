@@ -128,6 +128,109 @@
       });
   }
 
+  /* ================= DIAMOND DESCRIPTION HELPERS ================= */
+
+  /* Maps full select text → short abbreviation for the short description */
+  const DIA_SHORT_MAP = {
+    // Shapes
+    "Oval": "OV", "Round": "RD", "Princess": "PR", "Cushion": "CU",
+    "Emerald": "EM", "Asscher": "AS", "Radiant": "RA", "Pear": "PE",
+    "Marquise": "MQ", "Heart": "HT", "Trillion": "TR", "Baguette": "BG",
+
+    // Cut / Polish / Symmetry grades
+    "Excellent": "X", "Very Good": "VG", "Good": "G",
+    "Fair": "F", "Poor": "P",
+
+    // Fluorescence
+    "None": null,
+    "Faint": "Fnt",
+    "Medium": "Med",
+    "Strong": "Str",
+    "Very Strong": "VSt",
+
+    // Fluorescence Color
+    "Blue": "Blue", "Yellow": "Yel", "Green": "Grn",
+    "Orange": "Org", "White": "Wht",
+  };
+
+  function abbr(text) {
+    if (!text) return "";
+    return DIA_SHORT_MAP.hasOwnProperty(text) ? (DIA_SHORT_MAP[text] || "") : text;
+  }
+
+  function buildDiamondDescriptions({
+    shape, color, clarity, cut, polish, symmetry,
+    culet, fluorescence, fluorescenceColor,
+    length, width, depth,
+    labName, certId
+  }) {
+    /* ── Dimensions string ── */
+    const dims = [length, width, depth]
+      .map(v => (v && !isNaN(parseFloat(v))) ? parseFloat(v).toFixed(2) : null)
+      .filter(Boolean);
+    const dimsLong  = dims.length === 3 ? `${dims[0]} x ${dims[1]} x ${dims[2]}mm` : "";
+    const dimsShort = dims.length === 3 ? `${dims[0]}X${dims[1]}X${dims[2]}MM`     : "";
+
+    /* ── Certificate block (only if both lab and ID exist) ── */
+    const certLong  = (labName && certId) ? `(${labName} ${certId})` : "";
+
+    /* ── Fluorescence block — omit entirely if none/empty ── */
+    const fluor = fluorescence && fluorescence.toLowerCase() !== "none" ? fluorescence : "";
+    const fluorColor = (fluor && fluorescenceColor) ? fluorescenceColor : "";
+    const fluorLong  = fluor ? `${fluor}${fluorColor ? " " + fluorColor : ""}` : "";
+    const fluorShort = fluor ? `${abbr(fluor)}${fluorColor ? " " + abbr(fluorColor) : ""}`.trim() : "";
+
+    /* ─────────────── LONG DESCRIPTION ─────────────── */
+    let longParts = ["Diamond"];
+    if (shape)    longParts.push(shape);
+    if (dimsLong) longParts.push(dimsLong);
+    if (certLong) longParts.push(certLong);
+
+    let gradeBlock = [];
+    if (color)   gradeBlock.push(`${color} color`);
+    if (clarity) gradeBlock.push(`${clarity} clarity`);
+    let gradeLine = gradeBlock.join(", ");
+
+    let gradeParts = [];
+    if (gradeLine) gradeParts.push(gradeLine);
+    if (cut)       gradeParts.push(`| Cut: ${cut}`);
+    if (polish)    gradeParts.push(`| Polish: ${polish}`);
+    if (symmetry)  gradeParts.push(`| Symmetry: ${symmetry}`);
+    if (fluorLong) gradeParts.push(`| ${fluorLong}`);
+
+    if (gradeParts.length) longParts.push(gradeParts.join(" "));
+    const longDesc = longParts.join(" ");
+
+    /* ─────────────── SHORT DESCRIPTION ─────────────── */
+    let shortParts = ["DIA"];
+    if (shape)     shortParts.push(abbr(shape) || shape.toUpperCase().slice(0, 3));
+    if (dimsShort) shortParts.push(dimsShort);
+
+    let colorClarity = [color, clarity].filter(Boolean).join("-");
+    if (colorClarity) shortParts.push(colorClarity);
+
+    let cps = [abbr(cut), abbr(polish), abbr(symmetry)].filter(Boolean);
+    if (cps.length) shortParts.push(cps.join("-"));
+
+    if (fluorShort) shortParts.push(fluorShort);
+
+    const shortDesc = shortParts.join(" ");
+
+    return { longDesc, shortDesc };
+  }
+
+  /* ── Pull first cert row's lab name and cert ID ── */
+  function getFirstCertInfo() {
+    const firstRow = document.querySelector("#certificateBody tr.cert-row");
+    if (!firstRow) return { labName: "", certId: "" };
+    const labSelect = firstRow.querySelector(".cert-lab");
+    const labName = labSelect?.selectedOptions[0]?.text?.trim() || "";
+    const certIdInput = firstRow.querySelector(".cert-id");
+    const certId = certIdInput?.value?.trim() || "";
+    const cleanLab = (labName === "Select" || labName === "") ? "" : labName;
+    return { labName: cleanLab, certId };
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     /* ================= GET RECORD ID FROM URL ================= */
     ZOHO.CREATOR.UTIL.getQueryParams().then(function (params) {
@@ -354,22 +457,25 @@
     const dialongDescEl = document.getElementById("dialong_description");
 
     function updateDescriptions() {
-      const diashape = diashapeEl?.selectedOptions[0]?.text || "";
-      const diacolor = diacolorEl?.selectedOptions[0]?.text || "";
-      const diaclarity = diaclarityEl?.selectedOptions[0]?.text || "";
-      const diacut = diacutEl?.selectedOptions[0]?.text || "";
-      const diapolish = diapolishEl?.selectedOptions[0]?.text || "";
-      const diasymmetry = diasymmetryEl?.selectedOptions[0]?.text || "";
-      const diaculet = diaculetEl?.selectedOptions[0]?.text || "";
-      const diafluorescence = diafluorescenceEl?.selectedOptions[0]?.text || "";
-      const diafluorescencecolor = diafluorescencecolorEl?.selectedOptions[0]?.text || "";
-
-      const parts = [
-        diashape, diacolor, diaclarity, diacut, diapolish,
-        diasymmetry, diaculet, diafluorescence, diafluorescencecolor,
-      ].filter(Boolean);
-      if (diashortDescEl) diashortDescEl.value = parts.join(" ");
-      if (dialongDescEl) dialongDescEl.value = parts.join(", ");
+      const { labName, certId } = getFirstCertInfo();
+      const { longDesc, shortDesc } = buildDiamondDescriptions({
+        shape:             diashapeEl?.selectedOptions[0]?.text || "",
+        color:             diacolorEl?.selectedOptions[0]?.text || "",
+        clarity:           diaclarityEl?.selectedOptions[0]?.text || "",
+        cut:               diacutEl?.selectedOptions[0]?.text || "",
+        polish:            diapolishEl?.selectedOptions[0]?.text || "",
+        symmetry:          diasymmetryEl?.selectedOptions[0]?.text || "",
+        culet:             diaculetEl?.selectedOptions[0]?.text || "",
+        fluorescence:      diafluorescenceEl?.selectedOptions[0]?.text || "",
+        fluorescenceColor: diafluorescencecolorEl?.selectedOptions[0]?.text || "",
+        length: document.getElementById("dia_length")?.value || "",
+        width:  document.getElementById("dia_width")?.value  || "",
+        depth:  document.getElementById("dia_depth")?.value  || "",
+        labName,
+        certId,
+      });
+      if (diashortDescEl) diashortDescEl.value = shortDesc;
+      if (dialongDescEl)  dialongDescEl.value  = longDesc;
     }
 
     [
@@ -377,6 +483,23 @@
       diapolishEl, diasymmetryEl, diaculetEl, diafluorescenceEl, diafluorescencecolorEl,
     ].forEach((el) => {
       if (el) el.addEventListener("change", updateDescriptions);
+    });
+
+    ["dia_length", "dia_width", "dia_depth"].forEach(function (id) {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener("input", updateDescriptions);
+    });
+
+    /* Cert row lab/id changes should also refresh descriptions */
+    document.addEventListener("change", function (e) {
+      if (e.target && e.target.classList.contains("cert-lab")) {
+        updateDescriptions();
+      }
+    });
+    document.addEventListener("input", function (e) {
+      if (e.target && e.target.classList.contains("cert-id")) {
+        updateDescriptions();
+      }
     });
 
     updateDescriptions();
@@ -468,18 +591,25 @@
   const longDescEl = document.getElementById("long_description");
 
   function updateDiamondDescriptions() {
-    const shape = diaShapeEl?.selectedOptions[0]?.text || "";
-    const color = diaColorEl?.selectedOptions[0]?.text || "";
-    const clarity = diaClarityEl?.selectedOptions[0]?.text || "";
-    const cut = diaCutEl?.selectedOptions[0]?.text || "";
-    const polish = diaPolishEl?.selectedOptions[0]?.text || "";
-    const symmetry = diaSymmetryEl?.selectedOptions[0]?.text || "";
-    const culet = diaCuletEl?.selectedOptions[0]?.text || "";
-    const fluorescence = diaFluorescenceEl?.selectedOptions[0]?.text || "";
-
-    const parts = [color, clarity, cut, shape, polish, symmetry, culet, fluorescence].filter(Boolean);
-    if (shortDescEl) shortDescEl.value = parts.join(" ");
-    if (longDescEl) longDescEl.value = parts.join(", ");
+    const { labName, certId } = getFirstCertInfo();
+    const { longDesc, shortDesc } = buildDiamondDescriptions({
+      shape:             diaShapeEl?.selectedOptions[0]?.text || "",
+      color:             diaColorEl?.selectedOptions[0]?.text || "",
+      clarity:           diaClarityEl?.selectedOptions[0]?.text || "",
+      cut:               diaCutEl?.selectedOptions[0]?.text || "",
+      polish:            diaPolishEl?.selectedOptions[0]?.text || "",
+      symmetry:          diaSymmetryEl?.selectedOptions[0]?.text || "",
+      culet:             diaCuletEl?.selectedOptions[0]?.text || "",
+      fluorescence:      diaFluorescenceEl?.selectedOptions[0]?.text || "",
+      fluorescenceColor: "",
+      length: document.getElementById("dia_length")?.value || "",
+      width:  document.getElementById("dia_width")?.value  || "",
+      depth:  document.getElementById("dia_depth")?.value  || "",
+      labName,
+      certId,
+    });
+    if (shortDescEl) shortDescEl.value = shortDesc;
+    if (longDescEl)  longDescEl.value  = longDesc;
   }
 
   [diaShapeEl, diaColorEl, diaClarityEl, diaCutEl, diaPolishEl, diaSymmetryEl, diaCuletEl, diaFluorescenceEl].forEach((el) => {
@@ -1370,8 +1500,7 @@ function initRapportPriceTriggers() {
 
     ZOHO.CREATOR.DATA.updateRecordById({
       app_name: "feiny-app",
-      report_name: "All_Lot_Master", // ✅ must be report_name, not form_name
-      id: recId,
+      report_name: "All_Lot_Master",
       id: String(recId),
       payload: {
         data: recordData,
@@ -1383,7 +1512,6 @@ function initRapportPriceTriggers() {
         if (res.code === 3000 || res.code === "3000") {
           alert("✅ Updated Successfully");
 
-          // Handle file uploads after update
           let uploadPromises = [];
           const certPromises = createCertificateRecords(In_SKU, recId);
           if (certPromises && certPromises.length > 0)
@@ -1407,74 +1535,18 @@ function initRapportPriceTriggers() {
         certificateFiles.clear();
         certificateFilesToUpload = [];
 
- /* ================= CLEAR PAGE AFTER SAVE ================= */
-function clearPageAfterSave() {
-  // Reset all input fields
-  document.querySelectorAll("input").forEach((el) => {
-    if (el.type === "checkbox" || el.type === "radio") {
-      el.checked = false;
-    } else if (el.type !== "button" && el.type !== "submit") {
-      el.value = "";
-    }
-  });
+        // ✅ Call the global clearPageAfterSave — no local redefinition here
+        clearPageAfterSave();
 
-  // Reset textarea
-  document.querySelectorAll("textarea").forEach((el) => {
-    el.value = "";
-  });
+        recId = null;
+        lot_edit = false;
 
-  // Reset dropdowns
-  document.querySelectorAll("select").forEach((el) => {
-    el.selectedIndex = 0;
-  });
-
-  // Clear subforms
-  const partnerBody = document.getElementById("partnerBody");
-  if (partnerBody) partnerBody.innerHTML = "";
-
-  const jewelleryPartnershipBody = document.getElementById("jewelleryPartnershipBody");
-  if (jewelleryPartnershipBody) jewelleryPartnershipBody.innerHTML = "";
-
-  const certificateBody = document.getElementById("certificateBody");
-  if (certificateBody) certificateBody.innerHTML = "";
-
-  // Clear image preview
-  const preview = document.getElementById("imagePreview");
-  if (preview) {
-    preview.src = "";
-    preview.style.display = "none";
-  }
-
-  const stonePreview = document.getElementById("stoneImagePreview");
-  if (stonePreview) {
-    stonePreview.src = "";
-    stonePreview.style.display = "none";
-  }
-
-  // Reset variables
-  diaImageFile = null;
-  stoneImageFile = null;
-  certificateFiles.clear();
-  certificateFilesToUpload = [];
-
-  console.log("✅ Form Cleared Successfully");
-}
-
-        // ✅ CLEAR PAGE AFTER SUCCESSFUL UPDATE
-       clearPageAfterSave();
-
-// Reset edit mode
-recId = null;
-lot_edit = false;
-
-// Stay on same page and clear form
-setTimeout(() => {
-  window.location.reload();
-}, 500);
+        setTimeout(function () {
+          window.location.reload();
+        }, 500);
       })
       .catch(function (error) {
         console.error("❌ Save Error:", error);
-        alert("❌ Error: " + error.message);
         alert("❌ Error: " + getErrorMessage(error));
       })
       .finally(function () {
@@ -1767,9 +1839,6 @@ setTimeout(() => {
       if (isJewellery) {
         const partnerSelect = row.querySelector(".jp_partner_select_contact");
 
-        // ── FIX BUG 1: read live select value first, then fall back to the
-        //    dataset attribute that was stamped on the TR by loadExistingRecord.
-        //    Use both dataset property AND getAttribute to be safe.
         const datasetPartnerId =
           (row.dataset && row.dataset.partnerId && String(row.dataset.partnerId).trim() !== "")
             ? String(row.dataset.partnerId).trim()
@@ -1789,7 +1858,6 @@ setTimeout(() => {
       } else {
         const partnerSelect = row.querySelector(".partnerdatalookup");
 
-        // ── FIX BUG 1 (same pattern for non-Jewellery rows)
         const datasetPartnerId =
           (row.dataset && row.dataset.partnerId && String(row.dataset.partnerId).trim() !== "")
             ? String(row.dataset.partnerId).trim()
@@ -1808,7 +1876,6 @@ setTimeout(() => {
         Description = row.querySelector(".partner-desc")?.value || "";
       }
 
-      // ── Skip completely empty rows (no data at all) ──
       if (
         !partnerValue &&
         !shares &&
@@ -1820,7 +1887,6 @@ setTimeout(() => {
         return;
       }
 
-      // ── Read the existing subform row ID (for update vs insert) ──
       const rowId =
         (row.dataset && row.dataset.rowId && String(row.dataset.rowId).trim() !== "")
           ? String(row.dataset.rowId).trim()
@@ -1828,7 +1894,6 @@ setTimeout(() => {
             ? String(row.getAttribute("data-row-id")).trim()
             : null;
 
-      // ── Build the row payload ──
       const rowData = {
         Partnership_shares: shares,
         Partnership: percent,
@@ -1837,10 +1902,6 @@ setTimeout(() => {
         Commission_Itemized_on_Invoice: Commission_Itemized_on_Invoice,
       };
 
-      // ── FIX BUG 2: only include Partner_Name when we actually have a value.
-      //    If the lookup select had not loaded yet and we have no fallback ID,
-      //    omitting the field is safer than sending "" which would clear the
-      //    existing linked record on Zoho's side. ──
       if (partnerValue) {
         rowData.Partner_Name = partnerValue;
       }
@@ -2126,8 +2187,9 @@ setTimeout(() => {
         document.getElementById("In_SKU").value = data.In_SKU || "";
         document.getElementById("itemType").value = data.Category1 || "";
         document.getElementById("Stock_On_Hand").value = data.Stock_On_Hand || "1";
+        document.getElementById("species_lookup").value = data.Species?.ID || "";
+        document.getElementById("sub_species").value = data.Sub_species || "";
         document.getElementById("Status").value = data.Status || "";
-
         document.getElementById("surface_lookup").value = data.Surface?.ID || "";
         document.getElementById("treatment_lookup").value = data.Treatment?.ID || "";
         document.getElementById("shape_lookup").value = data.Shape?.ID || "";
@@ -2138,8 +2200,6 @@ setTimeout(() => {
         document.getElementById("cs_short_description").value = data.Name1 || "";
         document.getElementById("cs_long_description").value = data.Long_Description || "";
 
-        const speciesId = data.Species?.ID || "";
-        loadSpeciesLookup(speciesId);
 
         const culetId = data.Culet?.ID || "";
         loadDiaCuletLookup(culetId);

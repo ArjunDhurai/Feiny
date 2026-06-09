@@ -1410,6 +1410,227 @@ function initRapportPriceTriggers() {
     const num = Number(val);
     return isNaN(num) ? null : num;
   }
+  /* =================================================================================
+    FIX: getMetalDetailsRowsData — was called in saveRecord but never defined
+  ================================================================================= */
+  function getMetalDetailsRowsData() {
+    const rows = [];
+    document.querySelectorAll("#jewel1Body tr.jewel1-row").forEach(function (row) {
+      const castNo      = row.querySelector(".j1-cast-no")?.value || "";
+      const vendor      = row.querySelector(".j1-vendor")?.value || "";
+      const metalType   = row.querySelector(".j1-metal-type")?.value || "";
+      const metalColor  = row.querySelector(".j1-metal-color")?.value || "";
+      const metalPurity = row.querySelector(".j1-metal-purity")?.value || "";
+      const unit        = row.querySelector(".j1-unit")?.value || "";
+      const weight      = row.querySelector(".j1-weight")?.value || "";
+      const qty         = row.querySelector(".j1-qty")?.value || "";
+      const market      = row.querySelector(".j1-market")?.value || "";
+      const price       = row.querySelector(".j1-price")?.value || "";
+      const goldCost    = row.querySelector(".j1-gold-cost")?.value || "";
+      const remarks     = row.querySelector(".j1-remarks")?.value || "";
+      const rowId       = row.dataset.rowId || "";
+ 
+      const rowData = {
+        Cast:      castNo,
+        Vendor1:       vendor,
+        Metal_Type1:   metalType,
+        Metal_Color: metalColor,
+        Metal_Purity: metalPurity,
+        Unit1:         unit,
+        Weight:       weight,
+        Quantity:     qty,
+        Metal_Market: market,
+        Price:        price,
+        Gold_Cost:    goldCost,
+        Remarks:      remarks,
+      };
+ 
+      if (rowId) rowData.ID = rowId;
+ 
+      rows.push(rowData);
+    });
+    return rows;
+  }
+ 
+  /* =================================================================================
+    FIX: getDiamondDetailsRowsData — was called in saveRecord but never defined
+  ================================================================================= */
+  function getDiamondDetailsRowsData() {
+    const rows = [];
+    document.querySelectorAll("#jewel2Body tr.jewel2-row").forEach(function (row) {
+      const lot      = row.querySelector(".j2-lot")?.value || "";
+      const shape    = row.querySelector(".j2-shape")?.value || "";
+      const quality  = row.querySelector(".j2-quality")?.value || "";
+      const stones   = row.querySelector(".j2-stones")?.value || "";
+      const totalCt  = row.querySelector(".j2-total-ct")?.value || "";
+      const price    = row.querySelector(".j2-price")?.value || "";
+      const cost     = row.querySelector(".j2-cost")?.value || "";
+      const remarks  = row.querySelector(".j2-remarks")?.value || "";
+      const rowId    = row.dataset.rowId || "";
+ 
+      const rowData = {
+        Diamond_Lot: lot,
+        Shape1: shape,
+        Diamond_Quality: quality,
+        No_of_Stones:stones,
+        Total_Ct_Wt: totalCt,
+        Price: price,
+        Diamond_cost:cost,
+        Remarks:    remarks,
+      };
+ 
+      if (rowId) rowData.ID = rowId;
+ 
+      rows.push(rowData);
+    });
+    return rows;
+  }
+ 
+  /* =================================================================================
+    FIX: getColorStoneDetailsRowsData — was called in saveRecord but never defined
+  ================================================================================= */
+  function getColorStoneDetailsRowsData() {
+    const rows = [];
+    document.querySelectorAll("#jewel3Body tr.jewel3-row").forEach(function (row) {
+      const lot       = row.querySelector(".j3-lot")?.value || "";
+      const stoneType = row.querySelector(".j3-stone-type")?.value || "";
+      const shape     = row.querySelector(".select_shape")?.value || "";
+      const quality   = row.querySelector(".j3-quality")?.value || "";
+      const range     = row.querySelector(".j3-range")?.value || "";
+      const noStones  = row.querySelector(".j3-no-stones")?.value || "";
+      const wtStone   = row.querySelector(".j3-wt-stone")?.value || "";
+      const ctWt      = row.querySelector(".j3-ctwt")?.value || "";
+      const unit      = row.querySelector(".j3-unit")?.value || "";
+      const cut       = row.querySelector(".j3-cut")?.value || "";
+      const color     = row.querySelector(".j3-color")?.value || "";
+      const clarity   = row.querySelector(".Select_Clarity_j3-clarity")?.value || "";
+      const price     = row.querySelector(".j3-price")?.value || "";
+      const cost      = row.querySelector(".j3-cost")?.value || "";
+      const cs        = row.querySelector(".j3-cs")?.checked || false;
+      const duty      = row.querySelector(".j3-duty")?.checked || false;
+      const remarks   = row.querySelector(".j3-remarks")?.value || "";
+      const rowId     = row.dataset.rowId || "";
+ 
+      const rowData = {
+        Colorstone_Lot: lot,
+        Stone_Type: stoneType,
+        Stone_Shape:shape,
+        Stone_Quality:quality,
+        Range_Sieve_Mm:range,
+        No_Of_Stones:noStones,
+        Wt_Per_Stone: wtStone,
+        CT_WT:ctWt,
+        Stone_Unit:unit,
+        Stone_Cut:cut,
+        Stone_Color: color,
+        Stone_Clarity:clarity,
+        Stone_Price:price,
+        Stone_Cost:cost,
+        C_S:cs,
+        Duty:duty,
+        Remarks:remarks,
+      };
+ 
+      if (rowId) rowData.ID = rowId;
+ 
+      rows.push(rowData);
+    });
+    return rows;
+  }
+ 
+  /* =================================================================================
+    FIX: getLabourDetailsRowsData — was called in saveRecord but never defined
+  ================================================================================= */
+  function getLabourDetailsRowsData() {
+    const rows = [];
+    document.querySelectorAll("#jewel4Body tr.jewel4-row").forEach(function (row) {
+      const laborNo     = row.querySelector(".j4-labor-no")?.value || "";
+      const description = row.querySelector(".j4-description")?.value || "";
+      const price       = row.querySelector(".j4-price")?.value || "";
+      const qty         = row.querySelector(".j4-qty")?.value || "";
+      const duty        = row.querySelector(".j4-duty")?.checked || false;
+      const amount      = row.querySelector(".j4-amount")?.value || "";
+      const rowId       = row.dataset.rowId || "";
+ 
+      const rowData = {
+        Labor:   laborNo,
+        Description: description,
+        Price:       price,
+        Quantity:    qty,
+        Duty:        duty,
+        Amount:      amount,
+      };
+ 
+      if (rowId) rowData.ID = rowId;
+ 
+      rows.push(rowData);
+    });
+    return rows;
+  }
+ 
+  /* =================================================================================
+    FIX: addPartnerRow — was called in clearPageAfterSave and loadExistingRecord but never defined
+  ================================================================================= */
+  function addPartnerRow() {
+    const tbody = document.getElementById("partnerBody");
+    if (!tbody) return;
+ 
+    const tr = document.createElement("tr");
+    tr.classList.add("partner-row");
+ 
+    tr.innerHTML = `
+      <td>
+        <select class="partnerdatalookup">
+          <option value="">Select Partner</option>
+        </select>
+      </td>
+      <td><input type="text" class="partner-share" placeholder="Shares"></td>
+      <td><input type="text" class="partner-percent" placeholder="Partnership %"></td>
+      <td><input type="text" class="commission-percent" placeholder="Commission %"></td>
+      <td style="text-align:center">
+        <input type="checkbox" class="commission-itemized">
+      </td>
+      <td><textarea class="partner-desc" placeholder="Description"></textarea></td>
+      <td>
+        <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
+      </td>
+    `;
+ 
+    tbody.appendChild(tr);
+    populatePartnerDropdowns(tr.querySelector(".partnerdatalookup"));
+  }
+  /* =================================================================================
+    FIX: addPartnerRow — was called in clearPageAfterSave and loadExistingRecord but never defined
+  ================================================================================= */
+  function jewellryaddPartnerRow() {
+    const tbody = document.getElementById("jewelleryPartnershipBody");
+    if (!tbody) return;
+ 
+    const tr = document.createElement("tr");
+    tr.classList.add("jewellery-partnership-row");
+ 
+    tr.innerHTML = `
+      <td>
+        <select class="jp_partner_select_contact">
+          <option value="">Select Contact</option>
+        </select>
+      </td>
+      <td><input type="text" class="jp_shares" placeholder="Shares"></td>
+      <td><input type="text" class="jp_partnership_percentage" placeholder="Partnership %"></td>
+      <td><input type="text" class="jp_commission_percentage" placeholder="Commission %"></td>
+      <td style="text-align:center">
+        <input type="checkbox" class="jp_commission_itemization">
+      </td>
+      <td><textarea class="partner-desc" placeholder="jp_description"></textarea></td>
+      <td>
+        <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
+      </td>
+    `;
+ 
+    tbody.appendChild(tr);
+    populatePartnerDropdowns(tr.querySelector(".jp_partner_select_contact"));
+  }
+
 
   /* =================================================================================
     SAVE RECORD — CREATE + UPDATE
@@ -1437,6 +1658,7 @@ function initRapportPriceTriggers() {
 
   // ── Build base record object ──
   const recordData = cleanRecordData({
+
       Select: Category1,
       // Category1: Category1,
       Category1: Category1,
@@ -1517,18 +1739,22 @@ function initRapportPriceTriggers() {
       Amount: getNumber("duty_amount"),
       Final_Cost: getNumber("final_cost"),
       Selling_price_per_piece: getNumber("selling_price_piece"),
+      Category: document.getElementById("category")?.value || "",
       Partnership_Details: cleanSubformRows(getPartnerRowsData()),
       
-  Metal_Details: cleanSubformRows(getMetalDetailsRowsData()),
-
+   Metal_Details: cleanSubformRows(getMetalDetailsRowsData()),
+ 
   Diamond_Details: cleanSubformRows(getDiamondDetailsRowsData()),
-
+ 
   // Jewellery 3 - Color Stone Details
   Color_Stone1: cleanSubformRows(getColorStoneDetailsRowsData()),
-
+ 
   // Jewellery 4 - Labour Details
   Labour_Details: cleanSubformRows(getLabourDetailsRowsData()),
+
     });
+
+    
     console.log("Partnership Data", getPartnerRowsData());
   console.log("Saving config:", recordData);
 
@@ -1543,14 +1769,14 @@ function initRapportPriceTriggers() {
         data: recordData,
       },
     };
-
+ 
     ZOHO.CREATOR.DATA.addRecords(config)
       .then(function (response) {
         console.log("✅ Created:", response);
-
+ 
         if (response.code === 3000 || response.code === "3000") {
           alert("✅ Record Saved Successfully");
-
+ 
           let recordId = null;
           if (response.data && Array.isArray(response.data) && response.data.length > 0)
             recordId = response.data[0].ID;
@@ -1559,10 +1785,10 @@ function initRapportPriceTriggers() {
           else if (response.details && response.details.id)
             recordId = response.details.id;
           else if (response.id) recordId = response.id;
-
+ 
           if (!recordId)
             throw new Error("Record created but ID not found: " + JSON.stringify(response));
-
+ 
           // Handle file uploads after create
           let uploadPromises = [];
           const certPromises = createCertificateRecords(In_SKU, recordId);
@@ -1576,7 +1802,7 @@ function initRapportPriceTriggers() {
             uploadPromises.push(uploadJewelleryImage(recordId, jewelleryImageFile));
           if (recordId && jewellerySideImageFile)
             uploadPromises.push(uploadJewellerySideImage(recordId, jewellerySideImageFile));
-
+ 
           return Promise.all(uploadPromises);
         } else {
           throw new Error("Failed to create record: " + (response.message || JSON.stringify(response)));
@@ -1590,10 +1816,10 @@ function initRapportPriceTriggers() {
         alert(message);
         certificateFiles.clear();
         certificateFilesToUpload = [];
-
+ 
         // ✅ CLEAR PAGE AFTER SUCCESSFUL SAVE
         clearPageAfterSave();
-
+ 
         // Navigate to the report list
         ZOHO.CREATOR.UTIL.navigateTo({
           url: "#Report:All_Lot_Master",
@@ -1617,7 +1843,7 @@ function initRapportPriceTriggers() {
     =============================== */
     console.log("recId:", recId);
     console.log("Update Data:", recordData);
-
+ 
     ZOHO.CREATOR.DATA.updateRecordById({
       app_name: "feiny-app",
       report_name: "All_Lot_Master",
@@ -1628,10 +1854,10 @@ function initRapportPriceTriggers() {
     })
       .then(function (res) {
         console.log("✅ Updated:", res);
-
+ 
         if (res.code === 3000 || res.code === "3000") {
           alert("✅ Updated Successfully");
-
+ 
           let uploadPromises = [];
           const certPromises = createCertificateRecords(In_SKU, recId);
           if (certPromises && certPromises.length > 0)
@@ -1657,13 +1883,13 @@ function initRapportPriceTriggers() {
         alert(message);
         certificateFiles.clear();
         certificateFilesToUpload = [];
-
+ 
         // ✅ Call the global clearPageAfterSave — no local redefinition here
         clearPageAfterSave();
-
+ 
         recId = null;
         lot_edit = false;
-
+ 
         setTimeout(function () {
           window.location.reload();
         }, 500);
@@ -2214,8 +2440,6 @@ function addJewellery3Row() {
     <td><select class="Select_Cut j3-cut"><option value="">Select Cut</option></select></td>
     <td><select class="Select_Stone_Color j3-color"><option value="">Select Color</option></select></td>
     <td><select class="Select_Clarity_j3-clarity"><option value="">Select Clarity</option></select></td>
-    <td><select class="j3-supplier"><option value="">Select Supplier</option></select></td>
-    <td><select class="j3-setter"><option value="">Select Setter</option></select></td>
     <td><input type="text" class="j3-price" placeholder="Price"></td>
     <td><input type="text" class="j3-cost" placeholder="Cost"></td>
     <td style="text-align:center"><input type="checkbox" class="j3-cs"></td>
@@ -2259,7 +2483,7 @@ function addJewellery4Row() {
  
   tbody.appendChild(tr);
 }
-
+ 
   /* ================= CLEAR FULL PAGE AFTER SAVE ================= */
   function clearPageAfterSave() {
     document.querySelectorAll("input, textarea, select").forEach(function (el) {
@@ -2272,51 +2496,53 @@ function addJewellery4Row() {
         el.value = "";
       }
     });
-
+ 
     document.querySelectorAll("select").forEach(function (sel) {
       sel.selectedIndex = 0;
     });
-
+ 
     diaImageFile = null;
     stoneImageFile = null;
-
+    jewelleryImageFile = null;
+    jewellerySideImageFile = null;
+ 
     const diaPrev = document.getElementById("imagePreview");
     if (diaPrev) { diaPrev.src = ""; diaPrev.style.display = "none"; }
-
+ 
     const stonePrev = document.getElementById("stoneImagePreview");
     if (stonePrev) { stonePrev.src = ""; stonePrev.style.display = "none"; }
-
+ 
     const clearImg = document.getElementById("clearImage");
     if (clearImg) clearImg.style.display = "none";
-
+ 
     const clearStone = document.getElementById("clearStoneImage");
     if (clearStone) clearStone.style.display = "none";
-
+ 
     if (document.getElementById("diamand_imageText"))
       document.getElementById("diamand_imageText").style.display = "block";
     if (document.getElementById("imageText"))
       document.getElementById("imageText").style.display = "block";
-
+ 
     const certBody = document.getElementById("certificateBody");
     if (certBody) {
       certBody.innerHTML = "";
       addCertificateRow();
     }
-
+ 
     certificateFiles.clear();
     certificateFilesToUpload = [];
-
+ 
     const partnerBody = document.getElementById("partnerBody");
     if (partnerBody) {
       partnerBody.innerHTML = "";
       if (typeof addPartnerRow === "function") addPartnerRow();
     }
-
+ 
     ["jewel1Body", "jewel2Body", "jewel3Body", "jewel4Body", "jewelleryPartnershipBody"].forEach(function (id) {
       const body = document.getElementById(id);
       if (body) body.innerHTML = "";
     });
-
+ 
     [
       "total_price", "rapport_price", "Rapport_Price",
       "cs_short_description", "cs_long_description",
@@ -2326,7 +2552,7 @@ function addJewellery4Row() {
       const f = document.getElementById(id);
       if (f) f.value = "";
     });
-
+ 
     [
       "colorStoneSection", "diamondSection", "pricingSection",
       "Dimensionssection", "neededcertificatesec", "certificateuploadsec",
@@ -2337,7 +2563,7 @@ function addJewellery4Row() {
       const sec = document.getElementById(id);
       if (sec) sec.style.display = "none";
     });
-
+ 
     recId = null;
     lot_edit = false;
     window.scrollTo(0, 0);
@@ -2348,6 +2574,7 @@ function addJewellery4Row() {
     LOAD EXISTING RECORD (EDIT MODE)
   ================================================================================= */
   function loadExistingRecord(recordID) {
+    // console.log("Existing record data:", data);
     ZOHO.CREATOR.DATA.getRecordById({
       app_name: "feiny-app",
       report_name: "All_Lot_Master",
@@ -2356,6 +2583,143 @@ function addJewellery4Row() {
       .then(function (res) {
         const data = res.data;
         console.log("Existing record data:", data);
+        /* ─── JEWELLERY PARTNERSHIP SUBFORM ─── */
+
+var jewelleryPartnerData =
+  data.Partnership_Details;
+
+var jewelleryTbody =
+  document.getElementById(
+    "jewelleryPartnershipBody"
+  );
+
+if (jewelleryTbody) {
+
+  jewelleryTbody.innerHTML = "";
+
+  if (
+    jewelleryPartnerData &&
+    jewelleryPartnerData.length > 0
+  ) {
+
+    jewelleryPartnerData.forEach(function (
+      item
+    ) {
+
+      var tr =
+        document.createElement("tr");
+
+      tr.classList.add(
+        "jewellery-partnership-row"
+      );
+
+      tr.innerHTML = `
+        <td>
+          <select class="jp_partner_select_contact">
+            <option value="">
+              Select Contact
+            </option>
+          </select>
+        </td>
+
+        <td>
+          <input
+            type="number"
+            class="jp_shares"
+            step="0.01"
+            value="${
+              item.Partnership_shares || ""
+            }"
+          />
+        </td>
+
+        <td>
+          <input
+            type="number"
+            class="jp_partnership_percentage"
+            step="0.01"
+            value="${
+              item.Partnership || ""
+            }"
+          />
+        </td>
+
+        <td>
+          <input
+            type="number"
+            class="jp_commission_percentage"
+            step="0.01"
+            value="${
+              item.Commission || ""
+            }"
+          />
+        </td>
+
+        <td class="checkbox-cell">
+          <input
+            type="checkbox"
+            class="jp_commission_itemization"
+            ${
+              item.Commission_Itemized_on_Invoice ===
+              "true"
+                ? "checked"
+                : ""
+            }
+          />
+        </td>
+
+        <td>
+          <textarea class="jp_description">${
+            item.Description || ""
+          }</textarea>
+        </td>
+
+        <td>
+          <button
+            type="button"
+            class="btn-remove"
+            onclick="removeRow(this)"
+          >
+            ❌
+          </button>
+        </td>
+      `;
+
+      jewelleryTbody.appendChild(tr);
+
+      // load partner dropdown
+      populatePartnerDropdowns(
+        tr.querySelector(
+          ".jp_partner_select_contact"
+        )
+      );
+
+      // set selected partner
+      setTimeout(function () {
+
+        const selectEl =
+          tr.querySelector(
+            ".jp_partner_select_contact"
+          );
+
+        if (selectEl) {
+          selectEl.value =
+            item.Partner_Name?.ID || "";
+        }
+
+      }, 300);
+    });
+
+  } else {
+
+    console.log(
+      "⚠️ No Jewellery Partnership data found"
+    );
+
+    jewellryaddPartnerRow();
+  }
+}
+         loadJewelleryMetalSubform(recordID, data);
 
         if (data.item_Image) {
           const fullUrl = "https://creator.zoho.com" + data.item_Image;
@@ -2440,16 +2804,11 @@ function addJewellery4Row() {
         document.getElementById("rapport_price").value = data.Rapport_Price1 || "";
         document.getElementById("diashort_description").value = data.Short_Description1 || "";
         document.getElementById("dialong_description").value = data.Long_Description2 || "";
-
         document.getElementById("style").value = data.Style || "";
         document.getElementById("jewellery_type").value = data.Jewellery_Type?.ID || data.Jewellery_Type || "";
         document.getElementById("platinum").value = data.Platinum || "";
         document.getElementById("gold").value = data.Gold || "";
         document.getElementById("production").value = data.Production || "";
-        if (document.getElementById("instructions"))
-          document.getElementById("instructions").value = data.Instructions || "";
-        if (document.getElementById("countries_origin"))
-          document.getElementById("countries_origin").value = data.Country_Of_Origin1 || "";
         document.getElementById("size").value = data.Size || "";
         document.getElementById("weight_grams").value = data.Weight_grams || "";
         document.getElementById("circa").value = data.Circa || "";
@@ -2457,40 +2816,42 @@ function addJewellery4Row() {
         document.getElementById("hts").value = data.HTS1 || "";
         document.getElementById("note").value = data.Notes || "";
         document.getElementById("brand").value = data.Brand?.ID || data.Brand || "";
-        if (document.getElementById("description"))
-          document.getElementById("description").value = data.Jewel_Short_Description || "";
-        if (document.getElementById("instruction"))
-          document.getElementById("instruction").value = data.Jewel_Long_Description || "";
-
-        if (document.getElementById("diamond_price"))
-          document.getElementById("diamond_price").value = data.Diamond_Price || "";
-        if (document.getElementById("semi_mount_price"))
-          document.getElementById("semi_mount_price").value = data.Semi_Mount_Price || "";
-        if (document.getElementById("other_cost"))
-          document.getElementById("other_cost").value = data.Other_Cost || "";
-        if (document.getElementById("total_cost"))
-          document.getElementById("total_cost").value = data.Total_Cost || "";
-        if (document.getElementById("duty_percentage"))
-          document.getElementById("duty_percentage").value = data.Duty_Percentage || "";
-        if (document.getElementById("duty_amount"))
-          document.getElementById("duty_amount").value = data.Duty_Amount || "";
-        if (document.getElementById("final_cost"))
-          document.getElementById("final_cost").value = data.Final_Cost || "";
-        if (document.getElementById("selling_price_piece"))
-          document.getElementById("selling_price_piece").value = data.Selling_Price_Piece || "";
-        if (document.getElementById("cost_amount_summary"))
-          document.getElementById("cost_amount_summary").value = data.Cost_Amount || "";
-
+        document.getElementById("category").value = data.Category?.ID || data.Category || "";
+        document.getElementById("description").value = data.Jewel_Short_Description || "";
+        document.getElementById("instruction").value = data.Jewel_Long_Description || "";
+        document.getElementById("category").value = data.Category?.ID || data.Category || "";
+        document.getElementById("diamond_price").value = data.Diamond_price || "";
+        document.getElementById("semi_mount_price").value = data.Semi_Mount_Price || "";
+        document.getElementById("other_cost").value = data.Other_Cost || "";
+        document.getElementById("total_cost").value = data.Total_Cost || "";
+        document.getElementById("duty_percentage").value = data.Duty2 || "";
+        document.getElementById("duty_amount").value = data.Amount || "";
+        document.getElementById("final_cost").value = data.Final_Cost || "";
+        document.getElementById("selling_price_piece").value = data.Selling_price_per_piece || "";
+        document.getElementById("cost_amount_summary").value = data.Cost_Amount || "";
+        
         /* ─── Certificate Subform ─── */
         loadCertificateSubform(recordID);
 
-        /* ─── Jewellery Subforms ─── */
-        if (data.Category1 === "Jewellery") {
-          loadJewelleryMetalSubform(recordID, data);
-          loadJewelleryDiamondSubform(recordID, data);
-          loadJewelleryColorStoneSubform(recordID, data);
-          loadJewelleryLabourSubform(recordID, data);
-        }
+       if (data.Category1 === "Jewellery") {
+
+  document.getElementById("itemType").value =
+    "Jewellery";
+
+  document
+    .getElementById("itemType")
+    .dispatchEvent(new Event("change"));
+
+  setTimeout(function () {
+
+    loadJewelleryMetalSubform(data);
+    loadJewelleryDiamondSubform(data);
+    loadJewelleryColorStoneSubform(data);
+    loadJewelleryLabourSubform(data);
+    loadJewelleryPartnershipSubform(data);
+
+  }, 1500);
+}
 
         /* ─── PARTNERSHIP DETAILS SUBFORM ─── */
       var partnerData = data.Partnership_Details;
@@ -2543,196 +2904,332 @@ function addJewellery4Row() {
     });
 }
 
-  /* =================================================================================
-    LOAD JEWELLERY SUBFORMS
-  ================================================================================= */
+ /* =================================================================================
+   LOAD JEWELLERY SUBFORMS
+================================================================================= */
 
-  function loadJewelleryMetalSubform(recordID, data) {
-    const tbody = document.getElementById("jewel1Body");
-    if (!tbody) return;
-    tbody.innerHTML = "";
+function loadJewelleryMetalSubform(data) {
+  const tbody = document.getElementById("jewel1Body");
+  if (!tbody) return;
 
-    const rows = data.Metal_Details || [];
-    if (rows.length === 0) {
-      if (typeof addJewellery1Row === "function") addJewellery1Row();
-      return;
-    }
+  tbody.innerHTML = "";
 
-    rows.forEach(function (item) {
-      const tr = document.createElement("tr");
-      tr.className = "jewel1-row";
-      tr.dataset.rowId = item.ID || "";
-      tr.innerHTML = `
-        <td><input type="text" class="j1-cast-no" value="${item.Cast_No || ""}"></td>
-        <td><select class="select_contact j1-vendor"><option value="">Select Contact</option></select></td>
-        <td><select class="select_metal_type j1-metal-type"><option value="">Select Metal Type</option></select></td>
-        <td><select class="select_color j1-metal-color"><option value="">Select Color</option></select></td>
-        <td><select class="select_purity j1-metal-purity"><option value="">Select Purity</option></select></td>
-        <td><select class="select_unit j1-unit"><option value="">Select Unit</option></select></td>
-        <td><input type="number" class="j1-weight" value="${item.Weight || ""}"></td>
-        <td><input type="number" class="j1-qty" value="${item.Quantity || ""}"></td>
-        <td><input type="number" class="j1-market" value="${item.Metal_Market || ""}"></td>
-        <td><input type="text" class="j1-price" value="${item.Price || ""}"></td>
-        <td><input type="text" class="j1-gold-cost" value="${item.Gold_Cost || ""}"></td>
-        <td><textarea class="j1-remarks">${item.Remarks || ""}</textarea></td>
-      `;
-      tbody.appendChild(tr);
+  const rows = data.Metal_Details || [];
 
-      if (typeof loadContactLookup === "function") loadContactLookup(tr.querySelector(".j1-vendor"));
-      if (typeof loadMetalTypeLookup === "function") loadMetalTypeLookup(tr.querySelector(".j1-metal-type"));
-      if (typeof loadColorLookup === "function") loadColorLookup(tr.querySelector(".j1-metal-color"));
-      if (typeof loadPurityLookup === "function") loadPurityLookup(tr.querySelector(".j1-metal-purity"));
-      if (typeof loadUnitLookup === "function") loadUnitLookup(tr.querySelector(".j1-unit"));
-
-      setTimeout(function () {
-        const vendorId = item.Vendor?.ID || item.Vendor || "";
-        const metalTypeId = item.Metal_Type?.ID || item.Metal_Type || "";
-        const metalColorId = item.Metal_Colour?.ID || item.Metal_Colour || "";
-        const metalPurityId = item.Metal_Purity?.ID || item.Metal_Purity || "";
-        const unitId = item.Unit?.ID || item.Unit || "";
-
-        if (vendorId) tr.querySelector(".j1-vendor").value = vendorId;
-        if (metalTypeId) tr.querySelector(".j1-metal-type").value = metalTypeId;
-        if (metalColorId) tr.querySelector(".j1-metal-color").value = metalColorId;
-        if (metalPurityId) tr.querySelector(".j1-metal-purity").value = metalPurityId;
-        if (unitId) tr.querySelector(".j1-unit").value = unitId;
-      }, 500);
-    });
+  if (!rows.length) {
+    addJewellery1Row();
+    return;
   }
 
-  function loadJewelleryDiamondSubform(recordID, data) {
-    const tbody = document.getElementById("jewel2Body");
-    if (!tbody) return;
-    tbody.innerHTML = "";
+  rows.forEach(function (item) {
+    addJewellery1Row();
 
-    const rows = data.Diamond_Details || [];
-    if (rows.length === 0) {
-      if (typeof addJewellery2Row === "function") addJewellery2Row();
-      return;
-    }
+    const tr = tbody.lastElementChild;
+    tr.dataset.rowId = item.ID || "";
 
-    rows.forEach(function (item) {
-      const tr = document.createElement("tr");
-      tr.className = "jewel2-row";
-      tr.dataset.rowId = item.ID || "";
-      tr.innerHTML = `
-        <td><input type="text" class="j2-lot" value="${item.Diamond_Lot_No || ""}"></td>
-        <td><select class="select_shape j2-shape"><option value="">Select Shape</option></select></td>
-        <td><input type="text" class="j2-quality" value="${item.Quality || ""}"></td>
-        <td><input type="number" class="j2-stones" value="${item.No_of_Stones || ""}"></td>
-        <td><input type="number" class="j2-total-ct" value="${item.Total_Ct_Wt || ""}"></td>
-        <td><input type="text" class="j2-price" value="${item.Price || ""}"></td>
-        <td><input type="text" class="j2-cost" value="${item.Diamond_Cost || ""}"></td>
-        <td><textarea class="j2-remarks">${item.Remarks || ""}</textarea></td>
-      `;
-      tbody.appendChild(tr);
+    tr.querySelector(".j1-cast-no").value =
+      item.Cast || "";
 
-      if (typeof renderShapeOptions === "function") {
-        renderShapeOptions(tr.querySelector(".j2-shape"));
-      }
+    tr.querySelector(".j1-weight").value =
+      item.Weight || "";
 
-      setTimeout(function () {
-        const shapeId = item.Shape?.ID || item.Shape || "";
-        if (shapeId) tr.querySelector(".j2-shape").value = shapeId;
-      }, 500);
-    });
+    tr.querySelector(".j1-qty").value =
+      item.Quantity || "";
+
+    tr.querySelector(".j1-market").value =
+      item.Metal_Market || "";
+
+    tr.querySelector(".j1-price").value =
+      item.Price || "";
+
+    tr.querySelector(".j1-gold-cost").value =
+      item.Gold_Cost || "";
+
+    tr.querySelector(".j1-remarks").value =
+      item.Remarks || "";
+
+    setTimeout(function () {
+      tr.querySelector(".j1-vendor").value =
+        item.Vendor1?.ID ||
+        item.Vendor1 ||
+        "";
+
+      tr.querySelector(".j1-metal-type").value =
+        item.Metal_Type1?.ID ||
+        item.Metal_Type1 ||
+        "";
+
+      tr.querySelector(".j1-metal-color").value =
+        item.Metal_Color?.ID ||
+        item.Metal_Color ||
+        "";
+
+      tr.querySelector(".j1-metal-purity").value =
+        item.Metal_Purity?.ID ||
+        item.Metal_Purity ||
+        "";
+
+      tr.querySelector(".j1-unit").value =
+        item.Unit1?.ID ||
+        item.Unit1 ||
+        "";
+    }, 1000);
+  });
+}
+
+function loadJewelleryDiamondSubform(data) {
+  const tbody = document.getElementById("jewel2Body");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  const rows = data.Diamond_Details || [];
+
+  if (!rows.length) {
+    addJewellery2Row();
+    return;
   }
 
-  function loadJewelleryColorStoneSubform(recordID, data) {
-    const tbody = document.getElementById("jewel3Body");
-    if (!tbody) return;
-    tbody.innerHTML = "";
+  rows.forEach(function (item) {
+    addJewellery2Row();
 
-    const rows = data.Color_Stone1 || [];
-    if (rows.length === 0) {
-      if (typeof addJewellery3Row === "function") addJewellery3Row();
-      return;
-    }
+    const tr = tbody.lastElementChild;
+    tr.dataset.rowId = item.ID || "";
 
-    rows.forEach(function (item) {
-      const tr = document.createElement("tr");
-      tr.className = "jewel3-row";
-      tr.dataset.rowId = item.ID || "";
-      tr.innerHTML = `
-        <td><input type="text" class="j3-lot" value="${item.Lot_No || ""}"></td>
-        <td><select class="j3-stone-type"><option value="">Select</option></select></td>
-        <td><select class="select_shape"><option value="">Select Shape</option></select></td>
-        <td><input type="text" class="j3-quality" value="${item.Quality || ""}"></td>
-        <td><input type="text" class="j3-range" value="${item.Range || ""}"></td>
-        <td><input type="number" class="j3-no-stones" value="${item.No_Stones || ""}"></td>
-        <td><input type="number" class="j3-wt-stone" value="${item.Wt_Stone || ""}"></td>
-        <td><input type="number" class="j3-ctwt" value="${item.CT_WT || ""}"></td>
-        <td><select class="select_unit j3-unit"><option value="">Select Unit</option></select></td>
-        <td><select class="Select_Cut j3-cut"><option value="">Select Cut</option></select></td>
-        <td><select class="Select_Stone_Color j3-color"><option value="">Select Stone Color</option></select></td>
-        <td><select class="Select_Clarity_j3-clarity"><option value="">Select Clarity</option></select></td>
-        <td><select class="j3-supplier"><option value="">Select Supplier</option></select></td>
-        <td><select class="j3-setter"><option value="">Select Setter</option></select></td>
-        <td><input type="text" class="j3-price" value="${item.Price || ""}"></td>
-        <td><input type="text" class="j3-cost" value="${item.Stone_Cost || ""}"></td>
-        <td><input type="checkbox" class="j3-cs" ${item.CS ? "checked" : ""}></td>
-        <td><input type="checkbox" class="j3-duty" ${item.Duty ? "checked" : ""}></td>
-        <td><textarea class="j3-remarks">${item.Remarks || ""}</textarea></td>
-      `;
-      tbody.appendChild(tr);
+    tr.querySelector(".j2-lot").value =
+      item.Diamond_Lot || "";
 
-      if (typeof loadUnitLookup === "function") loadUnitLookup(tr.querySelector(".j3-unit"));
-      if (typeof loadCutLookup === "function") loadCutLookup(tr.querySelector(".j3-cut"));
-      if (typeof loadColorLookup === "function") loadColorLookup(tr.querySelector(".j3-color"));
-      if (typeof loadClarityLookup === "function") loadClarityLookup(tr.querySelector(".Select_Clarity_j3-clarity"));
-      if (typeof loadStoneTypeLookup === "function") loadStoneTypeLookup(tr.querySelector(".j3-stone-type"));
-      if (typeof renderShapeOptions === "function") renderShapeOptions(tr.querySelector(".select_shape"));
-      if (typeof loadStoneLookup === "function") loadStoneLookup(tr.querySelector(".j3-stone-type"));
+    tr.querySelector(".j2-quality").value =
+      item.Diamond_Quality || "";
 
-      setTimeout(function () {
-        const shapeId = item.Shape?.ID || item.Shape || "";
-        const unitId = item.Unit?.ID || item.Unit || "";
-        const cutId = item.Cut?.ID || item.Cut || "";
-        const colorId = item.Stone_Color?.ID || item.Stone_Color || "";
-        const clarityId = item.Clarity?.ID || item.Clarity || "";
-        // const supplierId = item.Supplier?.ID || item.Supplier || "";
-        // const setterId = item.Setter?.ID || item.Setter || "";
-        const stoneTypeId = item.Stone_Type?.ID || item.Stone_Type || "";
+    tr.querySelector(".j2-stones").value =
+      item.No_of_Stones || "";
 
-        if (shapeId) tr.querySelector(".select_shape").value = shapeId;
-        if (unitId) tr.querySelector(".j3-unit").value = unitId;
-        if (cutId) tr.querySelector(".j3-cut").value = cutId;
-        if (colorId) tr.querySelector(".j3-color").value = colorId;
-        if (clarityId) tr.querySelector(".Select_Clarity_j3-clarity").value = clarityId;
-        // if (supplierId) tr.querySelector(".j3-supplier").value = supplierId;
-        // if (setterId) tr.querySelector(".j3-setter").value = setterId;
-        if (stoneTypeId) tr.querySelector(".j3-stone-type").value = stoneTypeId;
-      }, 500);
-    });
+    tr.querySelector(".j2-total-ct").value =
+      item.Total_Ct_Wt || "";
+
+    tr.querySelector(".j2-price").value =
+      item.Price || "";
+
+    tr.querySelector(".j2-cost").value =
+      item.Diamond_cost || "";
+
+    tr.querySelector(".j2-remarks").value =
+      item.Remarks || "";
+
+    setTimeout(function () {
+      tr.querySelector(".j2-shape").value =
+        item.Shape1?.ID ||
+        item.Shape1 ||
+        "";
+    }, 1000);
+  });
+}
+
+function loadJewelleryColorStoneSubform(data) {
+  const tbody = document.getElementById("jewel3Body");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  const rows = data.Color_Stone1 || [];
+
+  if (!rows.length) {
+    addJewellery3Row();
+    return;
   }
 
-  function loadJewelleryLabourSubform(recordID, data) {
-    const tbody = document.getElementById("jewel4Body");
-    if (!tbody) return;
-    tbody.innerHTML = "";
+  rows.forEach(function (item) {
+    addJewellery3Row();
 
-    const rows = data.Labour_Details || [];
-    if (rows.length === 0) {
-      if (typeof addJewellery4Row === "function") addJewellery4Row();
-      return;
-    }
+    const tr = tbody.lastElementChild;
+    tr.dataset.rowId = item.ID || "";
 
-    rows.forEach(function (item) {
-      const tr = document.createElement("tr");
-      tr.className = "jewel4-row";
-      tr.dataset.rowId = item.ID || "";
-      tr.innerHTML = `
-        <td><input type="text" class="j4-labor-no" value="${item.Labour_No || ""}"></td>
-        <td><textarea class="j4-description">${item.Description || ""}</textarea></td>
-        <td><input type="text" class="j4-price" value="${item.Price || ""}"></td>
-        <td><input type="number" class="j4-qty" value="${item.Quantity || ""}"></td>
-        <td><input type="checkbox" class="j4-duty" ${item.Duty ? "checked" : ""}></td>
-        <td><input type="text" class="j4-amount" value="${item.Amount || ""}"></td>
-      `;
-      tbody.appendChild(tr);
-    });
+    tr.querySelector(".j3-lot").value =
+      item.Colorstone_Lot || "";
+
+    tr.querySelector(".j3-quality").value =
+      item.Stone_Quality || "";
+
+    tr.querySelector(".j3-range").value =
+      item.Range_Sieve_Mm || "";
+
+    tr.querySelector(".j3-no-stones").value =
+      item.No_Of_Stones || "";
+
+    tr.querySelector(".j3-wt-stone").value =
+      item.Wt_Per_Stone || "";
+
+    tr.querySelector(".j3-ctwt").value =
+      item.CT_WT || "";
+
+    tr.querySelector(".j3-price").value =
+      item.Stone_Price || "";
+
+    tr.querySelector(".j3-cost").value =
+      item.Stone_Cost || "";
+
+    tr.querySelector(".j3-cs").checked =
+      item.C_S || false;
+
+    tr.querySelector(".j3-duty").checked =
+      item.Duty || false;
+
+    tr.querySelector(".j3-remarks").value =
+      item.Remarks || "";
+
+    setTimeout(function () {
+      tr.querySelector(".select_shape").value =
+        item.Stone_Shape?.ID ||
+        item.Stone_Shape ||
+        "";
+
+      tr.querySelector(".j3-unit").value =
+        item.Stone_Unit?.ID ||
+        item.Stone_Unit ||
+        "";
+
+      tr.querySelector(".j3-cut").value =
+        item.Stone_Cut?.ID ||
+        item.Stone_Cut ||
+        "";
+
+      tr.querySelector(".j3-color").value =
+        item.Stone_Color?.ID ||
+        item.Stone_Color ||
+        "";
+
+      tr.querySelector(".Select_Clarity_j3-clarity").value =
+        item.Stone_Clarity?.ID ||
+        item.Stone_Clarity ||
+        "";
+
+      tr.querySelector(".j3-stone-type").value =
+        item.Stone_Type?.ID ||
+        item.Stone_Type ||
+        "";
+    }, 1000);
+  });
+}
+
+function loadJewelleryLabourSubform(data) {
+  const tbody = document.getElementById("jewel4Body");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  const rows = data.Labour_Details || [];
+
+  if (!rows.length) {
+    addJewellery4Row();
+    return;
   }
 
+  rows.forEach(function (item) {
+    addJewellery4Row();
+
+    const tr = tbody.lastElementChild;
+    tr.dataset.rowId = item.ID || "";
+
+    tr.querySelector(".j4-labor-no").value =
+      item.Labor || "";
+
+    tr.querySelector(".j4-description").value =
+      item.Description || "";
+
+    tr.querySelector(".j4-price").value =
+      item.Price || "";
+
+    tr.querySelector(".j4-qty").value =
+      item.Quantity || "";
+
+    tr.querySelector(".j4-duty").checked =
+      item.Duty || false;
+
+    tr.querySelector(".j4-amount").value =
+      item.Amount || "";
+  });
+}
+function loadJewelleryPartnershipSubform(data) {
+const tbody = document.getElementById(
+"jewelleryPartnershipBody"
+);
+
+if (!tbody) return;
+
+tbody.innerHTML = "";
+
+const rows =
+data.Partnership_Details || [];
+
+if (!rows.length) {
+jewellryaddPartnerRow();
+return;
+}
+
+rows.forEach(function (item) {
+jewellryaddPartnerRow();
+
+```
+const tr =
+  tbody.lastElementChild;
+
+// IMPORTANT FOR UPDATE
+tr.dataset.rowId =
+  item.ID || "";
+
+tr.dataset.partnerId =
+  item.Partner_Name?.ID ||
+  item.Partner_Name ||
+  "";
+
+tr.querySelector(
+  ".jp_shares"
+).value =
+  item.Partnership_shares ||
+  "";
+
+tr.querySelector(
+  ".jp_partnership_percentage"
+).value =
+  item.Partnership || "";
+
+tr.querySelector(
+  ".jp_commission_percentage"
+).value =
+  item.Commission || "";
+
+tr.querySelector(
+  ".jp_commission_itemization"
+).checked =
+  item.Commission_Itemized_on_Invoice === true ||
+  item.Commission_Itemized_on_Invoice ===
+    "true";
+
+tr.querySelector(
+  ".jp_description"
+).value =
+  item.Description || "";
+
+setTimeout(function () {
+  const partnerSelect =
+    tr.querySelector(
+      ".jp_partner_select_contact"
+    );
+
+  if (partnerSelect) {
+    partnerSelect.value =
+      item.Partner_Name?.ID ||
+      item.Partner_Name ||
+      "";
+  }
+}, 500);
+```
+
+});
+}
+
+ 
   /* ─── Date string from Zoho → yyyy-mm-dd for <input type="date"> ─── */
   function formatToYYYYMMDD(dateStr) {
     if (!dateStr) return "";

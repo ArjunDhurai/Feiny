@@ -909,6 +909,276 @@ if (
         dropdown.appendChild(option);
       });
     });
+    /* =====================================================
+   AUTO SELECT FEI IN FIRST ROW
+===================================================== */
+function setDefaultFEI() {
+
+  // NORMAL PARTNERSHIP
+  const firstPartnerDropdown =
+    document.querySelector(
+      "#partnerBody tr.partner-row .partnerdatalookup"
+    );
+
+  if (
+    firstPartnerDropdown &&
+    !firstPartnerDropdown.value
+  ) {
+
+    const feiOption =
+      Array.from(
+        firstPartnerDropdown.options
+      ).find(option =>
+        option.text.trim().toUpperCase() === "FEI"
+      );
+
+    if (feiOption) {
+      firstPartnerDropdown.value =
+        feiOption.value;
+    }
+  }
+
+
+  // JEWELLERY PARTNERSHIP
+  const firstJewelleryDropdown =
+    document.querySelector(
+      "#jewelleryPartnershipBody tr.jewellery-partnership-row .jp_partner_select_contact"
+    );
+
+  if (
+    firstJewelleryDropdown &&
+    !firstJewelleryDropdown.value
+  ) {
+
+    const feiOption =
+      Array.from(
+        firstJewelleryDropdown.options
+      ).find(option =>
+        option.text.trim().toUpperCase() === "FEI"
+      );
+
+    if (feiOption) {
+      firstJewelleryDropdown.value =
+        feiOption.value;
+    }
+  }
+}
+
+
+/* =====================================================
+   SHARE CALCULATION
+===================================================== */
+document.addEventListener(
+  "input",
+  function (e) {
+
+    /* ==========================
+       NORMAL PARTNERSHIP
+    ========================== */
+    if (
+      e.target.classList.contains(
+        "partner-share"
+      )
+    ) {
+
+      const rows =
+        document.querySelectorAll(
+          "#partnerBody tr.partner-row"
+        );
+
+      const firstShare =
+        parseFloat(
+          rows[0]
+          ?.querySelector(
+            ".partner-share"
+          )?.value
+        ) || 0;
+
+      // Row 1 %
+      rows[0].querySelector(
+        ".partner-percent"
+      ).value =
+        (firstShare / 100)
+        .toFixed(2);
+
+      // Row 2 remaining
+      if (rows.length > 1) {
+
+        const secondRow =
+          rows[1];
+
+        const secondPartner =
+          secondRow.querySelector(
+            ".partnerdatalookup"
+          )?.value;
+
+        if (secondPartner) {
+
+          const remaining =
+            100 - firstShare;
+
+          secondRow.querySelector(
+            ".partner-share"
+          ).value =
+            remaining;
+
+          secondRow.querySelector(
+            ".partner-percent"
+          ).value =
+            (remaining / 100)
+            .toFixed(2);
+        }
+      }
+    }
+
+
+    /* ==========================
+       JEWELLERY PARTNERSHIP
+    ========================== */
+    if (
+      e.target.classList.contains(
+        "jp_shares"
+      )
+    ) {
+
+      const rows =
+        document.querySelectorAll(
+          "#jewelleryPartnershipBody tr.jewellery-partnership-row"
+        );
+
+      const firstShare =
+        parseFloat(
+          rows[0]
+          ?.querySelector(
+            ".jp_shares"
+          )?.value
+        ) || 0;
+
+      // Row 1 %
+      rows[0].querySelector(
+        ".jp_partnership_percentage"
+      ).value =
+        (firstShare / 100)
+        .toFixed(2);
+
+      // Row 2 remaining
+      if (rows.length > 1) {
+
+        const secondRow =
+          rows[1];
+
+        const secondPartner =
+          secondRow.querySelector(
+            ".jp_partner_select_contact"
+          )?.value;
+
+        if (secondPartner) {
+
+          const remaining =
+            100 - firstShare;
+
+          secondRow.querySelector(
+            ".jp_shares"
+          ).value =
+            remaining;
+
+          secondRow.querySelector(
+            ".jp_partnership_percentage"
+          ).value =
+            (remaining / 100)
+            .toFixed(2);
+        }
+      }
+    }
+  }
+);
+
+
+/* =====================================================
+   WHEN SECOND PARTNER SELECTED
+===================================================== */
+document.addEventListener(
+  "change",
+  function (e) {
+
+    // NORMAL
+    if (
+      e.target.classList.contains(
+        "partnerdatalookup"
+      )
+    ) {
+
+      const rows =
+        document.querySelectorAll(
+          "#partnerBody tr.partner-row"
+        );
+
+      if (rows.length > 1) {
+
+        const firstShare =
+          parseFloat(
+            rows[0]
+            .querySelector(
+              ".partner-share"
+            ).value
+          ) || 0;
+
+        const remaining =
+          100 - firstShare;
+
+        rows[1].querySelector(
+          ".partner-share"
+        ).value =
+          remaining;
+
+        rows[1].querySelector(
+          ".partner-percent"
+        ).value =
+          (remaining / 100)
+          .toFixed(2);
+      }
+    }
+
+
+    // JEWELLERY
+    if (
+      e.target.classList.contains(
+        "jp_partner_select_contact"
+      )
+    ) {
+
+      const rows =
+        document.querySelectorAll(
+          "#jewelleryPartnershipBody tr.jewellery-partnership-row"
+        );
+
+      if (rows.length > 1) {
+
+        const firstShare =
+          parseFloat(
+            rows[0]
+            .querySelector(
+              ".jp_shares"
+            ).value
+          ) || 0;
+
+        const remaining =
+          100 - firstShare;
+
+        rows[1].querySelector(
+          ".jp_shares"
+        ).value =
+          remaining;
+
+        rows[1].querySelector(
+          ".jp_partnership_percentage"
+        ).value =
+          (remaining / 100)
+          .toFixed(2);
+      }
+    }
+  }
+);
   }
 
   /* ================= UNIT LOOKUP ================= */
@@ -1632,6 +1902,7 @@ function initRapportPriceTriggers() {
   }
 
 
+
   /* =================================================================================
     SAVE RECORD — CREATE + UPDATE
   ================================================================================= */
@@ -1751,7 +2022,7 @@ function initRapportPriceTriggers() {
  
   // Jewellery 4 - Labour Details
   Labour_Details: cleanSubformRows(getLabourDetailsRowsData()),
-
+  
     });
 
     

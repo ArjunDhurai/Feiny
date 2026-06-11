@@ -1534,7 +1534,7 @@ function initRapportPriceTriggers() {
     const rows = [];
     document.querySelectorAll("#jewel1Body tr.jewel1-row").forEach(function (row) {
       const castNo      = row.querySelector(".j1-cast-no")?.value || "";
-      const vendor      = row.querySelector(".j1-vendor")?.value || "";
+      const vendor      = row.querySelector(".select_contact_j1_vendor")?.value || "";
       const metalType   = row.querySelector(".j1-metal-type")?.value || "";
       const metalColor  = row.querySelector(".j1-metal-color")?.value || "";
       const metalPurity = row.querySelector(".j1-metal-purity")?.value || "";
@@ -1574,7 +1574,7 @@ function initRapportPriceTriggers() {
     const rows = [];
     document.querySelectorAll("#jewel2Body tr.jewel2-row").forEach(function (row) {
       const lot      = row.querySelector(".j2-lot")?.value || "";
-      const shape    = row.querySelector(".j2-shape")?.value || "";
+      const shape    = row.querySelector(".select_shape")?.value || "";
       const quality  = row.querySelector(".j2-quality")?.value || "";
       const stones   = row.querySelector(".j2-stones")?.value || "";
       const totalCt  = row.querySelector(".j2-total-ct")?.value || "";
@@ -2587,7 +2587,7 @@ function initRapportPriceTriggers() {
     tbody.appendChild(tr);
 
     /* Populate lookups for the new row */
-    if (typeof loadContactLookup === "function")   loadContactLookup(tr.querySelector(".j1-vendor"));
+    if (typeof loadContactLookup === "function")   loadContactLookup(tr.querySelector(".select_contact_j1_vendor"));
     if (typeof loadMetalTypeLookup === "function") loadMetalTypeLookup(tr.querySelector(".j1-metal-type"));
     if (typeof loadColorLookup === "function")     loadColorLookup(tr.querySelector(".j1-metal-color"));
     if (typeof loadPurityLookup === "function")    loadPurityLookup(tr.querySelector(".j1-metal-purity"));
@@ -2809,6 +2809,26 @@ function initRapportPriceTriggers() {
             const clearDia = document.getElementById("clearImage");
             if (clearDia) clearDia.style.display = "block";
           }
+          const jewFrame = document.getElementById("mainImagePreview");
+        if (jewFrame) {
+          jewFrame.src = fullUrl;
+          jewFrame.style.display = "block";
+          const clearMain = document.getElementById("clearMainImage");
+          if (clearMain) clearMain.style.display = "block";
+        }
+        
+        // ── Side image (Jewellery only) ──
+        if (data.Side_Image) {
+          const sideUrl = "https://creator.zoho.com" + data.Side_Image;
+
+          const sideFrame = document.getElementById("sideImagePreview");
+          if (sideFrame) {
+            sideFrame.src = sideUrl;
+            sideFrame.style.display = "block";
+            const clearSide = document.getElementById("clearSideImage");
+            if (clearSide) clearSide.style.display = "block";
+          }
+        }
         }
 
         /* ── Plain text / number fields (safe to set immediately) ── */
@@ -3171,7 +3191,7 @@ function loadNonJewelleryPartnershipSubform(data) {
       tr.querySelector(".j1-remarks").value   = item.Remarks || "";
 
       setTimeout(function () {
-        tr.querySelector(".j1-vendor").value       = item.Vendor1?.ID || item.Vendor1 || "";
+        tr.querySelector(".select_contact_j1_vendor").value       = item.Vendor1?.ID || item.Vendor1 || "";
         tr.querySelector(".j1-metal-type").value   = item.Metal_Type1?.ID || item.Metal_Type1 || "";
         tr.querySelector(".j1-metal-color").value  = item.Metal_Color?.ID || item.Metal_Color || "";
         tr.querySelector(".j1-metal-purity").value = item.Metal_Purity?.ID || item.Metal_Purity || "";

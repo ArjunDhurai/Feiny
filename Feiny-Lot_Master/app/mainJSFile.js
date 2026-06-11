@@ -1562,8 +1562,6 @@ function initRapportPriceTriggers() {
         Remarks:      remarks,
       };
 
-      if (rowId) rowData.ID = rowId;
-
       rows.push(rowData);
     });
     return rows;
@@ -1596,7 +1594,7 @@ function initRapportPriceTriggers() {
         Remarks:         remarks,
       };
 
-      if (rowId) rowData.ID = rowId;
+      
 
       rows.push(rowData);
     });
@@ -1648,8 +1646,7 @@ function initRapportPriceTriggers() {
         Remarks:         remarks,
       };
 
-      if (rowId) rowData.ID = rowId;
-
+      
       rows.push(rowData);
     });
     return rows;
@@ -1676,9 +1673,7 @@ function initRapportPriceTriggers() {
         Quantity:    qty,
         Duty:        duty,
         Amount:      amount,
-      };
-
-      if (rowId) rowData.ID = rowId;
+      }; 
 
       rows.push(rowData);
     });

@@ -91,3 +91,11 @@ Response Headers{"server":"ZGS","date":"Sat, 18 Apr 2026 08:14:10 GMT","content-
 [error] [2026-06-03T05:34:50.809Z] : × Below file formats are not allowed in Sigma
 [info] [2026-06-03T05:34:50.810Z] :  ==> app\er.name
 [info] [2026-06-03T05:34:50.811Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-06-10T11:42:42.850Z] : × Below file formats are not allowed in Sigma
+[info] [2026-06-10T11:42:42.872Z] :  ==> app\er.name
+[info] [2026-06-10T11:42:42.873Z] :  ==> app\Stone Type
+[info] [2026-06-10T11:42:42.874Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-06-10T11:42:42.891Z] : × Below file formats are not allowed in Sigma
+[info] [2026-06-10T11:42:42.892Z] :  ==> app\er.name
+[info] [2026-06-10T11:42:42.893Z] :  ==> app\Stone Type
+[info] [2026-06-10T11:42:42.894Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2

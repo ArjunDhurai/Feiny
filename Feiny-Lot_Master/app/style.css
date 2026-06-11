@@ -1269,3 +1269,25 @@ button.add-row {
   background: #ffffff;
   transition: all 0.2s ease; */
 }
+/* System Info - single row */
+.system-info-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  align-items: end;
+}
+
+/* Reduce field width */
+.system-info-row .field input,
+.system-info-row .field select {
+  width: 100%;
+  padding: 8px;
+  font-size: 13px;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .system-info-row {
+    grid-template-columns: 1fr;
+  }
+}

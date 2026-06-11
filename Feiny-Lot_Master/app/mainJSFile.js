@@ -97,6 +97,7 @@
   }
 
   /* ─── Clean subform rows: remove nulls inside each row, skip fully empty rows ─── */
+  /* FIX: preserve boolean false values (checkboxes) and numeric 0 */
   function cleanSubformRows(rows) {
     if (!Array.isArray(rows)) return [];
     return rows
@@ -107,6 +108,11 @@
 
         Object.keys(row).forEach(function (key) {
           const val = row[key];
+          // Keep booleans (including false) and numbers (including 0)
+          if (typeof val === "boolean" || typeof val === "number") {
+            cleaned[key] = val;
+            return;
+          }
           if (val === null || val === undefined) return;
           if (
             typeof val === "string" &&
@@ -1759,6 +1765,125 @@ function initRapportPriceTriggers() {
     }, 100);
   }
 
+  /* =================================================================================
+    ██████╗  █████╗ ██████╗ ████████╗███╗   ██╗███████╗██████╗ ███████╗██╗  ██╗██╗██████╗
+    ██╔══██╗██╔══██╗██╔══██╗╚══██╔══╝████╗  ██║██╔════╝██╔══██╗██╔════╝██║  ██║██║██╔══██╗
+    ██████╔╝███████║██████╔╝   ██║   ██╔██╗ ██║█████╗  ██████╔╝███████╗███████║██║██████╔╝
+    ██╔═══╝ ██╔══██║██╔══██╗   ██║   ██║╚██╗██║██╔══╝  ██╔══██╗╚════██║██╔══██║██║██╔═══╝
+    ██║     ██║  ██║██║  ██║   ██║   ██║ ╚████║███████╗██║  ██║███████║██║  ██║██║██║
+    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝╚═╝
+
+    KEY FIX: getPartnerRowsData()
+    ─────────────────────────────────────────────────────────────────────────────────────
+    ROOT CAUSE OF UPDATE ERROR:
+      Zoho Creator's updateRecordById REJECTS the entire request when the
+      Partnership_Details subform array contains rows that have an "ID" field.
+      Zoho interprets row IDs inside an updateRecordById payload as a conflict and
+      throws "Error Occurred".
+
+    SOLUTION:
+      Strip the ID field from every partnership row before sending to updateRecordById.
+      Zoho will then REPLACE all subform rows with the new data.
+      The row IDs stored in tr.dataset.rowId are still used for display/load purposes
+      but MUST NOT be sent in the update payload's Partnership_Details array.
+  ================================================================================= */
+  function getPartnerRowsData(forUpdate = false) {
+    const category = document.getElementById("itemType")?.value;
+    const partnerRows = [];
+    const isJewellery = category === "Jewellery";
+
+    const selector = isJewellery
+      ? "#jewelleryPartnershipBody tr.jewellery-partnership-row"
+      : "#partnerBody tr.partner-row";
+
+    document.querySelectorAll(selector).forEach(function (row) {
+
+      let partnerValue = "";
+      let shares = 0;
+      let percent = 0;
+      let commission = 0;
+      let description = "";
+      let itemized = false;
+
+      if (isJewellery) {
+        partnerValue =
+          row.querySelector(".jp_partner_select_contact")?.value || "";
+
+        shares =
+          parseFloat(row.querySelector(".jp_shares")?.value) || 0;
+
+        percent =
+          parseFloat(row.querySelector(".jp_partnership_percentage")?.value) || 0;
+
+        commission =
+          parseFloat(row.querySelector(".jp_commission_percentage")?.value) || 0;
+
+        itemized =
+          row.querySelector(".jp_commission_itemization")?.checked || false;
+
+        description =
+          row.querySelector(".jp_description")?.value || "";
+
+      } else {
+
+        partnerValue =
+          row.querySelector(".partnerdatalookup")?.value || "";
+
+        shares =
+          parseFloat(row.querySelector(".partner-share")?.value) || 0;
+
+        percent =
+          parseFloat(row.querySelector(".partner-percent")?.value) || 0;
+
+        commission =
+          parseFloat(row.querySelector(".commission-percent")?.value) || 0;
+
+        itemized =
+          row.querySelector(".commission-itemized")?.checked || false;
+
+        description =
+          row.querySelector(".partner-desc")?.value || "";
+      }
+
+      if (!partnerValue) return;
+
+      const rowData = {
+        Partner_Name: partnerValue,
+        Partnership_shares: shares,
+        Partnership: percent,
+        Commission: commission,
+        Commission_Itemized_on_Invoice: itemized,
+        Description: description
+      };
+
+      /*
+       * CRITICAL FIX:
+       * Only include the subform row ID when creating a NEW record (forUpdate = false).
+       * When updating (forUpdate = true), we MUST omit the ID field entirely.
+       * Zoho Creator rejects updateRecordById when subform rows contain an ID.
+       */
+      if (!forUpdate) {
+        const rowId = row.dataset.rowId;
+        if (
+          rowId &&
+          rowId !== "undefined" &&
+          rowId !== "null" &&
+          rowId.trim() !== ""
+        ) {
+          rowData.ID = rowId.trim();
+        }
+      }
+
+      console.log("Partner Row Payload:", rowData);
+
+      partnerRows.push(rowData);
+    });
+
+    console.log("FINAL PARTNERSHIP PAYLOAD", partnerRows);
+
+    return partnerRows;
+  }
+
   /* ================= SAVE RECORD — CREATE + UPDATE ================= */
   function saveRecord() {
     const Category1 = document.getElementById("itemType")?.value || "";
@@ -1781,102 +1906,102 @@ function initRapportPriceTriggers() {
       saveBtn.disabled = true;
     }
 
-    // ── Build base record object ──
-    const recordData = cleanRecordData({
-      Select: Category1,
-      Category1: Category1,
-      In_SKU: In_SKU,
-      Stock_On_Hand: getNumber("Stock_On_Hand"),
-      Status: document.getElementById("Status")?.value || "",
-      Treatment: document.getElementById("treatment_lookup")?.value || "",
-      Species: document.getElementById("species_lookup")?.value || "",
-      Surface: document.getElementById("surface_lookup")?.value || "",
-      Shape: document.getElementById("shape_lookup")?.value || "",
-      Origin: document.getElementById("origin_country")?.value || "",
-      Country_of_Cut: document.getElementById("country_cut")?.value || "",
-      HTS: document.getElementById("hts_field")?.value || "",
-      Code: document.getElementById("code_field")?.value || "",
-      Rapport_Price: getNumber("rapport_price"),
-      Name1: document.getElementById("cs_short_description")?.value || "",
-      Long_Description: document.getElementById("cs_long_description")?.value || "",
-      length_field: getNumber("min_length"),
-      Width: getNumber("min_width"),
-      Height: getNumber("min_height"),
-      Length_field1: getNumber("max_length"),
-      Width1: getNumber("max_width"),
-      Height1: getNumber("max_height"),
-      weight: getNumber("weight"),
-      AGL: document.getElementById("cert_agl")?.checked || false,
-      GIA: document.getElementById("cert_gia")?.checked || false,
-      Gub: document.getElementById("cert_gubelin")?.checked || false,
-      SSEF: document.getElementById("cert_ssef")?.checked || false,
-      Other: document.getElementById("cert_other")?.checked || false,
-      Description2: document.getElementById("certificate_details")?.value || "",
-      Price4: getNumber("Price4"),
-      Minimum_Price: getNumber("MinimumPrice"),
-      Unit: document.getElementById("unit_lookup")?.value || "",
-      Shape3: document.getElementById("dia_shape")?.value || "",
-      Color: document.getElementById("dia_color")?.value || "",
-      Clarity: document.getElementById("dia_clarity")?.value || "",
-      Cut: document.getElementById("dia_cut")?.value || "",
-      Polish: document.getElementById("dia_polish")?.value || "",
-      Culet: document.getElementById("dia_culet")?.value || "",
-      Symmetry: document.getElementById("dia_symmetry")?.value || "",
-      Fluorescence1: document.getElementById("dia_fluorescence")?.value || "",
-      Fluorescence_Color: document.getElementById("dia_colour_fluorescence")?.value || "",
-      Length_mm: getNumber("dia_length"),
-      Width_mm: getNumber("dia_width"),
-      Depth1: getNumber("dia_depth"),
-      Table: getNumber("dia_table"),
-      Depth2: getNumber("dia_depth_percent"),
-      Weight_Ct: getNumber("dia_weight"),
-      Price_Per_carat: getNumber("price_per_carat"),
-      Total_Price: getNumber("total_price"),
-      Rapport_Price1: getNumber("rapport_price"),
-      Quantity: getNumber("quantity"),
-      Short_Description1: document.getElementById("diashort_description")?.value || "",
-      Long_Description2: document.getElementById("dialong_description")?.value || "",
-      Cost_Amount: costVal,
-      Sub_species: document.getElementById("sub_species")?.value || "",
-      Style: document.getElementById("style")?.value || "",
-      Jewellery_Type: document.getElementById("jewellery_type")?.value || "",
-      Platinum: document.getElementById("platinum")?.value || "",
-      Gold: document.getElementById("gold")?.value || "",
-      Production: document.getElementById("production")?.value || "",
-      Instructions: document.getElementById("instructions")?.value || "",
-      Country_Of_Origin1: document.getElementById("countries_origin")?.value || "",
-      Size: document.getElementById("size")?.value || "",
-      Weight_grams: getNumber("weight_grams"),
-      Circa: document.getElementById("circa")?.value || "",
-      Order: document.getElementById("order")?.value || "",
-      HTS1: document.getElementById("hts")?.value || "",
-      Notes: document.getElementById("note")?.value || "",
-      Brand: document.getElementById("brand")?.value || "",
-      Jewel_Short_Description: document.getElementById("description")?.value || "",
-      Jewel_Long_Description: document.getElementById("instruction")?.value || "",
-      Diamond_price: getNumber("diamond_price"),
-      Semi_Mount_Price: getNumber("semi_mount_price"),
-      Other_Cost: getNumber("other_cost"),
-      Total_Cost: getNumber("total_cost"),
-      Duty2: getNumber("duty_percentage"),
-      Amount: getNumber("duty_amount"),
-      Final_Cost: getNumber("final_cost"),
-      Selling_price_per_piece: getNumber("selling_price_piece"),
-      Category: document.getElementById("category")?.value || "",
-      Partnership_Details: cleanSubformRows(getPartnerRowsData()),
-      Metal_Details: cleanSubformRows(getMetalDetailsRowsData()),
-      Diamond_Details: cleanSubformRows(getDiamondDetailsRowsData()),
-      Color_Stone1: cleanSubformRows(getColorStoneDetailsRowsData()),
-      Labour_Details: cleanSubformRows(getLabourDetailsRowsData()),
-    });
-
-    console.log("Partnership Data", getPartnerRowsData());
-    console.log("Saving config:", recordData);
-
     if (!recId) {
       /* ===============================
-          ➕ CREATE - Record Creation - API CALL
+          ➕ CREATE — build payload WITH subform row IDs (forUpdate = false)
       =============================== */
+      const recordData = cleanRecordData({
+        Select: Category1,
+        Category1: Category1,
+        In_SKU: In_SKU,
+        Stock_On_Hand: getNumber("Stock_On_Hand"),
+        Status: document.getElementById("Status")?.value || "",
+        Treatment: document.getElementById("treatment_lookup")?.value || "",
+        Species: document.getElementById("species_lookup")?.value || "",
+        Surface: document.getElementById("surface_lookup")?.value || "",
+        Shape: document.getElementById("shape_lookup")?.value || "",
+        Origin: document.getElementById("origin_country")?.value || "",
+        Country_of_Cut: document.getElementById("country_cut")?.value || "",
+        HTS: document.getElementById("hts_field")?.value || "",
+        Code: document.getElementById("code_field")?.value || "",
+        Rapport_Price: getNumber("rapport_price"),
+        Name1: document.getElementById("cs_short_description")?.value || "",
+        Long_Description: document.getElementById("cs_long_description")?.value || "",
+        length_field: getNumber("min_length"),
+        Width: getNumber("min_width"),
+        Height: getNumber("min_height"),
+        Length_field1: getNumber("max_length"),
+        Width1: getNumber("max_width"),
+        Height1: getNumber("max_height"),
+        weight: getNumber("weight"),
+        AGL: document.getElementById("cert_agl")?.checked || false,
+        GIA: document.getElementById("cert_gia")?.checked || false,
+        Gub: document.getElementById("cert_gubelin")?.checked || false,
+        SSEF: document.getElementById("cert_ssef")?.checked || false,
+        Other: document.getElementById("cert_other")?.checked || false,
+        Description2: document.getElementById("certificate_details")?.value || "",
+        Price4: getNumber("Price4"),
+        Minimum_Price: getNumber("MinimumPrice"),
+        Unit: document.getElementById("unit_lookup")?.value || "",
+        Shape3: document.getElementById("dia_shape")?.value || "",
+        Color: document.getElementById("dia_color")?.value || "",
+        Clarity: document.getElementById("dia_clarity")?.value || "",
+        Cut: document.getElementById("dia_cut")?.value || "",
+        Polish: document.getElementById("dia_polish")?.value || "",
+        Culet: document.getElementById("dia_culet")?.value || "",
+        Symmetry: document.getElementById("dia_symmetry")?.value || "",
+        Fluorescence1: document.getElementById("dia_fluorescence")?.value || "",
+        Fluorescence_Color: document.getElementById("dia_colour_fluorescence")?.value || "",
+        Length_mm: getNumber("dia_length"),
+        Width_mm: getNumber("dia_width"),
+        Depth1: getNumber("dia_depth"),
+        Table: getNumber("dia_table"),
+        Depth2: getNumber("dia_depth_percent"),
+        Weight_Ct: getNumber("dia_weight"),
+        Price_Per_carat: getNumber("price_per_carat"),
+        Total_Price: getNumber("total_price"),
+        Rapport_Price1: getNumber("rapport_price"),
+        Quantity: getNumber("quantity"),
+        Short_Description1: document.getElementById("diashort_description")?.value || "",
+        Long_Description2: document.getElementById("dialong_description")?.value || "",
+        Cost_Amount: costVal,
+        Sub_species: document.getElementById("sub_species")?.value || "",
+        Style: document.getElementById("style")?.value || "",
+        Jewellery_Type: document.getElementById("jewellery_type")?.value || "",
+        Platinum: document.getElementById("platinum")?.value || "",
+        Gold: document.getElementById("gold")?.value || "",
+        Production: document.getElementById("production")?.value || "",
+        Instructions: document.getElementById("instructions")?.value || "",
+        Country_Of_Origin1: document.getElementById("countries_origin")?.value || "",
+        Size: document.getElementById("size")?.value || "",
+        Weight_grams: getNumber("weight_grams"),
+        Circa: document.getElementById("circa")?.value || "",
+        Order: document.getElementById("order")?.value || "",
+        HTS1: document.getElementById("hts")?.value || "",
+        Notes: document.getElementById("note")?.value || "",
+        Brand: document.getElementById("brand")?.value || "",
+        Jewel_Short_Description: document.getElementById("description")?.value || "",
+        Jewel_Long_Description: document.getElementById("instruction")?.value || "",
+        Diamond_price: getNumber("diamond_price"),
+        Semi_Mount_Price: getNumber("semi_mount_price"),
+        Other_Cost: getNumber("other_cost"),
+        Total_Cost: getNumber("total_cost"),
+        Duty2: getNumber("duty_percentage"),
+        Amount: getNumber("duty_amount"),
+        Final_Cost: getNumber("final_cost"),
+        Selling_price_per_piece: getNumber("selling_price_piece"),
+        Category: document.getElementById("category")?.value || "",
+        /* CREATE: pass row IDs if available (forUpdate = false) */
+        Partnership_Details: getPartnerRowsData(false),
+        Metal_Details: cleanSubformRows(getMetalDetailsRowsData()),
+        Diamond_Details: cleanSubformRows(getDiamondDetailsRowsData()),
+        Color_Stone1: cleanSubformRows(getColorStoneDetailsRowsData()),
+        Labour_Details: cleanSubformRows(getLabourDetailsRowsData()),
+      });
+
+      console.log("Partnership Data", getPartnerRowsData(false));
+      console.log("Saving config (CREATE):", recordData);
+
       const config = {
         app_name: "feiny-app",
         form_name: "Lot_Master",
@@ -1943,7 +2068,6 @@ function initRapportPriceTriggers() {
         })
         .catch(function (error) {
           console.error("❌ Save Error:", error);
-          alert("❌ Error: " + error.message);
           alert("❌ Error: " + getErrorMessage(error));
         })
         .finally(function () {
@@ -1952,12 +2076,105 @@ function initRapportPriceTriggers() {
             saveBtn.disabled = false;
           }
         });
+
     } else {
       /* ===============================
-          🔄 Record Updatation - API CALL
+          🔄 UPDATE — build payload WITHOUT subform row IDs (forUpdate = true)
+          CRITICAL: Partnership_Details rows must NOT contain ID fields.
+          Zoho Creator rejects the entire updateRecordById call if subform
+          rows include an ID field.
       =============================== */
+      const recordData = cleanRecordData({
+        Select: Category1,
+        Category1: Category1,
+        In_SKU: In_SKU,
+        Stock_On_Hand: getNumber("Stock_On_Hand"),
+        Status: document.getElementById("Status")?.value || "",
+        Treatment: document.getElementById("treatment_lookup")?.value || "",
+        Species: document.getElementById("species_lookup")?.value || "",
+        Surface: document.getElementById("surface_lookup")?.value || "",
+        Shape: document.getElementById("shape_lookup")?.value || "",
+        Origin: document.getElementById("origin_country")?.value || "",
+        Country_of_Cut: document.getElementById("country_cut")?.value || "",
+        HTS: document.getElementById("hts_field")?.value || "",
+        Code: document.getElementById("code_field")?.value || "",
+        Rapport_Price: getNumber("rapport_price"),
+        Name1: document.getElementById("cs_short_description")?.value || "",
+        Long_Description: document.getElementById("cs_long_description")?.value || "",
+        length_field: getNumber("min_length"),
+        Width: getNumber("min_width"),
+        Height: getNumber("min_height"),
+        Length_field1: getNumber("max_length"),
+        Width1: getNumber("max_width"),
+        Height1: getNumber("max_height"),
+        weight: getNumber("weight"),
+        AGL: document.getElementById("cert_agl")?.checked || false,
+        GIA: document.getElementById("cert_gia")?.checked || false,
+        Gub: document.getElementById("cert_gubelin")?.checked || false,
+        SSEF: document.getElementById("cert_ssef")?.checked || false,
+        Other: document.getElementById("cert_other")?.checked || false,
+        Description2: document.getElementById("certificate_details")?.value || "",
+        Price4: getNumber("Price4"),
+        Minimum_Price: getNumber("MinimumPrice"),
+        Unit: document.getElementById("unit_lookup")?.value || "",
+        Shape3: document.getElementById("dia_shape")?.value || "",
+        Color: document.getElementById("dia_color")?.value || "",
+        Clarity: document.getElementById("dia_clarity")?.value || "",
+        Cut: document.getElementById("dia_cut")?.value || "",
+        Polish: document.getElementById("dia_polish")?.value || "",
+        Culet: document.getElementById("dia_culet")?.value || "",
+        Symmetry: document.getElementById("dia_symmetry")?.value || "",
+        Fluorescence1: document.getElementById("dia_fluorescence")?.value || "",
+        Fluorescence_Color: document.getElementById("dia_colour_fluorescence")?.value || "",
+        Length_mm: getNumber("dia_length"),
+        Width_mm: getNumber("dia_width"),
+        Depth1: getNumber("dia_depth"),
+        Table: getNumber("dia_table"),
+        Depth2: getNumber("dia_depth_percent"),
+        Weight_Ct: getNumber("dia_weight"),
+        Price_Per_carat: getNumber("price_per_carat"),
+        Total_Price: getNumber("total_price"),
+        Rapport_Price1: getNumber("rapport_price"),
+        Quantity: getNumber("quantity"),
+        Short_Description1: document.getElementById("diashort_description")?.value || "",
+        Long_Description2: document.getElementById("dialong_description")?.value || "",
+        Cost_Amount: costVal,
+        Sub_species: document.getElementById("sub_species")?.value || "",
+        Style: document.getElementById("style")?.value || "",
+        Jewellery_Type: document.getElementById("jewellery_type")?.value || "",
+        Platinum: document.getElementById("platinum")?.value || "",
+        Gold: document.getElementById("gold")?.value || "",
+        Production: document.getElementById("production")?.value || "",
+        Instructions: document.getElementById("instructions")?.value || "",
+        Country_Of_Origin1: document.getElementById("countries_origin")?.value || "",
+        Size: document.getElementById("size")?.value || "",
+        Weight_grams: getNumber("weight_grams"),
+        Circa: document.getElementById("circa")?.value || "",
+        Order: document.getElementById("order")?.value || "",
+        HTS1: document.getElementById("hts")?.value || "",
+        Notes: document.getElementById("note")?.value || "",
+        Brand: document.getElementById("brand")?.value || "",
+        Jewel_Short_Description: document.getElementById("description")?.value || "",
+        Jewel_Long_Description: document.getElementById("instruction")?.value || "",
+        Diamond_price: getNumber("diamond_price"),
+        Semi_Mount_Price: getNumber("semi_mount_price"),
+        Other_Cost: getNumber("other_cost"),
+        Total_Cost: getNumber("total_cost"),
+        Duty2: getNumber("duty_percentage"),
+        Amount: getNumber("duty_amount"),
+        Final_Cost: getNumber("final_cost"),
+        Selling_price_per_piece: getNumber("selling_price_piece"),
+        Category: document.getElementById("category")?.value || "",
+        /* UPDATE: strip subform row IDs to avoid Zoho rejection (forUpdate = true) */
+        Partnership_Details: getPartnerRowsData(true),
+        Metal_Details: cleanSubformRows(getMetalDetailsRowsData()),
+        Diamond_Details: cleanSubformRows(getDiamondDetailsRowsData()),
+        Color_Stone1: cleanSubformRows(getColorStoneDetailsRowsData()),
+        Labour_Details: cleanSubformRows(getLabourDetailsRowsData()),
+      });
+
       console.log("recId:", recId);
-      console.log("Update Data:", recordData);
+      console.log("Update Data (IDs stripped from Partnership_Details):", recordData);
 
       ZOHO.CREATOR.DATA.updateRecordById({
         app_name: "feiny-app",
@@ -2009,7 +2226,7 @@ function initRapportPriceTriggers() {
           }, 500);
         })
         .catch(function (error) {
-          console.error("❌ Save Error:", error);
+          console.error("❌ Update Error:", error);
           alert("❌ Error: " + getErrorMessage(error));
         })
         .finally(function () {
@@ -2346,110 +2563,6 @@ function initRapportPriceTriggers() {
     return promises;
   }
 
-  /* =================================================================================
-    getPartnerRowsData
-    — Color Stone / Diamond  →  reads #partnerBody   (.partnerdatalookup)
-    — Jewellery              →  reads #jewelleryPartnershipBody  (.jp_partner_select_contact)
-  ================================================================================= */
-  function getPartnerRowsData() {
-    const category = document.getElementById("itemType")?.value;
-    const partnerRows = [];
-    const isJewellery = category === "Jewellery";
-
-    const selector = isJewellery
-      ? "#jewelleryPartnershipBody tr.jewellery-partnership-row"
-      : "#partnerBody tr.partner-row";
-
-    document.querySelectorAll(selector).forEach(function (row) {
-
-      let partnerValue = "";
-      let shares = "";
-      let percent = "";
-      let commission = "";
-      let Commission_Itemized_on_Invoice = false;
-      let Description = "";
-
-      if (isJewellery) {
-        const partnerSelect = row.querySelector(".jp_partner_select_contact");
-
-        const datasetPartnerId =
-          (row.dataset && row.dataset.partnerId && String(row.dataset.partnerId).trim() !== "")
-            ? String(row.dataset.partnerId).trim()
-            : (row.getAttribute("data-partner-id") && String(row.getAttribute("data-partner-id")).trim() !== "")
-              ? String(row.getAttribute("data-partner-id")).trim()
-              : "";
-
-        partnerValue = (partnerSelect && partnerSelect.value && partnerSelect.value.trim() !== "")
-          ? partnerSelect.value.trim()
-          : datasetPartnerId;
-
-        shares = row.querySelector(".jp_shares")?.value || "";
-        percent = row.querySelector(".jp_partnership_percentage")?.value || "";
-        commission = row.querySelector(".jp_commission_percentage")?.value || "";
-        Commission_Itemized_on_Invoice = row.querySelector(".jp_commission_itemization")?.checked || false;
-        Description = row.querySelector(".jp_description")?.value || "";
-      } else {
-        const partnerSelect = row.querySelector(".partnerdatalookup");
-
-        const datasetPartnerId =
-          (row.dataset && row.dataset.partnerId && String(row.dataset.partnerId).trim() !== "")
-            ? String(row.dataset.partnerId).trim()
-            : (row.getAttribute("data-partner-id") && String(row.getAttribute("data-partner-id")).trim() !== "")
-              ? String(row.getAttribute("data-partner-id")).trim()
-              : "";
-
-        partnerValue = (partnerSelect && partnerSelect.value && partnerSelect.value.trim() !== "")
-          ? partnerSelect.value.trim()
-          : datasetPartnerId;
-
-        shares = row.querySelector(".partner-share")?.value || "";
-        percent = row.querySelector(".partner-percent")?.value || "";
-        commission = row.querySelector(".commission-percent")?.value || "";
-        Commission_Itemized_on_Invoice = row.querySelector(".commission-itemized")?.checked || false;
-        Description = row.querySelector(".partner-desc")?.value || "";
-      }
-
-      if (
-        !partnerValue &&
-        !shares &&
-        !percent &&
-        !commission &&
-        !Description &&
-        !Commission_Itemized_on_Invoice
-      ) {
-        return;
-      }
-
-      const rowId =
-        (row.dataset && row.dataset.rowId && String(row.dataset.rowId).trim() !== "")
-          ? String(row.dataset.rowId).trim()
-          : (row.getAttribute("data-row-id") && String(row.getAttribute("data-row-id")).trim() !== "")
-            ? String(row.getAttribute("data-row-id")).trim()
-            : null;
-
-      const rowData = {
-        Partnership_shares: shares,
-        Partnership: percent,
-        Commission: commission,
-        Description: Description,
-        Commission_Itemized_on_Invoice: Commission_Itemized_on_Invoice,
-      };
-
-      if (partnerValue) {
-        rowData.Partner_Name = partnerValue;
-      }
-
-      if (rowId) {
-        rowData.ID = rowId;
-      }
-
-      partnerRows.push(rowData);
-    });
-
-    console.log("Partnership Update Payload:", partnerRows);
-    return partnerRows;
-  }
-
   /* ─────────────────────────────────────────────
      JEWELLERY 1 — Metal Details
   ───────────────────────────────────────────── */
@@ -2669,10 +2782,6 @@ function initRapportPriceTriggers() {
 
   /* =================================================================================
     LOAD EXISTING RECORD (EDIT MODE)
-    — FIXED: removed duplicate partnership blocks
-    — FIXED: Diamond select fields restored inside setTimeout after dropdowns load
-    — FIXED: Color Stone & Diamond use loadNonJewelleryPartnershipSubform(data)
-    — FIXED: Jewellery uses loadJewelleryPartnershipSubform(data) inside setTimeout
   ================================================================================= */
   function loadExistingRecord(recordID) {
     ZOHO.CREATOR.DATA.getRecordById({
@@ -2832,133 +2941,208 @@ function initRapportPriceTriggers() {
   }
 
   /* =================================================================================
-     loadNonJewelleryPartnershipSubform
-     Used by Color Stone and Diamond edit mode.
-     Populates #partnerBody with Partnership_Details rows.
-  ================================================================================= */
-  function loadNonJewelleryPartnershipSubform(data) {
-    var partnerData = data.Partnership_Details;
-    var partnerTbody = document.getElementById("partnerBody");
-    if (!partnerTbody) return;
+   loadNonJewelleryPartnershipSubform
+================================================================================= */
+function loadNonJewelleryPartnershipSubform(data) {
 
-    partnerTbody.innerHTML = "";
+  const partnerData = data.Partnership_Details;
+  const partnerTbody = document.getElementById("partnerBody");
 
-    if (partnerData && partnerData.length > 0) {
-      partnerData.forEach(function (item) {
-        var tr = document.createElement("tr");
-        tr.classList.add("partner-row");
+  if (!partnerTbody) return;
 
-        /* Store the subform row ID so updates work correctly */
-        if (item.ID) tr.dataset.rowId = item.ID;
+  partnerTbody.innerHTML = "";
 
-        tr.innerHTML = `
-          <td>
-            <select class="partnerdatalookup">
-              <option value="">Select Partner</option>
-            </select>
-          </td>
-          <td><input type="text" class="partner-share" value="${item.Partnership_shares || ""}"></td>
-          <td><input type="text" class="partner-percent" value="${item.Partnership || ""}"></td>
-          <td><input type="text" class="commission-percent" value="${item.Commission || ""}"></td>
-          <td style="text-align:center">
-            <input type="checkbox" class="commission-itemized"
-              ${item.Commission_Itemized_on_Invoice === "true" || item.Commission_Itemized_on_Invoice === true ? "checked" : ""}>
-          </td>
-          <td><textarea class="partner-desc">${item.Description || ""}</textarea></td>
-          <td>
-            <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
-          </td>
-        `;
+  if (partnerData && partnerData.length > 0) {
 
-        partnerTbody.appendChild(tr);
+    partnerData.forEach(function (item) {
 
-        /* Populate the dropdown for this row */
-        populatePartnerDropdowns(tr.querySelector(".partnerdatalookup"));
+      console.log("Loaded Partnership Row:", item);
 
-        /* Restore the selected partner after the dropdown is populated */
-        var partnerId = item.Partner_Name?.ID || item.Partner_Name || "";
-        if (partnerId) {
-          setTimeout(function () {
-            var selectEl = tr.querySelector(".partnerdatalookup");
-            if (selectEl) selectEl.value = partnerId;
-          }, 400);
+      const tr = document.createElement("tr");
+      tr.classList.add("partner-row");
+
+      /*
+       * Store the subform row ID in data-row-id for display/reference only.
+       * This is NOT sent in the update payload (getPartnerRowsData(true) strips it).
+       */
+      const subformRowId =
+        item.ID ||
+        item.row_id ||
+        item.zc_subform_row_id ||
+        item.Subform_Row_ID ||
+        null;
+
+      if (
+        subformRowId &&
+        String(subformRowId).trim() !== "" &&
+        String(subformRowId) !== "undefined" &&
+        String(subformRowId) !== "null"
+      ) {
+        tr.dataset.rowId = String(subformRowId).trim();
+      }
+
+      console.log("Stored Partnership rowId:", tr.dataset.rowId);
+
+      /* PARTNER LOOKUP ID */
+      let partnerId = "";
+
+      if (item.Partner_Name) {
+        if (typeof item.Partner_Name === "object") {
+          partnerId = String(item.Partner_Name.ID || item.Partner_Name.id || "");
+        } else {
+          partnerId = String(item.Partner_Name);
         }
-      });
-    } else {
-      console.log("⚠️ No partnership data found — adding blank row");
-      addPartnerRow();
-    }
+      }
+
+      if (partnerId) {
+        tr.dataset.partnerId = partnerId;
+      }
+
+      tr.innerHTML = `
+        <td>
+          <select class="partnerdatalookup">
+            <option value="">Select Partner</option>
+          </select>
+        </td>
+        <td>
+          <input type="text" class="partner-share" value="${item.Partnership_shares || ""}">
+        </td>
+        <td>
+          <input type="text" class="partner-percent" value="${item.Partnership || ""}">
+        </td>
+        <td>
+          <input type="text" class="commission-percent" value="${item.Commission || ""}">
+        </td>
+        <td style="text-align:center">
+          <input type="checkbox" class="commission-itemized"
+            ${item.Commission_Itemized_on_Invoice === true || item.Commission_Itemized_on_Invoice === "true" ? "checked" : ""}>
+        </td>
+        <td>
+          <textarea class="partner-desc">${item.Description || ""}</textarea>
+        </td>
+        <td>
+          <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
+        </td>
+      `;
+
+      partnerTbody.appendChild(tr);
+
+      const selectEl = tr.querySelector(".partnerdatalookup");
+      populatePartnerDropdowns(selectEl);
+
+      if (partnerId) {
+        setTimeout(function () {
+          if (selectEl) {
+            selectEl.value = partnerId;
+            console.log("Restored partner:", selectEl.value, "ID:", partnerId);
+          }
+        }, 800);
+      }
+    });
+
+  } else {
+    console.log("⚠️ No partnership data found — adding blank row");
+    addPartnerRow();
   }
+}
 
   /* =================================================================================
      loadJewelleryPartnershipSubform
-     Used by Jewellery edit mode.
-     Populates #jewelleryPartnershipBody with Partnership_Details rows.
   ================================================================================= */
   function loadJewelleryPartnershipSubform(data) {
-    var partnerData = data.Partnership_Details;
-    var tbody = document.getElementById("jewelleryPartnershipBody");
-    if (!tbody) return;
 
-    tbody.innerHTML = "";
+  var partnerData = data.Partnership_Details;
+  var tbody = document.getElementById("jewelleryPartnershipBody");
 
-    if (partnerData && partnerData.length > 0) {
-      partnerData.forEach(function (item) {
-        var tr = document.createElement("tr");
-        tr.classList.add("jewellery-partnership-row");
+  if (!tbody) return;
 
-        /* Store the subform row ID so updates work correctly */
-        if (item.ID) tr.dataset.rowId = item.ID;
+  tbody.innerHTML = "";
 
-        tr.innerHTML = `
-          <td>
-            <select class="jp_partner_select_contact">
-              <option value="">Select Contact</option>
-            </select>
-          </td>
-          <td>
-            <input type="number" class="jp_shares" step="0.01"
-              value="${item.Partnership_shares || ""}">
-          </td>
-          <td>
-            <input type="number" class="jp_partnership_percentage" step="0.01"
-              value="${item.Partnership || ""}">
-          </td>
-          <td>
-            <input type="number" class="jp_commission_percentage" step="0.01"
-              value="${item.Commission || ""}">
-          </td>
-          <td class="checkbox-cell">
-            <input type="checkbox" class="jp_commission_itemization"
-              ${item.Commission_Itemized_on_Invoice === "true" || item.Commission_Itemized_on_Invoice === true ? "checked" : ""}>
-          </td>
-          <td>
-            <textarea class="jp_description">${item.Description || ""}</textarea>
-          </td>
-          <td>
-            <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
-          </td>
-        `;
+  if (partnerData && partnerData.length > 0) {
 
-        tbody.appendChild(tr);
+    partnerData.forEach(function (item) {
 
-        /* Populate the dropdown for this row */
-        populatePartnerDropdowns(tr.querySelector(".jp_partner_select_contact"));
+      console.log("Loaded Jewellery Partnership Item:", item);
 
-        /* Restore the selected partner after the dropdown is populated */
-        var partnerId = item.Partner_Name?.ID || item.Partner_Name || "";
-        if (partnerId) {
-          setTimeout(function () {
-            var selectEl = tr.querySelector(".jp_partner_select_contact");
-            if (selectEl) selectEl.value = partnerId;
-          }, 400);
+      var tr = document.createElement("tr");
+      tr.classList.add("jewellery-partnership-row");
+
+      /*
+       * Store the subform row ID for reference only.
+       * NOT included in the update payload.
+       */
+      const subformRowId =
+        item.ID ||
+        item.row_id ||
+        item.zc_subform_row_id ||
+        item.Subform_Row_ID ||
+        "";
+
+      if (subformRowId) {
+        tr.dataset.rowId = String(subformRowId);
+      }
+
+      console.log("Stored Jewellery Subform Row ID:", tr.dataset.rowId);
+
+      let partnerId = "";
+
+      if (item.Partner_Name) {
+        if (typeof item.Partner_Name === "object") {
+          partnerId = String(item.Partner_Name.ID || item.Partner_Name.id || "");
+        } else {
+          partnerId = String(item.Partner_Name);
         }
-      });
-    } else {
-      console.log("⚠️ No Jewellery partnership data found — adding blank row");
-      addJewelleryPartnershipRow();
-    }
+      }
+
+      if (partnerId) {
+        tr.dataset.partnerId = partnerId;
+      }
+
+      tr.innerHTML = `
+        <td>
+          <select class="jp_partner_select_contact">
+            <option value="">Select Contact</option>
+          </select>
+        </td>
+        <td>
+          <input type="number" class="jp_shares" step="0.01" value="${item.Partnership_shares || ""}">
+        </td>
+        <td>
+          <input type="number" class="jp_partnership_percentage" step="0.01" value="${item.Partnership || ""}">
+        </td>
+        <td>
+          <input type="number" class="jp_commission_percentage" step="0.01" value="${item.Commission || ""}">
+        </td>
+        <td class="checkbox-cell">
+          <input type="checkbox" class="jp_commission_itemization"
+            ${item.Commission_Itemized_on_Invoice === true || item.Commission_Itemized_on_Invoice === "true" ? "checked" : ""}>
+        </td>
+        <td>
+          <textarea class="jp_description">${item.Description || ""}</textarea>
+        </td>
+        <td>
+          <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+
+      const selectEl = tr.querySelector(".jp_partner_select_contact");
+      populatePartnerDropdowns(selectEl);
+
+      if (partnerId) {
+        setTimeout(function () {
+          selectEl.value = partnerId;
+          console.log("Restored JP Partner:", selectEl.value);
+        }, 800);
+      }
+    });
+
+  } else {
+    console.log("⚠️ No Jewellery partnership data found");
+    addJewelleryPartnershipRow();
   }
+}
 
   /* =================================================================================
      LOAD JEWELLERY SUBFORMS

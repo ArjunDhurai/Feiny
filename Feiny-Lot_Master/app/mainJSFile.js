@@ -14,6 +14,10 @@
   let lot_edit = false;
   let recId = null;
   let unitLookupData = null;
+  let diaImageCleared = false;
+let stoneImageCleared = false;
+let jewelleryImageCleared = false;
+let jewellerySideImageCleared = false;
 
   /* ─── Cached lookup data for the four fixed lookups ─── */
   let culetLookupData = null;
@@ -572,6 +576,7 @@
       clearBtn.addEventListener("click", function () {
         diaImageFile = null;
         diaInput.value = "";
+        diaImageCleared = true;
         preview.style.display = "none";
         clearBtn.style.display = "none";
         document.getElementById("diamand_imageText").style.display = "block";
@@ -613,7 +618,7 @@
       jewelleryClearBtn.addEventListener("click", function () {
         jewelleryImageFile = null;
         jewelleryInput.value = "";
-
+        jewelleryImageCleared = true;
         jewelleryPreview.src = "";
         jewelleryPreview.style.display = "none";
         jewelleryClearBtn.style.display = "none";
@@ -656,6 +661,7 @@
         jewellerySideInput.value = "";
 
         jewellerySidePreview.src = "";
+        jewellerySideImageCleared = true;
         jewellerySidePreview.style.display = "none";
         jewellerySideClearBtn.style.display = "none";
       });
@@ -692,6 +698,7 @@
       stoneClearBtn.addEventListener("click", function () {
         stoneImageFile = null;
         stoneInput.value = "";
+        stoneImageCleared = true;
         stonePreview.style.display = "none";
         stoneClearBtn.style.display = "none";
         document.getElementById("imageText").style.display = "block";
@@ -2186,6 +2193,27 @@ function initRapportPriceTriggers() {
             alert("✅ Updated Successfully");
 
             let uploadPromises = [];
+            if (diaImageCleared || stoneImageCleared || jewelleryImageCleared) {
+      uploadPromises.push(
+        ZOHO.CREATOR.DATA.updateRecordById({
+          app_name: "feiny-app",
+          report_name: "All_Lot_Master",
+          id: String(recId),
+          payload: { data: { item_Image: "" } },
+        }).catch(function(e) { console.warn("Clear main image failed:", e); })
+      );
+    }
+
+    if (jewellerySideImageCleared) {
+      uploadPromises.push(
+        ZOHO.CREATOR.DATA.updateRecordById({
+          app_name: "feiny-app",
+          report_name: "All_Lot_Master",
+          id: String(recId),
+          payload: { data: { Side_Image: "" } },
+        }).catch(function(e) { console.warn("Clear side image failed:", e); })
+      );
+    }
             const certPromises = createCertificateRecords(In_SKU, recId);
             if (certPromises && certPromises.length > 0)
               uploadPromises = uploadPromises.concat(certPromises);
@@ -2658,6 +2686,7 @@ function initRapportPriceTriggers() {
     tbody.appendChild(tr);
 
     /* Populate lookups for the new row */
+    if (typeof loadStoneLookup === "function")      loadStoneLookup(tr.querySelector(".j3-stone-type"));
     if (typeof loadUnitLookup === "function")      loadUnitLookup(tr.querySelector(".j3-unit"));
     if (typeof loadCutLookup === "function")       loadCutLookup(tr.querySelector(".j3-cut"));
     if (typeof loadColorLookup === "function")     loadColorLookup(tr.querySelector(".j3-color"));
@@ -2772,6 +2801,10 @@ function initRapportPriceTriggers() {
     recId = null;
     lot_edit = false;
     window.scrollTo(0, 0);
+diaImageCleared = false;
+stoneImageCleared = false;
+jewelleryImageCleared = false;
+jewellerySideImageCleared = false;
     console.log("Form Cleared Successfully");
   }
 
@@ -2779,6 +2812,10 @@ function initRapportPriceTriggers() {
     LOAD EXISTING RECORD (EDIT MODE)
   ================================================================================= */
   function loadExistingRecord(recordID) {
+    diaImageCleared = false;
+  stoneImageCleared = false;
+  jewelleryImageCleared = false;
+  jewellerySideImageCleared = false;
     ZOHO.CREATOR.DATA.getRecordById({
       app_name: "feiny-app",
       report_name: "All_Lot_Master",

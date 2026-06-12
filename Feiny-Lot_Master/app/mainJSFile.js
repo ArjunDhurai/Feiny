@@ -475,6 +475,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loadOriginCountryDropdown();
   typeof loadcategoryLookup === "function" && loadcategoryLookup();
   typeof loadStoneLookup === "function" && loadStoneLookup();
+  typeof loadjewelryUnitLookup === "function" && loadjewelryUnitLookup();
 
   /* ================= COLOR STONE AUTO DESCRIPTION ================= */
 
@@ -530,6 +531,36 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   initTotalCalculation();
+
+  /* ================= AUTO UPDATE HTS ================= */
+function initHTSCalculation() {
+  const weightField = document.getElementById("dia_weight");
+  const htsField = document.getElementById("dia_hts");
+
+  if (!weightField || !htsField) {
+    setTimeout(initHTSCalculation, 500);
+    return;
+  }
+
+  function updateHTS() {
+    const weight = parseFloat(weightField.value) || 0;
+
+    if (weight > 0 && weight <= 0.50) {
+      htsField.value = "7102.39.00.10";
+    } else if (weight > 0.50) {
+      htsField.value = "7102.39.00.50";
+    } else {
+      htsField.value = "";
+    }
+  }
+
+  weightField.addEventListener("input", updateHTS);
+
+  // Run once for edit mode
+  updateHTS();
+}
+
+initHTSCalculation();
 
   /* ================= DIAMOND AUTO DESCRIPTION ================= */
 
@@ -760,6 +791,79 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 });
+/* ================= AUTO GENERATE SKU ================= */
+
+function generateAutoSKU() {
+  const itemType = document.getElementById("itemType")?.value;
+  const skuField = document.getElementById("In_SKU");
+
+  if (!itemType || !skuField) return;
+
+  /* -----------------------------
+     STOP AUTO GENERATION IN EDIT
+  ----------------------------- */
+  if (lot_edit === true && recId) {
+    // Keep existing SKU while editing
+    return;
+  }
+
+  let prefix = "";
+
+  if (itemType === "Color Stone") {
+    prefix = "CS-";
+  } else if (itemType === "Diamond") {
+    prefix = "DIA-";
+  } else if (itemType === "Jewellery") {
+    prefix = "JEWE-";
+  } else {
+    skuField.value = "";
+    return;
+  }
+
+  ZOHO.CREATOR.DATA.getRecords({
+    app_name: "feiny-app",
+    report_name: "All_Lot_Master",
+    max_records: 200
+  })
+    .then(function (response) {
+
+      let maxNumber = 0;
+
+      if (response.data && response.data.length > 0) {
+        response.data.forEach(function (record) {
+
+          const sku = record.In_SKU || "";
+
+          if (sku.startsWith(prefix)) {
+            const numberPart = sku.replace(prefix, "").trim();
+            const num = parseInt(numberPart, 10);
+
+            if (!isNaN(num) && num > maxNumber) {
+              maxNumber = num;
+            }
+          }
+        });
+      }
+
+      const nextNumber = maxNumber + 1;
+      const formattedNumber = String(nextNumber).padStart(3, "0");
+
+      skuField.value = prefix + formattedNumber;
+    })
+    .catch(function (error) {
+      console.error("SKU generation error:", error);
+    });
+}
+
+/* ================= ITEM TYPE CHANGE ================= */
+
+const itemTypeEl = document.getElementById("itemType");
+
+if (itemTypeEl) {
+  itemTypeEl.addEventListener("change", function () {
+    generateAutoSKU();
+  });
+}
 
 /* ================= DIAMOND AUTO DESCRIPTION (GLOBAL) ================= */
 
@@ -1324,6 +1428,44 @@ function renderUnitOptions(targetElement = null) {
     ? [targetElement]
     : document.querySelectorAll(
         "#unit_lookup, .select_unit, .j1-unit, .j3-unit",
+      );
+
+  selects.forEach(function (select) {
+    const selectedValue = select.value;
+    select.innerHTML = `<option value="">Select Unit</option>`;
+    unitLookupData.forEach(function (record) {
+      const option = document.createElement("option");
+      option.value = record.ID;
+      option.text = record.Description1 || record.zc_display_value || "No Name";
+      if (selectedValue && selectedValue == record.ID) {
+        option.selected = true;
+      }
+      select.appendChild(option);
+    });
+  });
+}
+/* ================= JEWELRY UNIT LOOKUP ================= */
+function loadjewelryUnitLookup(targetElement = null) {
+  if (unitLookupData) {
+    renderUnitOptions(targetElement);
+    return;
+  }
+
+  ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Unit" })
+    .then(function (response) {
+      unitLookupData = response.data || [];
+      renderUnitOptions(targetElement);
+    })
+    .catch(function (error) {
+      console.error("Unit lookup error:", error);
+    });
+}
+
+function renderUnitOptions(targetElement = null) {
+  const selects = targetElement
+    ? [targetElement]
+    : document.querySelectorAll(
+        "#jw_unit, .select_unit, .j1-unit, .j3-unit",
       );
 
   selects.forEach(function (select) {
@@ -1937,8 +2079,7 @@ function getColorStoneDetailsRowsData() {
       const unit = row.querySelector(".j3-unit")?.value || "";
       const cut = row.querySelector(".j3-cut")?.value || "";
       const color = row.querySelector(".j3-color")?.value || "";
-      const clarity =
-        row.querySelector(".Select_Clarity_j3-clarity")?.value || "";
+      const clarity = row.querySelector(".Select_Clarity_j3-clarity")?.value || "";
       const price = row.querySelector(".j3-price")?.value || "";
       const cost = row.querySelector(".j3-cost")?.value || "";
       const cs = row.querySelector(".j3-cs")?.checked || false;
@@ -2163,6 +2304,7 @@ function saveRecord() {
     Sub_species: document.getElementById("sub_species")?.value || "",
     Style: document.getElementById("style")?.value || "",
     Jewellery_Type: document.getElementById("jewellery_type")?.value || "",
+    jewel_Unit: document.getElementById("jw_unit")?.value || "",
     Platinum: document.getElementById("platinum")?.value || "",
     Gold: document.getElementById("gold")?.value || "",
     Production: document.getElementById("production")?.value || "",
@@ -2556,6 +2698,7 @@ function createCertificateRecords(skuValue, lotRecordID) {
   const categoryValue = document.getElementById("itemType")?.value || "";
   const speciesId = document.getElementById("species_lookup")?.value || "";
   const speciesValue = speciesMap[speciesId]?.Species || "";
+  const subSpeciesValue = document.getElementById("sub_species")?.value || "";
 
   if (rows.length === 0) return promises;
 
@@ -2620,6 +2763,7 @@ function createCertificateRecords(skuValue, lotRecordID) {
       SKU: skuValue,
       Categories: categoryValue,
       Species: speciesValue,
+      Sub_species: subSpeciesValue,
       Lot_Master_ID: lotRecordID,
     };
 
@@ -3228,6 +3372,7 @@ function loadExistingRecord(recordID) {
       document.getElementById("style").value = data.Style || "";
       document.getElementById("platinum").value = data.Platinum || "";
       document.getElementById("gold").value = data.Gold || "";
+      document.getElementById("jw_unit").value = data.Jewel_Unit || "";
       document.getElementById("production").value = data.Production || "";
       document.getElementById("size").value = data.Size || "";
       document.getElementById("weight_grams").value = data.Weight_grams || "";
@@ -3285,6 +3430,8 @@ function loadExistingRecord(recordID) {
           data.Brand?.ID || data.Brand || "";
         document.getElementById("category").value =
           data.Category?.ID || data.Category || "";
+        document.getElementById("jw_unit").value =
+          data.jewel_Unit?.ID || data.jewel_Unit || "";
       }, 800);
 
       /* ── Certificate Subform ── */

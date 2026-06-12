@@ -38,6 +38,8 @@
     <script defer src="Select_Shape.js"></script>
     <script defer src="Select_Cut.js"></script>
     <script defer src="Stone_Type.js"></script>
+    <script defer src="Select_Clarity.js"></script>
+
 
   </head>
 
@@ -206,6 +208,10 @@
                 <label>Long Description</label
                 ><textarea id="dialong_description"></textarea>
               </div>
+               <div class="field">
+                <label>HTS</label
+                ><input type="text" id="dia_hts" readonly />
+              </div>
               <!-- <div class="field">
                 <label>HTS</label
                 ><input type="number" id="Hts_code" />
@@ -249,6 +255,7 @@
                 </button>
               </div>
             </div>
+           
 
             <!-- ROW 7: Image Upload
             <div class="diamond-fields-grid">
@@ -486,7 +493,7 @@
                   <th>Lab</th>
                   <th>Lab Descriptor</th>
                   <th>Laboratory Supplement</th>
-                  <th>RecordID</th>
+                  <!-- <th>RecordID</th> -->
                   <th>Action</th>
                 </tr>
               </thead>
@@ -505,7 +512,7 @@
                   <td><select class="cert-lab"></select></td>
                   <td><select class="cert-lab-desc"></select></td>
                   <td><select class="cert-lab-sup"></select></td>
-                  <td><select class="cert-rowUnique-id"></select></td>
+                  <!-- <td><select class="cert-rowUnique-id"></select></td> -->
                   <td>
                     <button
                       type="button"
@@ -728,10 +735,16 @@
               <label for="note">Note</label>
               <input id="note" type="text" />
             </div>
+            <div class="jm-field">
+              <label for="unit">Unit</label>
+              <select id="jw_unit">
+                <option value="">Select Unit</option>
+              </select>
+            </div>
 
-            <div class="jm-field full-width">
+            <div class="jm-field">
               <label for="description">Short Description</label>
-              <textarea id="description"></textarea>
+              <input id="description" type="text" />
             </div>
 
             <div class="jm-field full-width">

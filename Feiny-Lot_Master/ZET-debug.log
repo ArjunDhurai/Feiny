@@ -99,3 +99,9 @@ Response Headers{"server":"ZGS","date":"Sat, 18 Apr 2026 08:14:10 GMT","content-
 [info] [2026-06-10T11:42:42.892Z] :  ==> app\er.name
 [info] [2026-06-10T11:42:42.893Z] :  ==> app\Stone Type
 [info] [2026-06-10T11:42:42.894Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-06-11T12:15:53.867Z] : × Below file formats are not allowed in Sigma
+[info] [2026-06-11T12:15:53.884Z] :  ==> app\er.name
+[info] [2026-06-11T12:15:53.885Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2
+[error] [2026-06-11T12:15:53.900Z] : × Below file formats are not allowed in Sigma
+[info] [2026-06-11T12:15:53.902Z] :  ==> app\er.name
+[info] [2026-06-11T12:15:53.902Z] : Note - File formats that can be packed are: txt, md, xml, dre, jpg, jpeg, png, gif, css, js, html, json, mp3, svg, woff, ttf, eot, webm, mp4, and woff2

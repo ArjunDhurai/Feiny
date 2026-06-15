@@ -1413,8 +1413,13 @@ function loadUnitLookup(targetElement = null) {
     return;
   }
 
-  ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Unit" })
+  ZOHO.CREATOR.DATA.getRecords({
+    app_name: "feiny-app",
+    report_name: "Unit",
+  })
     .then(function (response) {
+      console.log("Unit Response:", response);
+
       unitLookupData = response.data || [];
       renderUnitOptions(targetElement);
     })
@@ -1427,61 +1432,72 @@ function renderUnitOptions(targetElement = null) {
   const selects = targetElement
     ? [targetElement]
     : document.querySelectorAll(
-        "#unit_lookup, .select_unit, .j1-unit, .j3-unit",
+        "#unit_lookup, #jw_unit, .select_unit, .j1-unit, .j3-unit"
       );
 
   selects.forEach(function (select) {
+    if (!select) return;
+
     const selectedValue = select.value;
+
     select.innerHTML = `<option value="">Select Unit</option>`;
+
     unitLookupData.forEach(function (record) {
       const option = document.createElement("option");
+
       option.value = record.ID;
-      option.text = record.Description1 || record.zc_display_value || "No Name";
-      if (selectedValue && selectedValue == record.ID) {
+
+      option.text =
+        record.Description1 ||
+        record.zc_display_value ||
+        "No Name";
+
+      if (selectedValue == record.ID) {
         option.selected = true;
       }
+
       select.appendChild(option);
     });
   });
 }
 /* ================= JEWELRY UNIT LOOKUP ================= */
-function loadjewelryUnitLookup(targetElement = null) {
-  if (unitLookupData) {
-    renderUnitOptions(targetElement);
-    return;
-  }
+// function loadjewelryUnitLookup(targetElement = null) {
+//   if (unitLookupData) {
+//     renderUnitOptions(targetElement);
+//     return;
+//   }
 
-  ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Unit" })
-    .then(function (response) {
-      unitLookupData = response.data || [];
-      renderUnitOptions(targetElement);
-    })
-    .catch(function (error) {
-      console.error("Unit lookup error:", error);
-    });
-}
+//   ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Unit" })
+//     .then(function (response) {
+//       unitLookupData = response.data || [];
+//       renderUnitOptions(targetElement);
+//     })
+//     .catch(function (error) {
+//       console.error("Unit lookup error:", error);
+//     });
+// }
 
-function renderUnitOptions(targetElement = null) {
-  const selects = targetElement
-    ? [targetElement]
-    : document.querySelectorAll(
-        "#jw_unit, .select_unit, .j1-unit, .j3-unit",
-      );
+// function renderUnitOptions(targetElement = null) {
+//   const selects = targetElement
+//     ? [targetElement]
+//     : document.querySelectorAll(
+//         "#jw_unit, .select_unit, .j1-unit, .j3-unit",
+//       );
 
-  selects.forEach(function (select) {
-    const selectedValue = select.value;
-    select.innerHTML = `<option value="">Select Unit</option>`;
-    unitLookupData.forEach(function (record) {
-      const option = document.createElement("option");
-      option.value = record.ID;
-      option.text = record.Description1 || record.zc_display_value || "No Name";
-      if (selectedValue && selectedValue == record.ID) {
-        option.selected = true;
-      }
-      select.appendChild(option);
-    });
-  });
-}
+//   selects.forEach(function (select) {
+//     const selectedValue = select.value;
+//     select.innerHTML = `<option value="">Select Unit</option>`;
+//     unitLookupData.forEach(function (record) {
+//       const option = document.createElement("option");
+//       option.value = record.ID;
+//       option.text = record.Description1 || record.zc_display_value || "No Name";
+//       if (selectedValue && selectedValue == record.ID) {
+//         option.selected = true;
+//       }
+//       select.appendChild(option);
+//     });
+//   });
+// }
 
 /* ================= SURFACE LOOKUP ================= */
 function loadSurfaceLookup() {
@@ -2229,15 +2245,42 @@ function addJewelleryPartnershipRow() {
 function saveRecord() {
   const Category1 = document.getElementById("itemType")?.value || "";
   const In_SKU = document.getElementById("In_SKU")?.value || "";
+  const Unit = document.getElementById("unit_lookup")?.value || "";
+  const jewel_Unit = document.getElementById("jw_unit")?.value || "";
 
   let costVal = getNumber("cost_amount");
   if (Category1 === "Diamond") costVal = getNumber("dia_cost_amount");
   else if (Category1 === "Jewellery") costVal = getNumber("cost_amount_summary");
 
   if (!Category1 || !In_SKU) {
-    alert("Please select Item Type and enter SKU");
+  alert("Please select Item Type and enter SKU");
+  return;
+}
+
+/* UNIT VALIDATION */
+ if (
+    Category1 === "Color Stone" &&
+    (!Unit || Unit === "Select Unit")
+  ) {
+    alert("Please select Unit");
+    document.getElementById("unit_lookup")?.focus();
     return;
   }
+
+  if (
+    Category1 === "Jewellery" &&
+    (!jewel_Unit || jewel_Unit === "Select Unit")
+  ) {
+    alert("Please select Jewellery Unit");
+    document.getElementById("jw_unit")?.focus();
+    return;
+  }
+
+/* COST VALIDATION */
+if (!costVal || costVal <= 0) {
+  alert("Please enter Cost Amount");
+  return;
+}
 
   const saveBtn = document.getElementById("addRecord");
   const originalText = saveBtn ? saveBtn.textContent : "Save";

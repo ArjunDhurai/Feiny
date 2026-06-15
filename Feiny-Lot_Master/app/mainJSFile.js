@@ -476,6 +476,7 @@ document.addEventListener("DOMContentLoaded", function () {
   typeof loadcategoryLookup === "function" && loadcategoryLookup();
   typeof loadStoneLookup === "function" && loadStoneLookup();
   typeof loadjewelryUnitLookup === "function" && loadjewelryUnitLookup();
+  typeof loadvendorLookup === "function" && loadvendorLookup();
 
   /* ================= COLOR STONE AUTO DESCRIPTION ================= */
 
@@ -2300,6 +2301,8 @@ if (!costVal || costVal <= 0) {
     Surface: document.getElementById("surface_lookup")?.value || "",
     Shape: document.getElementById("shape_lookup")?.value || "",
     Origin: document.getElementById("origin_country")?.value || "",
+    Location: document.getElementById("location")?.value || "",
+    Vendor: document.getElementById("vendor_lookup")?.value || "",
     Country_of_Cut: document.getElementById("country_cut")?.value || "",
     HTS: document.getElementById("hts_field")?.value || "",
     Code: document.getElementById("code_field")?.value || "",

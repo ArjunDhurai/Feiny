@@ -39,6 +39,8 @@
     <script defer src="Select_Cut.js"></script>
     <script defer src="Stone_Type.js"></script>
     <script defer src="Select_Clarity.js"></script>
+    <script defer src="vendor.js"></script>
+    
 
 
   </head>
@@ -49,7 +51,7 @@
       <div class="top-grid">
         <div class="card">
           <div class="card-title">Lot Master</div>
-          <div class="grid-2">
+          <div class="system-info-row">
             <div class="field">
               <label>Categories</label>
               <select id="itemType">
@@ -59,9 +61,16 @@
                 <option value="Jewellery">Jewellery</option>
               </select>
             </div>
+           
             <div class="field">
               <label>SKU</label>
               <input type="text" id="In_SKU" />
+            </div>
+             <div class="field">
+              <label>Vendor</label>
+              <select id="vendor_lookup">
+                <option value="">Select Vendor</option>
+              </select>
             </div>
           </div>
         </div>
@@ -71,7 +80,7 @@
           <div class="system-info-row">
             <div class="field">
               <label>Stock on Hand</label>
-              <input type="number" id="Stock_On_Hand" value="1" />
+              <input type="number" id="Stock_On_Hand" value="0" />
             </div>
             <div class="field">
               <label>Location</label>
@@ -194,7 +203,7 @@
               </div>
               <div class="field">
                 <label>Cost Amount</label
-                ><input type="currency" id="dia_cost_amount" step="0.01" />
+                ><input type="number" id="dia_cost_amount" step="0.01" />
               </div>
             </div>
 
@@ -362,7 +371,7 @@
                 </div>
                 <div class="field">
                   <label>Cost Amount</label
-                  ><input type="currency" id="cost_amount" step="0.01" />
+                  ><input type="number" id="cost_amount" step="0.01" />
                 </div>
                 <div class="field">
                   <label>Short Description</label
@@ -478,126 +487,7 @@
         </div>
       </div>
 
-      <!-- ========== CERTIFICATE UPLOAD (Color Stone + Diamond) ========== -->
-      <div id="certificateuploadsec" style="display: none">
-        <div class="card">
-          <div class="card-subtitle">Certificate Upload</div>
-          <div class="table-scroll">
-            <table class="subform-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Certificate</th>
-                  <th>Date</th>
-                  <th>Notes</th>
-                  <th>Lab</th>
-                  <th>Lab Descriptor</th>
-                  <th>Laboratory Supplement</th>
-                  <!-- <th>RecordID</th> -->
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="certificateBody">
-                <tr class="cert-row">
-                  <td><input class="cert-id" /></td>
-                  <td>
-                    <input
-                      type="file"
-                      class="cert-file"
-                      accept=".pdf,.jpg,.jpeg,.png,.gif"
-                    />
-                  </td>
-                  <td><input type="date" class="cert-date" /></td>
-                  <td><textarea class="cert-notes"></textarea></td>
-                  <td><select class="cert-lab"></select></td>
-                  <td><select class="cert-lab-desc"></select></td>
-                  <td><select class="cert-lab-sup"></select></td>
-                  <!-- <td><select class="cert-rowUnique-id"></select></td> -->
-                  <td>
-                    <button
-                      type="button"
-                      class="btn-remove"
-                      onclick="removeRow(this)"
-                    >
-                      ❌
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <button
-            type="button"
-            class="btn-outline"
-            onclick="addCertificateRow()"
-          >
-            + Add Row
-          </button>
-        </div>
-      </div>
-
-      <!-- ========== PARTNERSHIP DETAILS (Color Stone + Diamond) ========== -->
-      <div id="partnershipsec" style="display: none">
-        <div class="card">
-          <div class="card-subtitle">Partnership Details</div>
-          <div class="table-scroll">
-            <table class="subform-table">
-              <thead>
-                <tr>
-                  <th>Partner</th>
-                  <th>Share</th>
-                  <th>Partnership %</th>
-                  <th>Commission %</th>
-                  <th>Commission Itemization</th>
-                  <th>Description</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="partnerBody">
-                <tr class="partner-row">
-                  <td><select class="partnerdatalookup"><option value="">Select Contact</option></select></td>
-                  <td><input type="text" class="partner-share" /></td>
-                  <td><input type="text" class="partner-percent" /></td>
-                  <td><input type="text" class="commission-percent" /></td>
-                  <td style="text-align:center"><input type="checkbox" class="commission-itemized" /></td>
-                  <td><textarea class="partner-desc"></textarea></td>
-                  <td>
-                    <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <button type="button" class="btn-outline" onclick="addPartnerRow()">
-            + Add Row
-          </button>
-        </div>
-      </div>
-
-      <!-- ========== PRICING (Color Stone only) ========== -->
-      <div id="pricingSection" style="display: none">
-        <div class="card pricing-card">
-          <div class="card-title">Pricing</div>
-          <div class="pricing-row">
-            <div class="pricing-field">
-              <label>Asking Price</label
-              ><input id="Price4" type="number" step="0.01" />
-            </div>
-            <div class="pricing-field">
-              <label>Minimum Price</label
-              ><input id="MinimumPrice" type="number" step="0.01" />
-            </div>
-            <div class="pricing-field">
-  <label>Unit</label>
-  <select id="unit_lookup">
-    <option value="">Select Unit</option>
-  </select>
-</div>>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      
       <!-- ========== JEWELLERY SECTION ========== -->
       <div id="jewelleryWrapper" style="display: none">
         <div class="card jewellery-card">
@@ -758,6 +648,122 @@
         </div>
       </div>
 
+      <!-- ========== CERTIFICATE UPLOAD (Color Stone + Diamond) ========== -->
+      <div id="certificateuploadsec" style="display: none">
+        <div class="card">
+          <div class="card-subtitle">Certificate Upload</div>
+          <div class="table-scroll">
+            <table class="subform-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Certificate</th>
+                  <th>Date</th>
+                  <th>Notes</th>
+                  <th>Lab</th>
+                  <th>Lab Descriptor</th>
+                  <th>Laboratory Supplement</th>
+                  <!-- <th>RecordID</th> -->
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="certificateBody">
+                <tr class="cert-row">
+                  <td><input class="cert-id" /></td>
+                  <td>
+                    <input
+                      type="file"
+                      class="cert-file"
+                      accept=".pdf,.jpg,.jpeg,.png,.gif"
+                    />
+                  </td>
+                  <td><input type="date" class="cert-date" /></td>
+                  <td><textarea class="cert-notes"></textarea></td>
+                  <td><select class="cert-lab"></select></td>
+                  <td><select class="cert-lab-desc"></select></td>
+                  <td><select class="cert-lab-sup"></select></td>
+                  <!-- <td><select class="cert-rowUnique-id"></select></td> -->
+                  <td>
+                    <button
+                      type="button"
+                      class="btn-remove"
+                      onclick="removeRow(this)"
+                    >
+                      ❌
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <button
+            type="button"
+            class="btn-outline"
+            onclick="addCertificateRow()"
+          >
+            + Add Row
+          </button>
+        </div>
+      </div>
+      <!-- ========== PARTNERSHIP DETAILS (Color Stone + Diamond) ========== -->
+      <div id="partnershipsec" style="display: none">
+        <div class="card">
+          <div class="card-subtitle">Partnership Details</div>
+          <div class="table-scroll">
+            <table class="subform-table">
+              <thead>
+                <tr>
+                  <th>Partner</th>
+                  <th>Share</th>
+                  <th>Partnership %</th>
+                  <th>Commission %</th>
+                  <th>Commission Itemization</th>
+                  <th>Description</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="partnerBody">
+                <tr class="partner-row">
+                  <td><select class="partnerdatalookup"><option value="">Select Contact</option></select></td>
+                  <td><input type="text" class="partner-share" /></td>
+                  <td><input type="text" class="partner-percent" /></td>
+                  <td><input type="text" class="commission-percent" /></td>
+                  <td style="text-align:center"><input type="checkbox" class="commission-itemized" /></td>
+                  <td><textarea class="partner-desc"></textarea></td>
+                  <td>
+                    <button type="button" class="btn-remove" onclick="removeRow(this)">❌</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <button type="button" class="btn-outline" onclick="addPartnerRow()">
+            + Add Row
+          </button>
+        </div>
+      </div>
+
+
+      <!-- ========== PRICING (Color Stone only) ========== -->
+      <div id="pricingSection" style="display: none">
+        <div class="card pricing-card">
+          <div class="card-title">Pricing</div>
+          <div class="pricing-row">
+            <div class="pricing-field">
+              <label>Asking Price</label
+              ><input id="Price4" type="number" step="0.01" />
+            </div>
+            <div class="pricing-field">
+              <label>Minimum Price</label
+              ><input id="MinimumPrice" type="number" step="0.01" />
+            </div>
+            <div class="pricing-field">
+              <label>Unit</label
+              ><select id="unit_lookup"></select>
+            </div>
+          </div>
+        </div>
+      </div>
       <!-- ========================================= -->
       <!-- JEWELLERY 1 – METAL DETAILS -->
       <!-- ========================================= -->
@@ -1054,7 +1060,7 @@
 
           <div class="cost-field">
             <label for="cost_amount_summary">Cost Amount</label>
-            <input type="currency" id="cost_amount_summary" step="0.01" />
+            <input type="number" id="cost_amount_summary" step="0.01" />
           </div>
         </div>
       </div>

@@ -22,29 +22,36 @@ body {
   color: #333;
   line-height: 1.5;
 }
-
-/* ============================================================
-   CONTAINER
-   ============================================================ */
-
 .creator-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 18px;
-  font-weight: 400;
+  padding: 8px; /* before 18px */
 }
 
-/* ============================================================
-   CARDS
-   ============================================================ */
+/* TOP CARDS GAP */
+.top-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px; /* before 20px */
+  margin-bottom: 6px; /* before 10px */
+}
 
+/* CARD GAP */
 .card {
   background: #fff;
   border: 1px solid #e1e3e6;
   border-radius: 8px;
-  padding: 18px 22px; /* reduced */
-  margin-bottom: 12px; /* reduced gap */
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 14px 18px; /* reduce inner space */
+  margin-bottom: 6px; /* before 12px */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+/* Color stone section spacing */
+.colorstone-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 16px; /* before 30px */
+  align-items: start;
 }
 
 .card:last-child {
@@ -140,8 +147,8 @@ body {
 .field input,
 .field select,
 .field textarea {
-  width: 99%;
-  padding: 5px 7px;
+  width: 90%;
+  padding: 4px 6px;
   font-size: 13px;
   border: 1px solid #d0d0d0;
   border-radius: 4px;
@@ -280,7 +287,7 @@ body {
 }
 
 .dim-row input {
-  padding: 8px 10px;
+  padding: 5px 9px;
   font-size: 13px;
   border: 1px solid #d0d0d0;
   border-radius: 4px;
@@ -737,13 +744,13 @@ button.add-row {
 
 .pricing-field input,
 .pricing-field select {
-  padding: 8px 12px;
+  padding: 5px 9px;
   font-size: 13px;
   border: 1px solid #d0d0d0;
   border-radius: 4px;
   background: #ffffff;
   transition: all 0.2s ease;
-  width: 100%;
+  width: 80%;
 }
 
 .pricing-field input:focus,
@@ -810,8 +817,8 @@ button.add-row {
 .jm-field input,
 .jm-field select,
 .jm-field textarea {
-  width: 100%;
-  padding: 8px 12px;
+  width: 87%;
+  padding: 5px 12px;
   font-size: 13px;
   border: 1px solid #d0d0d0;
   border-radius: 4px;
@@ -873,13 +880,13 @@ button.add-row {
 }
 
 .cost-field input {
-  padding: 8px 12px;
+  padding: 5px 12px;
   font-size: 13px;
   border: 1px solid #d0d0d0;
   border-radius: 4px;
   background: #ffffff;
   transition: all 0.2s ease;
-  width: 100%;
+  width: 90%;
 }
 
 .cost-field input:focus {
@@ -1281,7 +1288,7 @@ button.add-row {
 .system-info-row .field input,
 .system-info-row .field select {
   width: 100%;
-  padding: 8px;
+  padding: 4px;
   font-size: 13px;
 }
 

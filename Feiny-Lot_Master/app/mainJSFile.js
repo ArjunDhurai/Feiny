@@ -16,6 +16,7 @@ let isApplying = false;
 let lot_edit = false;
 let recId = null;
 let unitLookupData = null;
+let metalPriceLookupData = null;
 
 let diaImageCleared = false;
 let stoneImageCleared = false;
@@ -270,38 +271,44 @@ function getFirstCertInfo() {
   return { labName: cleanLab, certId };
 }
 
-/* =====================================================
-   AUTO SELECT FEI IN FIRST ROW  (GLOBAL — called after any partner dropdown is populated)
-===================================================== */
 function setDefaultFEI() {
-  // NORMAL PARTNERSHIP
-  const firstPartnerDropdown = document.querySelector(
-    "#partnerBody tr.partner-row .partnerdatalookup",
-  );
-  if (firstPartnerDropdown && !firstPartnerDropdown.value) {
-    const feiOption = Array.from(firstPartnerDropdown.options).find(
-      function (option) {
-        return option.text.trim().toUpperCase() === "FEI";
-      },
-    );
-    if (feiOption) {
-      firstPartnerDropdown.value = feiOption.value;
+
+  // ── NORMAL PARTNERSHIP (Color Stone & Diamond) ──
+  const firstPartnerRow = document.querySelector("#partnerBody tr.partner-row");
+  if (firstPartnerRow) {
+    const dropdown    = firstPartnerRow.querySelector(".partnerdatalookup");
+    const shareInput  = firstPartnerRow.querySelector(".partner-share");
+    const percentInput = firstPartnerRow.querySelector(".partner-percent");
+
+    if (dropdown && !dropdown.value) {
+      const feiOption = Array.from(dropdown.options).find(function (opt) {
+        return opt.text.trim().toUpperCase() === "FEI";
+      });
+      if (feiOption) dropdown.value = feiOption.value;
     }
+
+    if (shareInput && !shareInput.value) shareInput.value = "1";
+    if (percentInput && !percentInput.value) percentInput.value = "100.00";
   }
 
-  // JEWELLERY PARTNERSHIP
-  const firstJewelleryDropdown = document.querySelector(
-    "#jewelleryPartnershipBody tr.jewellery-partnership-row .jp_partner_select_contact",
+  // ── JEWELLERY PARTNERSHIP ──
+  const firstJewelleryRow = document.querySelector(
+    "#jewelleryPartnershipBody tr.jewellery-partnership-row"
   );
-  if (firstJewelleryDropdown && !firstJewelleryDropdown.value) {
-    const feiOption = Array.from(firstJewelleryDropdown.options).find(
-      function (option) {
-        return option.text.trim().toUpperCase() === "FEI";
-      },
-    );
-    if (feiOption) {
-      firstJewelleryDropdown.value = feiOption.value;
+  if (firstJewelleryRow) {
+    const dropdown    = firstJewelleryRow.querySelector(".jp_partner_select_contact");
+    const shareInput  = firstJewelleryRow.querySelector(".jp_shares");
+    const percentInput = firstJewelleryRow.querySelector(".jp_partnership_percentage");
+
+    if (dropdown && !dropdown.value) {
+      const feiOption = Array.from(dropdown.options).find(function (opt) {
+        return opt.text.trim().toUpperCase() === "FEI";
+      });
+      if (feiOption) dropdown.value = feiOption.value;
     }
+
+    if (shareInput && !shareInput.value) shareInput.value = "1";
+    if (percentInput && !percentInput.value) percentInput.value = "100.00";
   }
 }
 
@@ -337,7 +344,7 @@ document.addEventListener("DOMContentLoaded", function () {
       Jewellery_3_Color_Stone: document.getElementById(
         "Jewellery_3_Color_Stone",
       ),
-      Jewellery_4_Labour: document.getElementById("Jewellery_4_Labour"),
+      Miscellaneous_Details: document.getElementById("Miscellaneous_Details"),
       Jewellery_Cost_Summary: document.getElementById("Jewellery_Cost_Summary"),
       Jewellery_Partnership: document.getElementById("Jewellery_Partnership"),
     };
@@ -367,7 +374,7 @@ document.addEventListener("DOMContentLoaded", function () {
       Jewellery_1_Metal_Details,
       Jewellery_2_Diamond_Details,
       Jewellery_3_Color_Stone,
-      Jewellery_4_Labour,
+      Miscellaneous_Details,
       Jewellery_Cost_Summary,
       Jewellery_Partnership,
     } = getElements();
@@ -383,7 +390,7 @@ document.addEventListener("DOMContentLoaded", function () {
     hide(Jewellery_1_Metal_Details);
     hide(Jewellery_2_Diamond_Details);
     hide(Jewellery_3_Color_Stone);
-    hide(Jewellery_4_Labour);
+    hide(Miscellaneous_Details);
     hide(Jewellery_Cost_Summary);
     hide(Jewellery_Partnership);
 
@@ -412,7 +419,7 @@ document.addEventListener("DOMContentLoaded", function () {
       show(Jewellery_1_Metal_Details);
       show(Jewellery_2_Diamond_Details);
       show(Jewellery_3_Color_Stone);
-      show(Jewellery_4_Labour);
+      show(Miscellaneous_Details);
       show(Jewellery_Cost_Summary);
       show(Jewellery_Partnership);
     }
@@ -425,6 +432,13 @@ document.addEventListener("DOMContentLoaded", function () {
   document.addEventListener("change", function (e) {
     if (e.target && e.target.id === "itemType") {
       setTimeout(applyVisibility, 100);
+    }
+  });
+   /* ── Metal Type change → auto-fill Metal Price ── */
+  document.addEventListener("change", function (e) {
+    if (e.target && e.target.classList.contains("j1-metal-type")) {
+      const row = e.target.closest("tr");
+      if (row) updateMetalPrice(row);
     }
   });
 
@@ -467,12 +481,12 @@ document.addEventListener("DOMContentLoaded", function () {
   typeof loadDiamondLookup === "function" && loadDiamondLookup();
   typeof loadUnitLookup === "function" && loadUnitLookup();
   typeof loadMetalTypeLookup === "function" && loadMetalTypeLookup();
+  typeof loadMetalPriceLookup === "function" && loadMetalPriceLookup();
   typeof loadPurityLookup === "function" && loadPurityLookup();
   typeof loadColorLookup === "function" && loadColorLookup();
   typeof loadCutLookup === "function" && loadCutLookup();
   typeof loadClarityLookup === "function" && loadClarityLookup();
-  typeof loadOriginCountryDropdown === "function" &&
-    loadOriginCountryDropdown();
+  typeof loadOriginCountryDropdown === "function" && loadOriginCountryDropdown();
   typeof loadcategoryLookup === "function" && loadcategoryLookup();
   typeof loadStoneLookup === "function" && loadStoneLookup();
   typeof loadjewelryUnitLookup === "function" && loadjewelryUnitLookup();
@@ -1008,7 +1022,19 @@ function addCertificateRow() {
 }
 
 function removeRow(btn) {
-  btn.closest("tr").remove();
+  const row = btn.closest("tr");
+  const tbody = row.closest("tbody");
+  row.remove();
+
+  // Recalculate shares after row removed
+  if (tbody) {
+    const id = tbody.id;
+    if (id === "partnerBody") {
+      recalculatePartnerShares("partnerBody", "partner-share", "partner-percent");
+    } else if (id === "jewelleryPartnershipBody") {
+      recalculatePartnerShares("jewelleryPartnershipBody", "jp_shares", "jp_partnership_percentage");
+    }
+  }
 }
 
 /* ================= COUNTRY DROPDOWNS ================= */
@@ -1301,110 +1327,81 @@ function populatePartnerDropdowns(targetElement = null) {
   // ── After populating, set FEI as default on the first row of each section ──
   setDefaultFEI();
 }
+/* ================= PARTNERSHIP SHARE CALCULATION ================= */
 
-/* =====================================================
-   SHARE CALCULATION
-===================================================== */
+function recalculatePartnerShares(tbodyId, shareClass, percentClass) {
+  const rows = document.querySelectorAll("#" + tbodyId + " tr");
+
+  // Step 1: Sum all shares
+  let totalShares = 0;
+  rows.forEach(function (row) {
+    const shareInput = row.querySelector("." + shareClass);
+    const val = parseFloat(shareInput?.value) || 0;
+    totalShares += val;
+  });
+
+  // Step 2: Set percent for each row
+  rows.forEach(function (row) {
+    const shareInput   = row.querySelector("." + shareClass);
+    const percentInput = row.querySelector("." + percentClass);
+    if (!shareInput || !percentInput) return;
+
+    const shares = parseFloat(shareInput.value) || 0;
+
+    if (totalShares > 0 && shares > 0) {
+      percentInput.value = ((shares / totalShares) * 100).toFixed(2);
+    } else {
+      percentInput.value = "";
+    }
+  });
+}
+
+/* ── Recalculate when shares typed ── */
 document.addEventListener("input", function (e) {
-  /* ==========================
-     NORMAL PARTNERSHIP
-  ========================== */
+
   if (e.target.classList.contains("partner-share")) {
-    const rows = document.querySelectorAll("#partnerBody tr.partner-row");
-
-    const firstShare =
-      parseFloat(rows[0]?.querySelector(".partner-share")?.value) || 0;
-
-    // Row 1 %
-    rows[0].querySelector(".partner-percent").value = (
-      firstShare / 100
-    ).toFixed(2);
-
-    // Row 2 remaining
-    if (rows.length > 1) {
-      const secondRow = rows[1];
-      const secondPartner =
-        secondRow.querySelector(".partnerdatalookup")?.value;
-
-      if (secondPartner) {
-        const remaining = 100 - firstShare;
-        secondRow.querySelector(".partner-share").value = remaining;
-        secondRow.querySelector(".partner-percent").value = (
-          remaining / 100
-        ).toFixed(2);
-      }
-    }
+    recalculatePartnerShares("partnerBody", "partner-share", "partner-percent");
   }
 
-  /* ==========================
-     JEWELLERY PARTNERSHIP
-  ========================== */
   if (e.target.classList.contains("jp_shares")) {
-    const rows = document.querySelectorAll(
-      "#jewelleryPartnershipBody tr.jewellery-partnership-row",
-    );
-
-    const firstShare =
-      parseFloat(rows[0]?.querySelector(".jp_shares")?.value) || 0;
-
-    // Row 1 %
-    rows[0].querySelector(".jp_partnership_percentage").value = (
-      firstShare / 100
-    ).toFixed(2);
-
-    // Row 2 remaining
-    if (rows.length > 1) {
-      const secondRow = rows[1];
-      const secondPartner = secondRow.querySelector(
-        ".jp_partner_select_contact",
-      )?.value;
-
-      if (secondPartner) {
-        const remaining = 100 - firstShare;
-        secondRow.querySelector(".jp_shares").value = remaining;
-        secondRow.querySelector(".jp_partnership_percentage").value = (
-          remaining / 100
-        ).toFixed(2);
-      }
-    }
+    recalculatePartnerShares("jewelleryPartnershipBody", "jp_shares", "jp_partnership_percentage");
   }
+
 });
 
+/* ── Recalculate when partner dropdown changes ── */
+document.addEventListener("change", function (e) {
+
+  if (e.target.classList.contains("partnerdatalookup")) {
+    recalculatePartnerShares("partnerBody", "partner-share", "partner-percent");
+  }
+
+  if (e.target.classList.contains("jp_partner_select_contact")) {
+    recalculatePartnerShares("jewelleryPartnershipBody", "jp_shares", "jp_partnership_percentage");
+  }
+
+});
 /* =====================================================
-   WHEN SECOND PARTNER SELECTED
+   WHEN PARTNER SELECTED — RECALCULATE SHARES
 ===================================================== */
 document.addEventListener("change", function (e) {
-  // NORMAL
+
   if (e.target.classList.contains("partnerdatalookup")) {
-    const rows = document.querySelectorAll("#partnerBody tr.partner-row");
-
-    if (rows.length > 1) {
-      const firstShare =
-        parseFloat(rows[0].querySelector(".partner-share").value) || 0;
-      const remaining = 100 - firstShare;
-      rows[1].querySelector(".partner-share").value = remaining;
-      rows[1].querySelector(".partner-percent").value = (
-        remaining / 100
-      ).toFixed(2);
-    }
-  }
-
-  // JEWELLERY
-  if (e.target.classList.contains("jp_partner_select_contact")) {
-    const rows = document.querySelectorAll(
-      "#jewelleryPartnershipBody tr.jewellery-partnership-row",
+    recalculatePartnerShares(
+      "partnerBody",
+      "partner-share",
+      "partner-percent"
     );
-
-    if (rows.length > 1) {
-      const firstShare =
-        parseFloat(rows[0].querySelector(".jp_shares").value) || 0;
-      const remaining = 100 - firstShare;
-      rows[1].querySelector(".jp_shares").value = remaining;
-      rows[1].querySelector(".jp_partnership_percentage").value = (
-        remaining / 100
-      ).toFixed(2);
-    }
   }
+
+  if (e.target.classList.contains("jp_partner_select_contact")) {
+    recalculatePartnerShares(
+      "jewelleryPartnershipBody",
+      "jp_shares",
+      "jp_partnership_percentage"
+    );
+  }
+
 });
 
 /* ================= UNIT LOOKUP ================= */
@@ -1461,44 +1458,227 @@ function renderUnitOptions(targetElement = null) {
     });
   });
 }
-/* ================= JEWELRY UNIT LOOKUP ================= */
-// function loadjewelryUnitLookup(targetElement = null) {
-//   if (unitLookupData) {
-//     renderUnitOptions(targetElement);
-//     return;
-//   }
+/* ================= METAL PRICE LOOKUP ================= */
+function loadMetalPriceLookup() {
+  if (metalPriceLookupData) return;
 
-//   ZOHO.CREATOR.DATA.getRecords({ app_name: "feiny-app", report_name: "Unit" })
-//     .then(function (response) {
-//       unitLookupData = response.data || [];
-//       renderUnitOptions(targetElement);
-//     })
-//     .catch(function (error) {
-//       console.error("Unit lookup error:", error);
-//     });
-// }
+  ZOHO.CREATOR.DATA.getRecords({
+    app_name: "feiny-app",
+    report_name: "Metals_Price_Master_Report",
+    max_records: 200,
+  })
+    .then(function (response) {
+      console.log("Metal Price Response:", response);
+      metalPriceLookupData = response.data || [];
+    })
+    .catch(function (error) {
+      console.error("Metal Price lookup error:", error);
+    });
+}
 
-// function renderUnitOptions(targetElement = null) {
-//   const selects = targetElement
-//     ? [targetElement]
-//     : document.querySelectorAll(
-//         "#jw_unit, .select_unit, .j1-unit, .j3-unit",
-//       );
+/* ================= UPDATE METAL PRICE ================= */
+function updateMetalPrice(row) {
+  if (!metalPriceLookupData) return;
 
-//   selects.forEach(function (select) {
-//     const selectedValue = select.value;
-//     select.innerHTML = `<option value="">Select Unit</option>`;
-//     unitLookupData.forEach(function (record) {
-//       const option = document.createElement("option");
-//       option.value = record.ID;
-//       option.text = record.Description1 || record.zc_display_value || "No Name";
-//       if (selectedValue && selectedValue == record.ID) {
-//         option.selected = true;
-//       }
-//       select.appendChild(option);
-//     });
-//   });
-// }
+  const metalSelect = row.querySelector(".j1-metal-type");
+  const priceInput = row.querySelector(".j1-Metal-Price");
+
+  if (!metalSelect || !priceInput) return;
+
+  const selectedText = metalSelect.selectedOptions[0]?.text?.trim().toLowerCase() || "";
+
+  if (!selectedText || selectedText === "select metal type") {
+    priceInput.value = "";
+    return;
+  }
+
+  const record = metalPriceLookupData.find(function (item) {
+    return (
+      item.Metal_Type &&
+      item.Metal_Type.trim().toLowerCase() === selectedText
+    );
+  });
+
+  if (record) {
+    priceInput.value = record.Metal_Price || "";
+  } else {
+    priceInput.value = "";
+  }
+}
+/* ================= GOLD COST CALCULATION ================= */
+
+function calcGoldCost(row) {
+
+    if (!row) return;
+
+    const puritySelect = row.querySelector(".j1-metal-purity");
+    const weightInput = row.querySelector(".j1-weight");
+    const metalPriceInput = row.querySelector(".j1-Metal-Price");
+    const goldCostInput = row.querySelector(".j1-gold-cost");
+
+    if (!puritySelect || !weightInput || !metalPriceInput || !goldCostInput) {
+        return;
+    }
+
+    const purityText = puritySelect.options[puritySelect.selectedIndex]?.text.trim().toLowerCase();
+
+    let purity = 0;
+
+    switch (purityText) {
+
+        case "24k":
+        case "999":
+            purity = 1.0000;
+            break;
+
+        case "22k":
+        case "916":
+            purity = 0.9160;
+            break;
+
+        case "18k":
+        case "750":
+            purity = 0.7500;
+            break;
+
+        case "14k":
+        case "585":
+            purity = 0.5850;
+            break;
+
+        case "10k":
+        case "417":
+            purity = 0.4167;
+            break;
+
+        case "950":
+            purity = 0.9500;
+            break;
+
+        case "925":
+            purity = 0.9250;
+            break;
+
+        case "900":
+            purity = 0.9000;
+            break;
+
+        default:
+            purity = 0;
+    }
+
+    const weight = parseFloat(weightInput.value) || 0;
+    const metalPrice = parseFloat(metalPriceInput.value) || 0;
+
+    if (purity === 0 || weight === 0 || metalPrice === 0) {
+        goldCostInput.value = "";
+        return;
+    }
+
+    const goldCost = purity * weight * metalPrice;
+
+    goldCostInput.value = goldCost.toFixed(2);
+}
+/* ================= SUBFORM EVENTS ================= */
+
+document.addEventListener("input", function(e){
+
+    if(
+        e.target.classList.contains("j1-weight") ||
+        e.target.classList.contains("j1-Metal-Price")
+    ){
+
+        const row = e.target.closest("tr");
+        calcGoldCost(row);
+
+    }
+
+});
+
+document.addEventListener("change", function(e){
+
+    if(e.target.classList.contains("j1-metal-purity")){
+
+        const row = e.target.closest("tr");
+        calcGoldCost(row);
+
+    }
+
+});
+
+/* ================= JEWELLERY 3 SUMMARY ================= */
+
+function calculateJewellery3Summary() {
+
+    let totalQty = 0;
+    let totalWeight = 0;
+    let grandTotal = 0;
+
+    document.querySelectorAll("#jewel3Body tr.jewel3-row").forEach(function(row){
+
+        totalQty += parseFloat(row.querySelector(".j3-no-stones")?.value) || 0;
+
+        totalWeight += parseFloat(row.querySelector(".j3-wt-stone")?.value) || 0;
+
+        grandTotal += parseFloat(row.querySelector(".j3-cost")?.value) || 0;
+
+    });
+
+    document.getElementById("csTotalQty").value = totalQty.toFixed(2);
+    document.getElementById("csTotalWeight").value = totalWeight.toFixed(2);
+    document.getElementById("csGrandTotal").value = grandTotal.toFixed(2);
+
+}
+document.addEventListener("input", function(e){
+
+    if(
+        e.target.classList.contains("j3-no-stones") ||
+        e.target.classList.contains("j3-wt-stone") ||
+        e.target.classList.contains("j3-cost")
+    ){
+
+        calculateJewellery3Summary();
+
+    }
+
+});
+
+/* ================= JEWELLERY 2 SUMMARY ================= */
+
+function calculateJewellery2Summary() {
+    let totalQty = 0;
+    let totalWeight = 0;
+    let grandTotal = 0;
+
+    document.querySelectorAll("#jewel2Body tr.jewel2-row").forEach(function(row){
+
+        totalQty += parseFloat(row.querySelector(".j2-stones")?.value) || 0;
+
+        totalWeight += parseFloat(row.querySelector(".j2-total-ct")?.value) || 0;
+
+        grandTotal += parseFloat(row.querySelector(".j2-cost")?.value) || 0;
+
+    });
+
+    document.getElementById("diamondTotalQty").value = totalQty.toFixed(2);
+    document.getElementById("diamondTotalWeight").value = totalWeight.toFixed(2);
+    document.getElementById("diamondGrandTotal").value = grandTotal.toFixed(2);
+
+}
+document.addEventListener("input", function(e){
+
+    if(
+        e.target.classList.contains("j2-stones") ||
+        e.target.classList.contains("j2-total-ct") ||
+        e.target.classList.contains("j2-cost")
+    ){
+
+        calculateJewellery2Summary();
+
+    }
+
+});
+
 
 /* ================= SURFACE LOOKUP ================= */
 function loadSurfaceLookup() {
@@ -1960,7 +2140,6 @@ function initRapportPriceTriggers() {
 
   fetchRapportPrice();
 }
-
 /* ================= SPECIES CHANGE → HTS / CODE ================= */
 const speciesLookupEl = document.getElementById("species_lookup");
 if (speciesLookupEl) {
@@ -2214,7 +2393,7 @@ function addJewelleryPartnershipRow() {
         <input type="number" class="jp_shares" step="0.01">
       </td>
       <td>
-        <input type="number" class="jp_partnership_percentage" step="0.01" readonly>
+        <input type="number" class="jp_partnership_percentage" step="0.01">
       </td>
       <td>
         <input type="number" class="jp_commission_percentage" step="0.01">
@@ -2953,7 +3132,7 @@ function getPartnerRowsData() {
         "";
       partnerValue = selectValue || datasetPartnerId;
       shares = row.querySelector(".jp_shares")?.value || "";
-      percent = row.querySelector(".jp_partnership_percentage")?.value || "";
+      percent = (row.querySelector(".jp_partnership_percentage")?.value || "").replace("%", "").trim();
       commission = row.querySelector(".jp_commission_percentage")?.value || "";
       Commission_Itemized_on_Invoice =
         row.querySelector(".jp_commission_itemization")?.checked || false;
@@ -2977,7 +3156,7 @@ function getPartnerRowsData() {
       partnerValue = selectValue || datasetPartnerId;
 
       shares = row.querySelector(".partner-share")?.value || "";
-      percent = row.querySelector(".partner-percent")?.value || "";
+      percent = (row.querySelector(".partner-percent")?.value || "").replace("%", "").trim();
       commission = row.querySelector(".commission-percent")?.value || "";
       Commission_Itemized_on_Invoice =
         row.querySelector(".commission-itemized")?.checked || false;
@@ -3067,6 +3246,11 @@ function addJewellery1Row() {
     loadPurityLookup(tr.querySelector(".j1-metal-purity"));
   if (typeof loadUnitLookup === "function")
     loadUnitLookup(tr.querySelector(".j1-unit"));
+
+  /* ── Gold Cost listeners for this row ── */
+  tr.querySelector(".j1-price").addEventListener("input",          function () { calcGoldCost(tr); });
+  tr.querySelector(".j1-metal-purity").addEventListener("change",  function () { calcGoldCost(tr); });
+  tr.querySelector(".j1-weight").addEventListener("input",         function () { calcGoldCost(tr); });
 }
 
 /* ─────────────────────────────────────────────
@@ -3081,8 +3265,6 @@ function addJewellery2Row() {
 
   tr.innerHTML = `
       <td><input type="text" class="j2-lot"></td>
-      <td><select class="select_shape j2-shape"><option value="">Select Shape</option></select></td>
-      <td><input type="text" class="j2-quality"></td>
       <td><input type="number" class="j2-stones"></td>
       <td><input type="number" class="j2-total-ct"></td>
       <td><input type="text" class="j2-price"></td>
@@ -3094,9 +3276,9 @@ function addJewellery2Row() {
   tbody.appendChild(tr);
 
   /* Populate shape lookup for the new row */
-  if (typeof renderShapeOptions === "function") {
-    renderShapeOptions(tr.querySelector(".j2-shape"));
-  }
+  // if (typeof renderShapeOptions === "function") {
+  //   renderShapeOptions(tr.querySelector(".j2-shape"));
+  // }
 }
 
 /* ─────────────────────────────────────────────
@@ -3111,17 +3293,9 @@ function addJewellery3Row() {
 
   tr.innerHTML = `
       <td><input type="text" class="j3-lot"></td>
-      <td><select class="j3-stone-type"><option value="">Select</option></select></td>
-      <td><select class="select_shape"><option value="">Select Shape</option></select></td>
-      <td><input type="text" class="j3-quality"></td>
-      <td><input type="text" class="j3-range"></td>
       <td><input type="number" class="j3-no-stones"></td>
       <td><input type="number" class="j3-wt-stone"></td>
-      <td><input type="number" class="j3-ctwt"></td>
       <td><select class="select_unit j3-unit"><option value="">Select Unit</option></select></td>
-      <td><select class="Select_Cut j3-cut"><option value="">Select Cut</option></select></td>
-      <td><select class="Select_Stone_Color j3-color"><option value="">Select Color</option></select></td>
-      <td><select class="Select_Clarity_j3-clarity"><option value="">Select Clarity</option></select></td>
       <td><input type="text" class="j3-price" placeholder="Price"></td>
       <td><input type="text" class="j3-cost" placeholder="Cost"></td>
       <td style="text-align:center"><input type="checkbox" class="j3-cs"></td>
@@ -3131,20 +3305,21 @@ function addJewellery3Row() {
     `;
 
   tbody.appendChild(tr);
+  calculateJewellery3Summary();
 
   /* Populate lookups for the new row */
   if (typeof loadUnitLookup === "function")
     loadUnitLookup(tr.querySelector(".j3-unit"));
-  if (typeof loadCutLookup === "function")
-    loadCutLookup(tr.querySelector(".j3-cut"));
-  if (typeof loadColorLookup === "function")
-    loadColorLookup(tr.querySelector(".j3-color"));
-  if (typeof loadClarityLookup === "function")
-    loadClarityLookup(tr.querySelector(".Select_Clarity_j3-clarity"));
-  if (typeof loadStoneLookup === "function")
-    loadStoneLookup(tr.querySelector(".j3-stone-type"));
-  if (typeof renderShapeOptions === "function")
-    renderShapeOptions(tr.querySelector(".select_shape"));
+  // if (typeof loadCutLookup === "function")
+  //   loadCutLookup(tr.querySelector(".j3-cut"));
+  // if (typeof loadColorLookup === "function")
+  //   loadColorLookup(tr.querySelector(".j3-color"));
+  // if (typeof loadClarityLookup === "function")
+  //   loadClarityLookup(tr.querySelector(".Select_Clarity_j3-clarity"));
+  // if (typeof loadStoneLookup === "function")
+  //   loadStoneLookup(tr.querySelector(".j3-stone-type"));
+  // if (typeof renderShapeOptions === "function")
+  //   renderShapeOptions(tr.querySelector(".select_shape"));
 }
 
 /* ─────────────────────────────────────────────
@@ -3280,7 +3455,7 @@ function clearPageAfterSave() {
     "pricingSection", "Dimensionssection",
     "neededcertificatesec", "certificateuploadsec", "partnershipsec",
     "Jewellery_1_Metal_Details", "Jewellery_2_Diamond_Details",
-    "Jewellery_3_Color_Stone", "Jewellery_4_Labour",
+    "Jewellery_3_Color_Stone", "Miscellaneous_Details",
     "Jewellery_Cost_Summary", "Jewellery_Partnership",
   ].forEach(function (id) {
     const el = document.getElementById(id);
@@ -3682,7 +3857,7 @@ function loadJewelleryMetalSubform(data) {
     tr.querySelector(".j1-gold-cost").value = item.Gold_Cost || "";
     tr.querySelector(".j1-remarks").value = item.Remarks || "";
 
-    setTimeout(function () {
+   setTimeout(function () {
       tr.querySelector(".select_contact_j1_vendor").value =
         item.Vendor1?.ID || item.Vendor1 || "";
       tr.querySelector(".j1-metal-type").value =
@@ -3692,6 +3867,7 @@ function loadJewelleryMetalSubform(data) {
       tr.querySelector(".j1-metal-purity").value =
         item.Metal_Purity?.ID || item.Metal_Purity || "";
       tr.querySelector(".j1-unit").value = item.Unit1?.ID || item.Unit1 || "";
+      updateMetalPrice(tr); // ✅ ADD THIS
     }, 1000);
   });
 }

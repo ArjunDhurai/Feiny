@@ -1,6 +1,6 @@
 /* ================= DIAMOND LOOKUP ================= */
 function loadDiamondLookup() {
-    console.log("Loading diamond lookup...");
+  console.log("Loading diamond lookup...");
   ZOHO.CREATOR.DATA.getRecords({
     app_name: "feiny-app",
     report_name: "All_Diamond",
@@ -8,6 +8,7 @@ function loadDiamondLookup() {
     .then(function (response) {
       // console.log("Diamond lookup response:", JSON.stringify(response));
       const diamondSelect = document.getElementById("select_diamond");
+      if (!diamondSelect) return;
       diamondSelect.innerHTML = `<option value="">Select Diamond</option>`;
       if (!response.data || response.data.length === 0) return;
       response.data.forEach(function (record) {

@@ -15,17 +15,17 @@ function loadColorLookup(targetElement) {
         app_name: "feiny-app",
         report_name: "Color"
     })
-    .then(function(response) {
+        .then(function (response) {
 
-        if (response.data && response.data.length > 0) {
-            colorLookupData = response.data;
-            renderColorOptions(targetElement);
-        }
+            if (response.data && response.data.length > 0) {
+                colorLookupData = response.data;
+                renderColorOptions(targetElement);
+            }
 
-    })
-    .catch(function(error) {
-        console.error("Color lookup error:", error);
-    });
+        })
+        .catch(function (error) {
+            console.error("Color lookup error:", error);
+        });
 
 }
 
@@ -35,17 +35,19 @@ function renderColorOptions(targetElement) {
         ? [targetElement]
         : document.querySelectorAll("#select_color, .select_color, .Select_Stone_Color");
 
-    selects.forEach(function(select) {
+    selects.forEach(function (select) {
 
         const row = select.closest("tr");
         const metalSelect = row ? row.querySelector(".select_metal_type, .j1-metal-type") : null;
-        const selectedMetal = metalSelect ? metalSelect.value.trim().toLowerCase() : "";
+        const selectedMetal = metalSelect && metalSelect.selectedIndex >= 0
+            ? metalSelect.options[metalSelect.selectedIndex].text.trim().toLowerCase()
+            : "";
 
         console.log("Selected metal:", selectedMetal); // Remove after testing
 
         select.innerHTML = '<option value="">Select Color</option>';
 
-        colorLookupData.forEach(function(record) {
+        colorLookupData.forEach(function (record) {
 
             const colorName = record.Description1.trim().toLowerCase();
 
@@ -70,7 +72,7 @@ function renderColorOptions(targetElement) {
 
 /* ================= REFRESH COLOR WHEN METAL TYPE CHANGES ================= */
 
-document.addEventListener("change", function(e) {
+document.addEventListener("change", function (e) {
 
     if (e.target.matches(".select_metal_type, .j1-metal-type")) {
 

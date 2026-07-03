@@ -1,5 +1,6 @@
-/* ================= UNIT LOOKUP ================= */
-let unitLookupData = null;
+if (typeof unitLookupData === "undefined") {
+  var unitLookupData = null;
+}
 
 function loadUnitLookup(targetElement = null) {
   if (unitLookupData) {
@@ -26,8 +27,8 @@ function renderUnitOptions(targetElement = null) {
   const selects = targetElement
     ? [targetElement]
     : document.querySelectorAll(
-        "#select_unit, .select_unit, #selectunit, .selectunit, #unitlookup, .selectunit, .j1-unit, .j3-unit",
-      );
+      "#unit_lookup, #jw_unit, #select_unit, .select_unit, #selectunit, .selectunit, #unitlookup, .selectunit, .j1-unit, .j3-unit",
+    );
 
   selects.forEach(function (select) {
     if (!select) return;
